@@ -11,7 +11,16 @@
 *.so.*
 *.dylib
 
+
+
 # Executables
 *.exe
 *.out
 *.app
+*.elf
+
+# Temp files
+*.swo
+*.swp
+.nfs*
+*~
