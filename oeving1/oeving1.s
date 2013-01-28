@@ -9,14 +9,12 @@
  * Used registers:
  * r5 - piob pointer
  * r6 - pioc pointer
- * r7 - All elements: 0b11111111
+ * r7 - All elements
  *****************************************************************************/
 
-.include "io.s"  /* inkludere noen nyttige symboler (konstanter) */
+.include "io.s"  /* Include useful constants */
 
-/* Symboler for hvert lys. Assembler kan legge dem sammen.
-For å laste inn bits i et register for at lys 1, 3 og 5 skal lyse,
-bruk mov rd, E_1+E_3+E_5 */
+/* Symbols for elements 0 through 7: Can be added to target multiple */
 E_0 = 0b00000001
 E_1 = 0b00000010
 E_2 = 0b00000100
@@ -27,10 +25,10 @@ E_6 = 0b01000000
 E_7 = 0b10000000
 E_ALL = 0b11111111
 
-/*****************************************************************************/
-/* text-segment */
-/* all programkoden må plasseres i dette segmentet */
 
+
+/*****************************************************************************/
+/* Text segment: Includes all program code */
 .text
 
 .globl  _start
@@ -86,50 +84,58 @@ loop:
     /* Enable LEDS over buttons that are down */
     st.w r6[AVR32_PIO_SODR], r8
 
-    /* Read button state */
+    /* Read button states */
     ld.w r0, r5[AVR32_PIO_PDSR]
     
     /* Invert so that down is 1 and up is 0 */
     mov r1, E_ALL
     andn r1, r0
     
-    /* Check if button */
+    /* Mask button 0 */
     mov r2, E_0
     and r2, r1
+
+    /* Loop if button is up */
     cp.w r2, 0
     breq loop
+    
+    /* Rotate LED left */
     rol r8
     
-    rjmp loop 
-
+    /* Loop */
+    rjmp loop
 
 
 
 /* Eternal polling loop that enables LEDS over buttons that are down */
 bled:
- 	/* Read button state */ 
-	ld.w r0, r5[AVR32_PIO_PDSR]
+    /* Read button states */ 
+    ld.w r0, r5[AVR32_PIO_PDSR]
+    
+    /* Invert so that down is 1 and up is 0 */
+    mov r1, E_ALL
+    andn r1, r0
+    
+    /* Disable LEDS */
+    st.w r6[AVR32_PIO_CODR], r7
+    
+    /* Enable LEDS over buttons that are down */
+    st.w r6[AVR32_PIO_SODR], r1
+    
+    /* Loop */
+    rjmp bled
 
-	/* Invert so that down is 1 and up is 0 */
-	mov r1, E_ALL
-	andn r1, r0
-
-	/* Disable LEDS */
-	st.w r6[AVR32_PIO_CODR], r7
-
-	/* Enable LEDS over buttons that are down */
-	st.w r6[AVR32_PIO_SODR], r1
-
-	rjmp bled
 
 
-
+/* piob address */
 piob:
-	.int AVR32_PIOB
-pioc:
-	.int AVR32_PIOC
-/*****************************************************************************/
-/* data-segment */
-/* alle dataområder som skal kunne skrives til må plasseres her */
+    .int AVR32_PIOB
 
+/* piob address */
+pioc:
+    .int AVR32_PIOC
+
+/*****************************************************************************/
+/* Data segment: Includes all variables */
 .data
+
