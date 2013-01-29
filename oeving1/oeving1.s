@@ -87,9 +87,9 @@ loop:
     /* Read button states */
     ld.w r0, r5[AVR32_PIO_PDSR]
     
-    /* Invert so that down is 1 and up is 0 */
-    mov r1, E_ALL
-    andn r1, r0
+    /* Copy and invert so that down is 1 and up is 0 */
+    mov r1, r0
+    com r1
     
     /* Mask button 0 */
     mov r2, E_0
@@ -112,9 +112,9 @@ bled:
     /* Read button states */ 
     ld.w r0, r5[AVR32_PIO_PDSR]
     
-    /* Invert so that down is 1 and up is 0 */
-    mov r1, E_ALL
-    andn r1, r0
+    /* Copy and invert so that down is 1 and up is 0 */
+    mov r1, r0
+    com r1
     
     /* Disable LEDS */
     st.w r6[AVR32_PIO_CODR], r7
@@ -134,6 +134,8 @@ piob:
 /* pioc address */
 pioc:
     .int AVR32_PIOC
+
+
 
 /*****************************************************************************/
 /* Data segment: Includes all variables */
