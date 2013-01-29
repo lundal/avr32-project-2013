@@ -131,7 +131,7 @@ bled:
 piob:
     .int AVR32_PIOB
 
-/* piob address */
+/* pioc address */
 pioc:
     .int AVR32_PIOC
 
