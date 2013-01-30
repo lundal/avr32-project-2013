@@ -110,53 +110,85 @@ bled:
     rjmp bled
 
 
-    /********************************************************************
-     *
-     *INTERUPT HANDLERS
-     *
-     ********************************************************************/
+
+/******************************************************************************
+ * 
+ * Interrupt handlers
+ * 
+ *****************************************************************************/
 
 buttonint:
-    /* DEBOUNCE */
+    
+    /* Set sleep time to debounce */
     mov r11, 100000
+    
 intr_sleep_start:
+    
+    /* Sleep */
     sub r11, 1
     cp.w r11, 0
     breq intr_sleep_end
     rjmp intr_sleep_start
+    
 intr_sleep_end:
-
-
-    //READPIOB  ISR
-    ld.w r0, r5[AVR32_PIO_ISR] /* Read ISR to make sure it knows the interupt was handled"
-
-
+    
+    /* Read ISR to make sure it knows the interupt was handled */
+    ld.w r0, r5[AVR32_PIO_ISR]
+    
+    /* Read button states */ 
+    ld.w r1, r5[AVR32_PIO_PDSR]
+    
     /* Copy and invert so that down is 1 and up is 0 */
-    //mov r1, r0
-    //com r1
-
-    /* Mask button 0 */
-    mov r2, E_0
-    and r2, r0
-
-    /* Loop if button is up */
-    cp.w r2, 0 /* Not actually needed because AND will set Z, but kept for clarity */
-    breq end
-
+    mov r2, r0
+    com r2
+    
+    /* Was this event related to the left button? If not then skip. */
+    mov r3, E_7
+    and r3, r0
+    breq after_left
+    
+    /* Is the button down? If not then skip. */
+    mov r3, E_7
+    and r3, r2
+    breq after_left
+    
     /* Shift LED one left */
     lsl r8, 1
-
+    
     /* If shifted beyond LED 7, set to LED 0 */
     cp.w r8, E_7
-    movgt r8, E_0
-
-    /* Disable LEDS */
+    movhi r8, E_0
+    
+after_left:
+    
+    /* Was this event related to the right button? If not then skip. */
+    mov r3, E_0
+    and r3, r0
+    breq after_left
+    
+    /* Is the button down? If not then skip. */
+    mov r3, E_0
+    and r3, r2
+    breq after_left
+    
+    /* Shift LED one right */
+    lsr r8, 1
+    
+    /* If shifted beyond LED O, set to LED 7 */
+    cp.w r8, E_0
+    movlo r8, E_0
+    
+after_right:
+    
+    /* Disable all LEDS */
     st.w r6[AVR32_PIO_CODR], r7
-
+    
     /* Enable current LED */
     st.w r6[AVR32_PIO_SODR], r8
-end:
+    
     rete
+
+
 
 clear_regs:
     /* Clear all registers */
