@@ -5,6 +5,10 @@
  * Register conventions used:
  * r0-r3: Temporary data. Will likely be overidden by subroutines.
  * r4-r11: Important data. Subroutines should not modify these without pushing to stack!
+ * r12: Parameter and return register
+ * r13: Stack pointer
+ * r14: Link register
+ * r15: Program counter
  * 
  * Used registers:
  * r5 - piob pointer
@@ -74,7 +78,7 @@ _start:
     com r0
     st.w r5[AVR32_PIO_IDR], r0
 
-    /* For the sake of simplicity, EVBA is set to 0 */
+    /* For simplicity, set EVBA to 0 */
     mov r1, 0
     mtsr 4, r1
 
@@ -115,16 +119,13 @@ bled:
     /* Read button states */ 
     ld.w r0, r5[AVR32_PIO_PDSR]
 
-    /* Copy and invert so that down is 1 and up is 0 */
-    mov r1, r0
-    com r1
-
-    /* Disable LEDS over buttons that are up */
-    st.w r6[AVR32_PIO_CODR], r0
-
-    /* Enable LEDS over buttons that are down */
-    st.w r6[AVR32_PIO_SODR], r1
-
+    /* Invert so that down is 1 and up is 0 */
+    com r0
+    
+    /* Set LEDS */
+    mov r12, r0
+    rcall set_leds
+    
     /* Loop */
     rjmp bled
 
@@ -188,17 +189,15 @@ button_interrupt_after_left:
     
 button_interrupt_after_right:
     
-    /* Disable all LEDS */
-    st.w r6[AVR32_PIO_CODR], r7
-    
-    /* Enable current LED */
-    st.w r6[AVR32_PIO_SODR], r8
+    /* Set LEDS */
+    mov r12, r8
+    rcall set_leds
     
     rete
 
 
 
-/* Clear all registers */
+/* Clear all registers. Useful for debugging */
 clear_regs:
     
     mov r0, 0
@@ -218,15 +217,16 @@ clear_regs:
 
 
 
-/* Update LEDS */
-update_leds:
+/* Enables and disables LEDS specified by r12 (1 means on, 0 means off) */
+set_leds:
     
-    /* Disable all LEDS */
-    st.w r6[AVR32_PIO_CODR], r7
+    /* Enable specified LEDS */
+    st.w r6[AVR32_PIO_SODR], r12
     
-    /* Enable current LED */
-    st.w r6[AVR32_PIO_SODR], r8
-
+    /* Disable other LEDS */
+    com r12
+    st.w r6[AVR32_PIO_CODR], r12
+    
     ret SP
 
 
@@ -267,10 +267,14 @@ pioc:
 intc:
     .int AVR32_INTC
 
+
+
 /******************************************************************************
  * 
  * Data segment: Includes all variables
  * 
  *****************************************************************************/
 .data
+
+
 
