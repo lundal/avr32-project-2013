@@ -15,6 +15,8 @@
 
 .include "io.s"  /* Include useful constants */
 
+
+
 /* Symbols for elements 0 through 7: Can be added to target multiple */
 E_0 = 0b00000001
 E_1 = 0b00000010
@@ -35,11 +37,17 @@ E_ALL = 0b11111111
  *****************************************************************************/
 .text
 
+
+
 .globl  _start
+
+
 
 /* Program starts here */
 _start:
-    //rcall clear_regs
+    
+    /* Clear registers to make debugging easier */
+    rcall clear_regs
 
     /* Load piob pointer */
     mov r0, piob
@@ -73,26 +81,37 @@ _start:
     /* Set autovector */
     mov r0, intc
     ld.w r1, r0
-    mov r0, buttonint
-    st.w r1[AVR32_INTC_IPR14],r0
+    mov r0, button_interrupt
+    st.w r1[AVR32_INTC_IPR14], r0
 
+    /* Initialize with LED 0 */
     mov r8, 1
+
     /* Disable LEDS */
     st.w r6[AVR32_PIO_CODR], r7
 
     /* Enable current LED */
     st.w r6[AVR32_PIO_SODR], r8
 
-    /* Enable interrupts globally */
+    /* Disable Global Interupt Mask */
     csrf 16
 
 infloop:
-    mov r0, 0x1337
+    
+    /*
+    mov r12, 1000000
+    rcall sleeper
+    lsl r8, 1
+    rcall update_leds
+    */
+    
     rjmp infloop
-    //sleep
 
-    /* Eternal polling loop that enables LEDS over buttons that are down */
+
+
+/* Eternal polling loop that enables LEDS over buttons that are down */
 bled:
+    
     /* Read button states */ 
     ld.w r0, r5[AVR32_PIO_PDSR]
 
@@ -111,27 +130,13 @@ bled:
 
 
 
-/******************************************************************************
- * 
- * Interrupt handlers
- * 
- *****************************************************************************/
+/* Button interrupt handler */
+button_interrupt:
+    
+    /* Debounce */
+    mov r12, 100000
+    rcall sleeper
 
-buttonint:
-    
-    /* Set sleep time to debounce */
-    mov r11, 100000
-    
-intr_sleep_start:
-    
-    /* Sleep */
-    sub r11, 1
-    cp.w r11, 0
-    breq intr_sleep_end
-    rjmp intr_sleep_start
-    
-intr_sleep_end:
-    
     /* Read ISR to make sure it knows the interupt was handled */
     ld.w r0, r5[AVR32_PIO_ISR]
     
@@ -139,18 +144,18 @@ intr_sleep_end:
     ld.w r1, r5[AVR32_PIO_PDSR]
     
     /* Copy and invert so that down is 1 and up is 0 */
-    mov r2, r0
+    mov r2, r1
     com r2
     
-    /* Was this event related to the left button? If not then skip. */
+    /* Was this event related to the left button? If not then skip (mask event by button) */
     mov r3, E_7
     and r3, r0
-    breq after_left
+    breq button_interrupt_after_left
     
-    /* Is the button down? If not then skip. */
+    /* Is the button down? If not then skip (mask state by button) */
     mov r3, E_7
     and r3, r2
-    breq after_left
+    breq button_interrupt_after_left
     
     /* Shift LED one left */
     lsl r8, 1
@@ -159,26 +164,29 @@ intr_sleep_end:
     cp.w r8, E_7
     movhi r8, E_0
     
-after_left:
+button_interrupt_after_left:
     
-    /* Was this event related to the right button? If not then skip. */
+    /* Was this event related to the right button? If not then skip (mask event by button) */
     mov r3, E_0
     and r3, r0
-    breq after_left
+    breq button_interrupt_after_right
     
-    /* Is the button down? If not then skip. */
+    /* Is the button down? If not then skip (mask state by button) */
     mov r3, E_0
     and r3, r2
-    breq after_left
+    breq button_interrupt_after_right
     
     /* Shift LED one right */
     lsr r8, 1
     
     /* If shifted beyond LED O, set to LED 7 */
     cp.w r8, E_0
-    movlo r8, E_0
     
-after_right:
+    /* Workaround because E_7 is too large for mov{cond} (addlo crashes, therefore sublo) */
+    movlo r8, E_7-1
+    sublo r8, -1
+    
+button_interrupt_after_right:
     
     /* Disable all LEDS */
     st.w r6[AVR32_PIO_CODR], r7
@@ -190,8 +198,9 @@ after_right:
 
 
 
+/* Clear all registers */
 clear_regs:
-    /* Clear all registers */
+    
     mov r0, 0
     mov r1, 0
     mov r2, 0
@@ -205,17 +214,56 @@ clear_regs:
     mov r10, 0
     mov r11, 0
 
-    ret r0
+    ret SP
 
 
-    /* piob address */
+
+/* Update LEDS */
+update_leds:
+    
+    /* Disable all LEDS */
+    st.w r6[AVR32_PIO_CODR], r7
+    
+    /* Enable current LED */
+    st.w r6[AVR32_PIO_SODR], r8
+
+    ret SP
+
+
+
+/* Sleeps for the duration of r12 */
+sleeper:
+    
+    /* Set sleep time */
+    mov r0, r12
+    
+sleeper_start:
+    
+    /* Subtract one */
+    sub r0, 1
+    
+    /* check if done */
+    cp.w r0, 0
+    brle sleeper_end
+    
+    /* Sleep more! */
+    rjmp sleeper_start
+    
+sleeper_end:
+    
+    ret SP
+
+
+
+/* piob address */
 piob:
     .int AVR32_PIOB
 
-    /* pioc address */
+/* pioc address */
 pioc:
     .int AVR32_PIOC
 
+/* intc address */
 intc:
     .int AVR32_INTC
 
