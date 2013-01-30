@@ -37,8 +37,7 @@ E_ALL = 0b11111111
 
 .globl  _start
 
-/* Program starts here */
-_start:
+clear_regs:
     /* Clear all registers */
     mov r0, 0
     mov r1, 0
@@ -52,8 +51,13 @@ _start:
     mov r9, 0
     mov r10, 0
     mov r11, 0
-    mov r12, 0
-    
+
+    ret
+
+/* Program starts here */
+_start:
+    rcall clear_regs
+
     /* Load piob pointer */
     mov r0, piob
     ld.w r5, r0
@@ -77,45 +81,6 @@ _start:
     rjmp test 
 
 
-
-/* Try to move the light with button 0 and 1 */
-test:
-    /* Start with LED 0 */
-    mov r8, E_O
-loop:
-    /* Disable LEDS */
-    st.w r6[AVR32_PIO_CODR], r7
-
-    /* Enable current LED */
-    st.w r6[AVR32_PIO_SODR], r8
-
-    /* Read button states */
-    ld.w r0, r5[AVR32_PIO_PDSR]
-    
-    /* Copy and invert so that down is 1 and up is 0 */
-    mov r1, r0
-    com r1
-    
-    /* Mask button 0 */
-    mov r2, E_0
-    and r2, r1
-
-    /* Loop if button is up */
-    cp.w r2, 0 /* Not actually needed because AND will set Z, but kept for clarity */
-    breq loop
-    
-    /* Shift LED one left */
-    lsl r8, 1
-    
-    /* If shifted beyond LED 7, set to LED 0 */
-    cp.w r8, E_7
-    movgt r8, E_0
-    
-    /* Loop */
-    rjmp loop
-
-
-
 /* Eternal polling loop that enables LEDS over buttons that are down */
 bled:
     /* Read button states */ 
@@ -135,6 +100,44 @@ bled:
     rjmp bled
 
 
+/********************************************************************
+ *
+ *INTERUPT HANDLERS
+ *
+ *
+ ********************************************************************/
+
+b0int:
+    //READPIOB  ISR
+    ld.w r0, r5[AVR32_PIO_ISR] /* Read ISR to make sure it knows the interupt was handled"
+
+    
+    /* Copy and invert so that down is 1 and up is 0 */
+    //mov r1, r0
+    //com r1
+    
+    /* Mask button 0 */
+    mov r2, E_0
+    and r2, r0
+
+    /* Loop if button is up */
+    cp.w r2, 0 /* Not actually needed because AND will set Z, but kept for clarity */
+    breq end
+    
+    /* Shift LED one left */
+    lsl r8, 1
+    
+    /* If shifted beyond LED 7, set to LED 0 */
+    cp.w r8, E_7
+    movgt r8, E_0
+    
+    /* Disable LEDS */
+    st.w r6[AVR32_PIO_CODR], r7
+
+    /* Enable current LED */
+    st.w r6[AVR32_PIO_SODR], r8
+end:
+    rete
 
 /* piob address */
 piob:
