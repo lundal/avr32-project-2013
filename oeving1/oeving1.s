@@ -1,15 +1,16 @@
 /******************************************************************************
- *
- * Øving 1 UCSysDes
- *
+ * 
+ * Assignment 1: UCSysDes
+ * 
  * Register conventions used:
- * r0-r4 : Temporary registers, will often be overidden.
- * r5-r11: Somewhat important data. Do not change unless you know it's clear.
- *
+ * r0-r3: Temporary data. Will likely be overidden by subroutines.
+ * r4-r11: Important data. Subroutines should not modify these without pushing to stack!
+ * 
  * Used registers:
  * r5 - piob pointer
  * r6 - pioc pointer
  * r7 - All elements
+ * 
  *****************************************************************************/
 
 .include "io.s"  /* Include useful constants */
@@ -27,8 +28,11 @@ E_ALL = 0b11111111
 
 
 
-/*****************************************************************************/
-/* Text segment: Includes all program code */
+/******************************************************************************
+ * 
+ * Text segment: Includes all program code
+ * 
+ *****************************************************************************/
 .text
 
 .globl  _start
@@ -142,7 +146,10 @@ pioc:
 
 
 
-/*****************************************************************************/
-/* Data segment: Includes all variables */
+/******************************************************************************
+ * 
+ * Data segment: Includes all variables
+ * 
+ *****************************************************************************/
 .data
 

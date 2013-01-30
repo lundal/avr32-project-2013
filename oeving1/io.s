@@ -1,16 +1,14 @@
 /******************************************************************************
  *	
- * En samling nyttige symboler:  Utvalg av AT32AP7000 I/O-registeradresser
+ * A collection of useful AT32AP7000 I/O register addresses
  *	
  *****************************************************************************/
 
-/* PIO baseadresser */
-        
+/* PIO base addresses */
 AVR32_PIOB = 0xFFE02C00
 AVR32_PIOC = 0xFFE03000
-	
+
 /* PIO offsets */
-        
 AVR32_PIO_ABSR = 0x00000078
 AVR32_PIO_ASR  = 0x00000070
 AVR32_PIO_BSR  = 0x00000074
@@ -40,9 +38,8 @@ AVR32_PIO_PUDR = 0x00000060
 AVR32_PIO_PUER = 0x00000064
 AVR32_PIO_PUSR = 0x00000068
 AVR32_PIO_SODR = 0x00000030
-	
-/* INTC baseadresse */
-	
+
+/* INTC base address */
 AVR32_INTC = 0xFFF00400
 
 /* INTC offsets */
