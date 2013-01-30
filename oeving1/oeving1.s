@@ -11,9 +11,11 @@
  * r15: Program counter
  * 
  * Used registers:
- * r5 - piob pointer
- * r6 - pioc pointer
+ * r4 - piob pointer
+ * r5 - pioc pointer
+ * r6 - intc pointer
  * r7 - All elements
+ * r8 - Current LED
  * 
  *****************************************************************************/
 
@@ -52,97 +54,74 @@ _start:
     
     /* Clear registers to make debugging easier */
     rcall clear_regs
+    
+    /* Initialize */
+    rcall init
+    
+    /* Start main program */
+    rcall main
+
+
+
+/* Initializes registers and components */
+init:
 
     /* Load piob pointer */
     mov r0, piob
-    ld.w r5, r0
+    ld.w r4, r0
     
     /* Load pioc pointer */
     mov r0, pioc
+    ld.w r5, r0
+
+    /* Load intc pointer */
+    mov r0, intc
     ld.w r6, r0
     
     /* Load all elements to r7 */
     mov r7, E_ALL
     
     /* Enable all buttons */
-    st.w r5[AVR32_PIO_PER], r7
-    st.w r5[AVR32_PIO_PUER], r7
+    st.w r4[AVR32_PIO_PER], r7
+    st.w r4[AVR32_PIO_PUER], r7
     
     /* Enable all LEDS */
-    st.w r6[AVR32_PIO_PER], r7
-    st.w r6[AVR32_PIO_OER], r7
+    st.w r5[AVR32_PIO_PER], r7
+    st.w r5[AVR32_PIO_OER], r7
     
     /* Enable button interrupts */
-    st.w r5[AVR32_PIO_IER], r7
+    st.w r4[AVR32_PIO_IER], r7
     mov r0, E_ALL
     com r0
-    st.w r5[AVR32_PIO_IDR], r0
-
+    st.w r4[AVR32_PIO_IDR], r0
+    
     /* For simplicity, set EVBA to 0 */
     mov r1, 0
     mtsr 4, r1
-
-    /* Set autovector */
-    mov r0, intc
-    ld.w r1, r0
+    
+    /* Set button interrupt autovector */
     mov r0, button_interrupt
-    st.w r1[AVR32_INTC_IPR14], r0
-
+    st.w r6[AVR32_INTC_IPR14], r0
+    
     /* Initialize with LED 0 */
-    mov r8, 1
-
-    /* Disable LEDS */
-    st.w r6[AVR32_PIO_CODR], r7
-
-    /* Enable current LED */
-    st.w r6[AVR32_PIO_SODR], r8
-
+    mov r8, E_0
+    
     /* Disable Global Interupt Mask */
     csrf 16
-
-infloop:
     
-    /*
-    mov r12, 1000000
-    rcall sleeper
-    lsl r8, 1
-    rcall update_leds
-    */
-    
-    rjmp infloop
+    ret SP
 
 
 
-/* Eternal polling loop that enables LEDS over buttons that are down */
-bled:
-    
-    /* Read button states */ 
-    ld.w r0, r5[AVR32_PIO_PDSR]
-
-    /* Invert so that down is 1 and up is 0 */
-    com r0
+/* Main program */
+main:
     
     /* Set LEDS */
-    mov r12, r0
+    mov r12, r8
     rcall set_leds
     
-    /* Loop */
-    rjmp bled
-
-
-
-/* Button interrupt handler */
-button_interrupt:
-    
-    /* Debounce */
-    mov r12, 100000
-    rcall sleeper
-
-    /* Read ISR to make sure it knows the interupt was handled */
-    ld.w r0, r5[AVR32_PIO_ISR]
-    
-    /* Read button states */ 
-    ld.w r1, r5[AVR32_PIO_PDSR]
+    /* Wait for interrupt */
+    sleep 1
     
     /* Copy and invert so that down is 1 and up is 0 */
     mov r2, r1
@@ -151,12 +130,12 @@ button_interrupt:
     /* Was this event related to the left button? If not then skip (mask event by button) */
     mov r3, E_7
     and r3, r0
-    breq button_interrupt_after_left
+    breq main_after_left
     
     /* Is the button down? If not then skip (mask state by button) */
     mov r3, E_7
     and r3, r2
-    breq button_interrupt_after_left
+    breq main_after_left
     
     /* Shift LED one left */
     lsl r8, 1
@@ -165,17 +144,17 @@ button_interrupt:
     cp.w r8, E_7
     movhi r8, E_0
     
-button_interrupt_after_left:
+main_after_left:
     
     /* Was this event related to the right button? If not then skip (mask event by button) */
     mov r3, E_0
     and r3, r0
-    breq button_interrupt_after_right
+    breq main_after_right
     
     /* Is the button down? If not then skip (mask state by button) */
     mov r3, E_0
     and r3, r2
-    breq button_interrupt_after_right
+    breq main_after_right
     
     /* Shift LED one right */
     lsr r8, 1
@@ -187,12 +166,27 @@ button_interrupt_after_left:
     movlo r8, E_7-1
     sublo r8, -1
     
-button_interrupt_after_right:
+main_after_right:
     
-    /* Set LEDS */
-    mov r12, r8
-    rcall set_leds
+    /* Loop */
+    rjmp main
+
+
+
+/* Button interrupt handler */
+button_interrupt:
     
+    /* Debounce */
+    mov r12, 1000
+    rcall sleeper
+
+    /* Read ISR to make sure it knows the interupt was handled */
+    ld.w r0, r4[AVR32_PIO_ISR]
+    
+    /* Read button states */ 
+    ld.w r1, r4[AVR32_PIO_PDSR]
+    
+    /* Be lazy: Let the main loop handle it */
     rete
 
 
@@ -221,11 +215,11 @@ clear_regs:
 set_leds:
     
     /* Enable specified LEDS */
-    st.w r6[AVR32_PIO_SODR], r12
+    st.w r5[AVR32_PIO_SODR], r12
     
     /* Disable other LEDS */
     com r12
-    st.w r6[AVR32_PIO_CODR], r12
+    st.w r5[AVR32_PIO_CODR], r12
     
     ret SP
 
