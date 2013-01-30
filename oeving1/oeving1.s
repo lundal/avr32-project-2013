@@ -144,13 +144,13 @@ main:
     cp.w r8, E_7
     movhi r8, E_0
     
-main_after_left:
+    main_after_left:
     
     /* Was this event related to the right button? If not then skip (mask event by button) */
     mov r3, E_0
     and r3, r0
     breq main_after_right
-    
+     
     /* Is the button down? If not then skip (mask state by button) */
     mov r3, E_0
     and r3, r2
@@ -166,7 +166,7 @@ main_after_left:
     movlo r8, E_7-1
     sublo r8, -1
     
-main_after_right:
+    main_after_right:
     
     /* Loop */
     rjmp main
@@ -231,7 +231,7 @@ sleeper:
     /* Set sleep time */
     mov r0, r12
     
-sleeper_start:
+    sleeper_start:
     
     /* Subtract one */
     sub r0, 1
@@ -243,7 +243,7 @@ sleeper_start:
     /* Sleep more! */
     rjmp sleeper_start
     
-sleeper_end:
+    sleeper_end:
     
     ret SP
 
