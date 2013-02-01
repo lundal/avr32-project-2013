@@ -67,16 +67,13 @@ _start:
 init:
 
     /* Load piob pointer */
-    mov r0, piob
-    ld.w r4, r0
+    lddpc r4, piob
     
     /* Load pioc pointer */
-    mov r0, pioc
-    ld.w r5, r0
+    lddpc r5, pioc
 
     /* Load intc pointer */
-    mov r0, intc
-    ld.w r6, r0
+    lddpc r6, intc
     
     /* Load all elements to r7 */
     mov r7, E_ALL
@@ -150,7 +147,7 @@ main:
     mov r3, E_0
     and r3, r0
     breq main_after_right
-     
+    
     /* Is the button down? If not then skip (mask state by button) */
     mov r3, E_0
     and r3, r2
