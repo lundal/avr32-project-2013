@@ -109,6 +109,10 @@ init:
 /* Main program */
 main:
     
+    /* Set LEDS */
+    mov r12, r8
+    rcall set_leds
+    
     /* Wait for interrupt */
     sleep 1
     
@@ -153,10 +157,6 @@ main:
     main_button_6:
     main_button_7:
     main_end:
-    
-    /* Set LEDS */
-    mov r12, r8
-    rcall set_leds
     
     /* Loop */
     rjmp main
