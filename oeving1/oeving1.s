@@ -71,6 +71,9 @@ init:
     lddpc r5, pioc
     lddpc r6, intc
     
+    /* Initialize stack */
+    lddpc sp, stack
+    
     /* Load all elements to r7 */
     mov r7, E_ALL
     
@@ -270,17 +273,21 @@ sleeper:
 
 
 
-/* piob address */
+/* PIOB address */
 piob:
     .int AVR32_PIOB
 
-/* pioc address */
+/* PIOC address */
 pioc:
     .int AVR32_PIOC
 
-/* intc address */
+/* INTC address */
 intc:
     .int AVR32_INTC
+
+/* Initial stack pointer address */
+stack:
+    .int _stack
 
 
 
