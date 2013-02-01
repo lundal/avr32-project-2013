@@ -19,8 +19,7 @@
  * r11 - Event button state
  * 
  * Known issues:
- * If an interrupt is triggered (which causes a sleep) while a sleep is in
- * progress, the program will crash.
+ * None! :D
  * 
  *****************************************************************************/
 
@@ -157,6 +156,20 @@ main:
     main_button_3:
     main_button_4:
     main_button_5:
+        
+        /* Was the event related to button 5? If not then skip (mask event by button) */
+        mov r0, E_5
+        and r0, r10
+        breq main_button_6
+        
+        /* Was the button pressed? If not then skip (mask state by button) */
+        mov r0, E_5
+        and r0, r11
+        breq main_button_6
+        
+        /* Handle event */
+        rcall flash_right
+        
     main_button_6:
     main_button_7:
         
@@ -215,8 +228,8 @@ cycle_led_right:
 flash_left:
     
     /* Backup registers */
-    st.w --sp, r8
     st.w --sp, lr
+    st.w --sp, r8
     
     /* Time between each iteration */
     mov r1, 200000
@@ -226,14 +239,6 @@ flash_left:
     
     /* Starting LED */
     mov r8, E_0
-    
-    /* Clear LEDS */
-    mov r12, 0
-    rcall set_leds
-    
-    /* Sleep for a while */
-    mov r12, r1
-    rcall sleeper
     
     flash_left_start:
         
@@ -260,13 +265,70 @@ flash_left:
         
     flash_left_end:
     
-    /* Restore registers */
-    ld.w lr, sp++
+    /* Restore r8 */
     ld.w r8, sp++
     
     /* Restore LEDS */
     mov r12, r8
     rcall set_leds
+    
+    /* Restore link */
+    ld.w lr, sp++
+    
+    ret SP
+
+
+
+/* Flash right */
+flash_right:
+    
+    /* Backup registers */
+    st.w --sp, lr
+    st.w --sp, r8
+    
+    /* Time between each iteration */
+    mov r1, 200000
+    
+    /* Number of iterations */
+    mov r2, 64
+    
+    /* Starting LED */
+    mov r8, E_0
+    
+    flash_right_start:
+        
+        /* Count down */
+        sub r2, 1
+        
+        /* Check if done */
+        cp.w r2, 0
+        brlt flash_right_end
+        
+        /* Set LEDS */
+        mov r12, r8
+        rcall set_leds
+        
+        /* Sleep for a while */
+        mov r12, r1
+        rcall sleeper
+        
+        /* Cycle one left */
+        rcall cycle_led_right
+        
+        /* Continue */
+        rjmp flash_right_start
+        
+    flash_right_end:
+    
+    /* Restore r8 */
+    ld.w r8, sp++
+    
+    /* Restore LEDS */
+    mov r12, r8
+    rcall set_leds
+    
+    /* Restore link */
+    ld.w lr, sp++
     
     ret SP
 
@@ -274,6 +336,7 @@ flash_left:
 
 /* Button interrupt handler */
 button_interrupt:
+
     /* Backup registers (r0 is used by sleeper) */
     st.w --sp, r0
     st.w --sp, lr
@@ -292,7 +355,7 @@ button_interrupt:
     com r11
     
     /* Restore registers */
-    st.w lr, sp++
+    ld.w lr, sp++
     ld.w r0, sp++
 
     /* Be lazy: Let the main loop handle the rest */
