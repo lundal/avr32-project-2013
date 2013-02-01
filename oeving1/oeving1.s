@@ -14,10 +14,13 @@
  * r4 - piob pointer
  * r5 - pioc pointer
  * r6 - intc pointer
- * r7 - All elements
  * r8 - Current LED
  * r10 - Event button source
  * r11 - Event button state
+ * 
+ * Known issues:
+ * If an interrupt is triggered (which causes a sleep) while a sleep is in
+ * progress, the program will crash.
  * 
  *****************************************************************************/
 
@@ -76,26 +79,25 @@ init:
     /* Initialize stack */
     lddpc sp, stack
     
-    /* Load all elements to r7 */
-    mov r7, E_ALL
+    /* Load all elements */
+    mov r0, E_ALL
     
     /* Enable all buttons */
-    st.w r4[AVR32_PIO_PER], r7
-    st.w r4[AVR32_PIO_PUER], r7
+    st.w r4[AVR32_PIO_PER], r0
+    st.w r4[AVR32_PIO_PUER], r0
     
     /* Enable all LEDS */
-    st.w r5[AVR32_PIO_PER], r7
-    st.w r5[AVR32_PIO_OER], r7
+    st.w r5[AVR32_PIO_PER], r0
+    st.w r5[AVR32_PIO_OER], r0
     
     /* Enable button interrupts */
-    st.w r4[AVR32_PIO_IER], r7
-    mov r0, E_ALL
+    st.w r4[AVR32_PIO_IER], r0
     com r0
     st.w r4[AVR32_PIO_IDR], r0
     
     /* For simplicity, set EVBA to 0 */
-    mov r1, 0
-    mtsr 4, r1
+    mov r0, 0
+    mtsr 4, r0
     
     /* Set button interrupt autovector */
     mov r0, button_interrupt
@@ -213,26 +215,33 @@ cycle_led_right:
 flash_left:
     
     /* Backup registers */
-    //pushm r8-r9, lr
     st.w --sp, r8
     st.w --sp, lr
     
-    /* Number of iterations */
-    mov r0, 20
-    
     /* Time between each iteration */
-    mov r1, 1000000
+    mov r1, 200000
+    
+    /* Number of iterations */
+    mov r2, 64
     
     /* Starting LED */
     mov r8, E_0
     
+    /* Clear LEDS */
+    mov r12, 0
+    rcall set_leds
+    
+    /* Sleep for a while */
+    mov r12, r1
+    rcall sleeper
+    
     flash_left_start:
         
         /* Count down */
-        sub r0, 1
+        sub r2, 1
         
         /* Check if done */
-        cp.w r0, 0
+        cp.w r2, 0
         brlt flash_left_end
         
         /* Set LEDS */
@@ -252,9 +261,12 @@ flash_left:
     flash_left_end:
     
     /* Restore registers */
-    //popm r8-r9, lr
     ld.w lr, sp++
     ld.w r8, sp++
+    
+    /* Restore LEDS */
+    mov r12, r8
+    rcall set_leds
     
     ret SP
 
@@ -262,7 +274,9 @@ flash_left:
 
 /* Button interrupt handler */
 button_interrupt:
-    
+    /* Backup r0 (used by sleeper) */
+    st.w --sp, r0
+
     /* Debounce */
     mov r12, 1000
     rcall sleeper
@@ -276,6 +290,9 @@ button_interrupt:
     /* Invert button states so that down is 1 and up is 0 */
     com r11
     
+    /* Restore r0 */
+    ld.w r0, sp++
+
     /* Be lazy: Let the main loop handle the rest */
     rete
 
