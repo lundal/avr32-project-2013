@@ -122,7 +122,7 @@ main:
     sleep 1
     
     main_button_0:
-    
+        
         /* Was the event related to button 0? If not then skip (mask event by button) */
         mov r0, E_0
         and r0, r10
@@ -135,10 +135,10 @@ main:
         
         /* Handle event */
         rcall cycle_led_right
-    
+        
     main_button_1:
     main_button_2:
-    
+        
         /* Was the event related to button 2? If not then skip (mask event by button) */
         mov r0, E_2
         and r0, r10
@@ -151,12 +151,26 @@ main:
         
         /* Handle event */
         rcall cycle_led_left
-    
+        
     main_button_3:
     main_button_4:
     main_button_5:
     main_button_6:
     main_button_7:
+        
+        /* Was the event related to button 7? If not then skip (mask event by button) */
+        mov r0, E_7
+        and r0, r10
+        breq main_end
+        
+        /* Was the button pressed? If not then skip (mask state by button) */
+        mov r0, E_7
+        and r0, r11
+        breq main_end
+        
+        /* Handle event */
+        rcall cycle_led_left
+        
     main_end:
     
     /* Loop */
@@ -197,6 +211,48 @@ cycle_led_right:
 
 /* Flash left */
 flash_left:
+    
+    /* Backup registers */
+    pushm r8-r9, lr
+    
+    /* Number of iterations */
+    mov r0, 20
+    
+    /* Time between each iteration */
+    mov r1, 1000000
+    
+    /* Starting LED */
+    mov r8, E_0
+    
+    flash_left_start:
+        
+        /* Count down */
+        sub r0, 1
+        
+        /* Check if done */
+        cp.w r0, 0
+        brlt flash_left_end
+        
+        /* Set LEDS */
+        mov r12, r8
+        rcall set_leds
+        
+        /* Sleep for a while */
+        mov r12, r1
+        rcall sleeper
+        
+        /* Cycle one left */
+        rcall cycle_led_left
+        
+        /* Continue */
+        rjmp flash_left_start
+        
+    flash_left_end:
+    
+    /* Restore registers */
+    popm r8-r9, lr
+    
+    ret SP
 
 
 
@@ -268,7 +324,7 @@ sleeper:
     
     /* Check if done */
     cp.w r0, 0
-    brle sleeper_end
+    brlt sleeper_end
     
     /* Sleep more! */
     rjmp sleeper_start
