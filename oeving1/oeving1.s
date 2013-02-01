@@ -16,6 +16,8 @@
  * r6 - intc pointer
  * r7 - All elements
  * r8 - Current LED
+ * r10 - Event button source
+ * r11 - Event button state
  * 
  *****************************************************************************/
 
@@ -119,20 +121,16 @@ main:
     /* Wait for interrupt */
     sleep 1
     
-    /* Copy and invert button states so that down is 1 and up is 0 */
-    mov r2, r1
-    com r2
-    
     main_button_0:
     
-        /* Was this event related to button 0? If not then skip (mask event by button) */
-        mov r3, E_0
-        and r3, r0
+        /* Was the event related to button 0? If not then skip (mask event by button) */
+        mov r0, E_0
+        and r0, r10
         breq main_button_1
         
         /* Was the button pressed? If not then skip (mask state by button) */
-        mov r3, E_0
-        and r3, r2
+        mov r0, E_0
+        and r0, r11
         breq main_button_1
         
         /* Handle event */
@@ -141,14 +139,14 @@ main:
     main_button_1:
     main_button_2:
     
-        /* Was this event related to button 2? If not then skip (mask event by button) */
-        mov r3, E_2
-        and r3, r0
+        /* Was the event related to button 2? If not then skip (mask event by button) */
+        mov r0, E_2
+        and r0, r10
         breq main_button_3
         
         /* Was the button pressed? If not then skip (mask state by button) */
-        mov r3, E_2
-        and r3, r2
+        mov r0, E_2
+        and r0, r11
         breq main_button_3
         
         /* Handle event */
@@ -197,6 +195,11 @@ cycle_led_right:
 
 
 
+/* Flash left */
+flash_left:
+
+
+
 /* Button interrupt handler */
 button_interrupt:
     
@@ -205,12 +208,15 @@ button_interrupt:
     rcall sleeper
 
     /* Read ISR to make sure it knows the interupt was handled */
-    ld.w r0, r4[AVR32_PIO_ISR]
+    ld.w r10, r4[AVR32_PIO_ISR]
     
     /* Read button states */ 
-    ld.w r1, r4[AVR32_PIO_PDSR]
+    ld.w r11, r4[AVR32_PIO_PDSR]
     
-    /* Be lazy: Let the main loop handle it */
+    /* Invert button states so that down is 1 and up is 0 */
+    com r11
+    
+    /* Be lazy: Let the main loop handle the rest */
     rete
 
 
