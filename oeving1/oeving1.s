@@ -274,8 +274,9 @@ flash_left:
 
 /* Button interrupt handler */
 button_interrupt:
-    /* Backup r0 (used by sleeper) */
+    /* Backup registers (r0 is used by sleeper) */
     st.w --sp, r0
+    st.w --sp, lr
 
     /* Debounce */
     mov r12, 1000
@@ -290,7 +291,8 @@ button_interrupt:
     /* Invert button states so that down is 1 and up is 0 */
     com r11
     
-    /* Restore r0 */
+    /* Restore registers */
+    st.w lr, sp++
     ld.w r0, sp++
 
     /* Be lazy: Let the main loop handle the rest */
