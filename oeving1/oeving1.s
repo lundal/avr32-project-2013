@@ -66,13 +66,9 @@ _start:
 /* Initializes registers and components */
 init:
 
-    /* Load piob pointer */
+    /* Load pointers */
     lddpc r4, piob
-    
-    /* Load pioc pointer */
     lddpc r5, pioc
-
-    /* Load intc pointer */
     lddpc r6, intc
     
     /* Load all elements to r7 */
@@ -125,12 +121,12 @@ main:
     com r2
     
     /* Was this event related to the left button? If not then skip (mask event by button) */
-    mov r3, E_7
+    mov r3, E_2
     and r3, r0
     breq main_after_left
     
     /* Is the button down? If not then skip (mask state by button) */
-    mov r3, E_7
+    mov r3, E_2
     and r3, r2
     breq main_after_left
     
@@ -230,10 +226,10 @@ sleeper:
     
     sleeper_start:
     
-    /* Subtract one */
+    /* Count down */
     sub r0, 1
     
-    /* check if done */
+    /* Check if done */
     cp.w r0, 0
     brle sleeper_end
     
