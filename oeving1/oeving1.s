@@ -109,26 +109,62 @@ init:
 /* Main program */
 main:
     
+    /* Wait for interrupt */
+    sleep 1
+    
+    /* Copy and invert button states so that down is 1 and up is 0 */
+    mov r2, r1
+    com r2
+    
+    main_button_0:
+    
+        /* Was this event related to button 0? If not then skip (mask event by button) */
+        mov r3, E_0
+        and r3, r0
+        breq main_button_1
+        
+        /* Was the button pressed? If not then skip (mask state by button) */
+        mov r3, E_0
+        and r3, r2
+        breq main_button_1
+        
+        /* Handle event */
+        rcall cycle_led_right
+    
+    main_button_1:
+    main_button_2:
+    
+        /* Was this event related to button 2? If not then skip (mask event by button) */
+        mov r3, E_2
+        and r3, r0
+        breq main_button_3
+        
+        /* Was the button pressed? If not then skip (mask state by button) */
+        mov r3, E_2
+        and r3, r2
+        breq main_button_3
+        
+        /* Handle event */
+        rcall cycle_led_left
+    
+    main_button_3:
+    main_button_4:
+    main_button_5:
+    main_button_6:
+    main_button_7:
+    main_end:
+    
     /* Set LEDS */
     mov r12, r8
     rcall set_leds
     
-    /* Wait for interrupt */
-    sleep 1
-    
-    /* Copy and invert so that down is 1 and up is 0 */
-    mov r2, r1
-    com r2
-    
-    /* Was this event related to the left button? If not then skip (mask event by button) */
-    mov r3, E_2
-    and r3, r0
-    breq main_after_left
-    
-    /* Is the button down? If not then skip (mask state by button) */
-    mov r3, E_2
-    and r3, r2
-    breq main_after_left
+    /* Loop */
+    rjmp main
+
+
+
+/* Cycle LED one left */
+cycle_led_left:
     
     /* Shift LED one left */
     lsl r8, 1
@@ -137,17 +173,12 @@ main:
     cp.w r8, E_7
     movhi r8, E_0
     
-    main_after_left:
-    
-    /* Was this event related to the right button? If not then skip (mask event by button) */
-    mov r3, E_0
-    and r3, r0
-    breq main_after_right
-    
-    /* Is the button down? If not then skip (mask state by button) */
-    mov r3, E_0
-    and r3, r2
-    breq main_after_right
+    ret SP
+
+
+
+/* Cycle LED one right */
+cycle_led_right:
     
     /* Shift LED one right */
     lsr r8, 1
@@ -159,10 +190,7 @@ main:
     movlo r8, E_7-1
     sublo r8, -1
     
-    main_after_right:
-    
-    /* Loop */
-    rjmp main
+    ret SP
 
 
 
