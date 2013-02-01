@@ -169,7 +169,7 @@ main:
         breq main_end
         
         /* Handle event */
-        rcall cycle_led_left
+        rcall flash_left
         
     main_end:
     
