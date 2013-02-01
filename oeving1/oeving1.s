@@ -213,7 +213,9 @@ cycle_led_right:
 flash_left:
     
     /* Backup registers */
-    pushm r8-r9, lr
+    //pushm r8-r9, lr
+    st.w --sp, r8
+    st.w --sp, lr
     
     /* Number of iterations */
     mov r0, 20
@@ -250,7 +252,9 @@ flash_left:
     flash_left_end:
     
     /* Restore registers */
-    popm r8-r9, lr
+    //popm r8-r9, lr
+    ld.w lr, sp++
+    ld.w r8, sp++
     
     ret SP
 
