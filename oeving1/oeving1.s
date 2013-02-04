@@ -13,8 +13,7 @@
  * Used registers:
  * r4 - piob pointer
  * r5 - pioc pointer
- * r6 - intc pointer
- * r8 - Current LED
+ * r9 - Current LED
  * r10 - Event button source
  * r11 - Event button state
  * 
@@ -70,10 +69,9 @@ _start:
 /* Initializes registers and components */
 init:
 
-    /* Load pointers */
+    /* Load IO pointers */
     lddpc r4, piob
     lddpc r5, pioc
-    lddpc r6, intc
     
     /* Initialize stack */
     lddpc sp, stack
@@ -99,11 +97,12 @@ init:
     mtsr 4, r0
     
     /* Set button interrupt autovector */
-    mov r0, button_interrupt
-    st.w r6[AVR32_INTC_IPR14], r0
+    lddpc r0, intc
+    mov r1, button_interrupt
+    st.w r0[AVR32_INTC_IPR14], r1
     
     /* Initialize with LED 0 */
-    mov r8, E_0
+    mov r9, E_0
     
     /* Disable Global Interupt Mask */
     csrf 16
@@ -116,7 +115,7 @@ init:
 main:
     
     /* Set LEDS */
-    mov r12, r8
+    mov r12, r9
     rcall set_leds
     
     /* Wait for interrupt */
@@ -197,11 +196,11 @@ main:
 cycle_led_left:
     
     /* Shift LED one left */
-    lsl r8, 1
+    lsl r9, 1
     
     /* If shifted beyond LED 7, set to LED 0 */
-    cp.w r8, E_7
-    movhi r8, E_0
+    cp.w r9, E_7
+    movhi r9, E_0
     
     ret SP
 
@@ -211,14 +210,14 @@ cycle_led_left:
 cycle_led_right:
     
     /* Shift LED one right */
-    lsr r8, 1
+    lsr r9, 1
     
     /* If shifted beyond LED O, set to LED 7 */
-    cp.w r8, E_0
+    cp.w r9, E_0
     
     /* Workaround because E_7 is too large for mov{cond} (addlo crashes, therefore sublo) */
-    movlo r8, E_7-1
-    sublo r8, -1
+    movlo r9, E_7-1
+    sublo r9, -1
     
     ret SP
 
@@ -229,7 +228,7 @@ flash_left:
     
     /* Backup registers */
     st.w --sp, lr
-    st.w --sp, r8
+    st.w --sp, r9
     
     /* Time between each iteration */
     mov r1, 200000
@@ -238,7 +237,7 @@ flash_left:
     mov r2, 64
     
     /* Starting LED */
-    mov r8, E_0
+    mov r9, E_0
     
     flash_left_start:
         
@@ -250,7 +249,7 @@ flash_left:
         brlt flash_left_end
         
         /* Set LEDS */
-        mov r12, r8
+        mov r12, r9
         rcall set_leds
         
         /* Sleep for a while */
@@ -265,11 +264,11 @@ flash_left:
         
     flash_left_end:
     
-    /* Restore r8 */
-    ld.w r8, sp++
+    /* Restore r9 */
+    ld.w r9, sp++
     
     /* Restore LEDS */
-    mov r12, r8
+    mov r12, r9
     rcall set_leds
     
     /* Restore link */
@@ -284,7 +283,7 @@ flash_right:
     
     /* Backup registers */
     st.w --sp, lr
-    st.w --sp, r8
+    st.w --sp, r9
     
     /* Time between each iteration */
     mov r1, 200000
@@ -293,7 +292,7 @@ flash_right:
     mov r2, 64
     
     /* Starting LED */
-    mov r8, E_0
+    mov r9, E_0
     
     flash_right_start:
         
@@ -305,7 +304,7 @@ flash_right:
         brlt flash_right_end
         
         /* Set LEDS */
-        mov r12, r8
+        mov r12, r9
         rcall set_leds
         
         /* Sleep for a while */
@@ -320,11 +319,11 @@ flash_right:
         
     flash_right_end:
     
-    /* Restore r8 */
-    ld.w r8, sp++
+    /* Restore r9 */
+    ld.w r9, sp++
     
     /* Restore LEDS */
-    mov r12, r8
+    mov r12, r9
     rcall set_leds
     
     /* Restore link */
