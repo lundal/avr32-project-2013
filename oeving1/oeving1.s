@@ -170,6 +170,20 @@ main:
         rcall flash_right
         
     main_button_6:
+        
+        /* Was the event related to button 6? If not then skip (mask event by button) */
+        mov r0, E_6
+        and r0, r10
+        breq main_button_7
+        
+        /* Was the button pressed? If not then skip (mask state by button) */
+        mov r0, E_6
+        and r0, r11
+        breq main_button_7
+        
+        /* Handle event */
+        rcall flash_both
+        
     main_button_7:
         
         /* Was the event related to button 7? If not then skip (mask event by button) */
@@ -264,14 +278,8 @@ flash_left:
         
     flash_left_end:
     
-    /* Restore r9 */
+    /* Restore registers */
     ld.w r9, sp++
-    
-    /* Restore LEDS */
-    mov r12, r9
-    rcall set_leds
-    
-    /* Restore link */
     ld.w lr, sp++
     
     ret SP
@@ -319,14 +327,58 @@ flash_right:
         
     flash_right_end:
     
-    /* Restore r9 */
+    /* Restore registers */
     ld.w r9, sp++
+    ld.w lr, sp++
     
-    /* Restore LEDS */
-    mov r12, r9
-    rcall set_leds
+    ret SP
+
+
+
+/* Flash both */
+flash_both:
     
-    /* Restore link */
+    /* Backup registers */
+    st.w --sp, lr
+    st.w --sp, r9
+    
+    /* Time between each iteration */
+    mov r1, 200000
+    
+    /* Number of iterations */
+    mov r2, 8
+    
+    /* Copy to r8 */
+    mov r8, r9
+    
+    flash_both_start:
+        
+        /* Count down */
+        sub r2, 1
+        
+        /* Check if done */
+        cp.w r2, 0
+        brlt flash_both_end
+        
+        /* Set LEDS */
+        add r12, r8, r9
+        rcall set_leds
+        
+        /* Sleep for a while */
+        mov r12, r1
+        rcall sleeper
+        
+        /* Shift one each way */
+        lsl r8, 1
+        lsr r9, 1
+        
+        /* Continue */
+        rjmp flash_both_start
+        
+    flash_both_end:
+    
+    /* Restore registers */
+    ld.w r9, sp++
     ld.w lr, sp++
     
     ret SP
