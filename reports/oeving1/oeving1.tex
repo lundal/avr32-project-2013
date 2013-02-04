@@ -5,6 +5,9 @@
 \usepackage{graphicx}
 \usepackage[utf8]{inputenc}
 
+% Set section numbering to Roman
+\renewcommand\thesection{\Roman{section}}
+
 \title{TDT4258\\ Energy Efficient Computer Design
 	\\Exercise 1}
 \author{
@@ -22,36 +25,37 @@
 \maketitle
 
 \clearpage
-\section*{Abstract}
+\begin{abstract}
+    \input{content/abstract.tex}
+\end{abstract}
+
 \clearpage
-
-
-%%%% \phantomsection
-
 \tableofcontents
-
 
 \clearpage
 \section{Introduction}
-
+    \input{content/introduction.tex}
 
 \clearpage
 \section{Description and methodology}
-
+    \input{content/descriptionAndMethodology.tex}
 
 \clearpage
 \section{Results and tests}
-
+    \input{content/resultsAndTests.tex}
 
 \clearpage
 \section{Evaluation of assignment}
+    \input{content/evaluation.tex}
 
 \clearpage
 \section{Conclusion}
+    \input{content/conclusion.tex}
 
 \clearpage
 \section{References}
+%TODO: Bibtex stuff!!!
 
-
+Bibtex will handle this part.
 
 \end{document}
