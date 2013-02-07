@@ -1,11 +1,12 @@
 Methodololololology\\
-The initial step in solving the task was to read up on the technical details on the AT32AP7000 microcontroller, the STK1000 development-board and the the AVR32 instruction set in order to figure out how to actually go about solving the assignment. Then a plan of four subsequent parts was made.
+The initial step in solving the task was to read up on the technical details on the AT32AP7000 microcontroller, the STK1000 development-board and the the AVR32 instruction set in order to figure out how to actually go about solving the assignment. Then a plan of five subsequent parts was made.
 \begin{enumerate}
 \item{Being able to program the lights in a functional manner by hard-coding a light-arrangement.}
-\item{connect the buttons to their corresponding LED's, and putting this code in a polling loop such that pushing them will turn on those lights.}
+\item{Connecting the buttons to the LED's, and putting code in a polling loop such that pushing one will turn on the corresponding lights.}
 \item{Making the button code interrupt based and putting all the code that altered the LED's in the main loop.}
-\item{The optimization with respect to energy. That is, putting the microcontroller in sleep mode 1, whenever feasible and reducing the amount of code where some things could be done with fewer lines.}
+\item{Optimization with respect to energy. That is, putting the microcontroller in sleep mode, reducing the amount of code and avoiding branches where this is possible while maintaining the same functionality.}
+\item{Adding extra functionality to the remaining unused buttons.}
 \end{enumerate}
-The reason for splitting up the assignment into smaller parts was for the sake of debugging and ensuring some measure of incremental success, instead of attempting to solve the whole asssignment in one go.
+The reason for splitting up the assignment into smaller parts was for the sake of debugging and ensuring some measure of incremental success, instead of attempting to solve the whole asssignment in one go and ending up debugging for several weeks.
 
 
