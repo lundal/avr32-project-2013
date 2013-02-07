@@ -1,1 +1,8 @@
-Methodololololology
+Methodololololology\\
+The initial step in solving the task was to read up on the technical details on the AT32AP7000 microcontroller, the STK1000 development-board and the the AVR32 RISC instruction set in order to figure out how to actually go about solving the assignment. Then a plan of four subsequent parts was made.
+\begin{enumerate}
+\item{Being able to program the lights in a functional manner by hard-coding a light-arrangement.}
+\item{connect the buttons to their corresponding LED's, and putting this code in a polling loop such that pushing them will turn on those lights.}
+\item{Making the button code interrupt based and putting all the code that altered the LED's in the main loop.}
+\item{The optimization with respect to energy. That is, putting the microcontroller in sleep 1, whenever feasible and reducing the amount of code where some things could be done with fewr lines of code.}
+\end{enumerate}
