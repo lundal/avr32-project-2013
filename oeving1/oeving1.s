@@ -455,17 +455,17 @@ sleeper:
     mov r0, r12
     
     sleeper_start:
-    
-    /* Count down */
-    sub r0, 1
-    
-    /* Check if done */
-    cp.w r0, 0
-    brlt sleeper_end
-    
-    /* Sleep more! */
-    rjmp sleeper_start
-    
+        
+        /* Count down */
+        sub r0, 1
+        
+        /* Check if done */
+        cp.w r0, 0
+        brlt sleeper_end
+        
+        /* Sleep more! */
+        rjmp sleeper_start
+        
     sleeper_end:
     
     ret SP
