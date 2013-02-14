@@ -1,12 +1,53 @@
-Methodololololology\\
-The initial step in solving the task was to read up on the technical details on the AT32AP7000 microcontroller, the STK1000 development-board and the the AVR32 instruction set in order to figure out how to actually go about solving the assignment. Then a plan of five subsequent parts was made.
-\begin{enumerate}
-\item{Being able to program the lights in a functional manner by hard-coding a light-arrangement.}
-\item{Connecting the buttons to the LED's, and putting code in a polling loop such that pushing one will turn on the corresponding lights.}
-\item{Making the button code interrupt based and putting all the code that altered the LED's in the main loop.}
-\item{Optimization with respect to energy. That is, putting the microcontroller in sleep mode, reducing the amount of code and avoiding branches where this is possible while maintaining the same functionality.}
-\item{Adding extra functionality to the remaining unused buttons.}
-\end{enumerate}
-The reason for splitting up the assignment into smaller parts was for the sake of debugging and ensuring some measure of incremental success, instead of attempting to solve the whole asssignment in one go and ending up debugging for several weeks.
+The initial step in solving the task was to read up on the technical details on the AT32AP7000 microcontroller, the STK1000 development-board and the the AVR32 instruction set in order to figure out how to actually solve the assignment. Then a plan of five subsequent steps was made.
+
+Activate LEDs
+Read button states
+Make use of interrupts
+Optimize for energy efficiency
+Add additional functionality if time allows
+
+The reason for splitting up the assignment into smaller parts was due to debugging and ensuring some measure of incremental success, instead of attempting to solve the whole assignment in one go and ending up debugging for weeks.
+
+\subsection{Jumper and cable configuration}
 
 
+The LED’s were connected to PIOC by a flat-cable from GPIO pins 16-23(J3) to the LED-pins(J15) on the STK1000 board \cite[section~2.4.1]{kompendium}. 
+The buttons were connected to PIOB by flat-cable from GPIO pins 0-7(J1) to the SWITCH-pins(J25) on the STK1000 board \cite[section~2.4.1]{kompendium}.
+On the AT32AP7000 we set the jumpers SW6 and SW4 to GPIO(so that PIOC and PIOB would be connected to GPIO)\cite[table~2.3]{kompendium}.
+
+\subsection{LEDs [unfinished]}
+
+As mentioned above, the first goal was to simply light up the LEDs. We used the value 0b11111111 to target all LEDs, and started by writing the value to the Pin Enable Register (PER) and Output Enable Register (OER). Then 
+
+After this point, the program entered an infinite loop that did nothing.
+
+The program wrote 0xFF to PIOC’s PER and OER memory locations to enable the relevant pins and set them in output mode, and then wrote 0x55 to SODR in order to turn every other LED on. 
+
+
+As mentioned above, our first goal was simply to get the LEDs to light up. The LEDs were connected to GPIO pins 16-23, which is mapped to the 0-7 bits in the PIOC memory location. 
+The program wrote 0xFF to PIOC’s PER and OER memory locations to enable the relevant pins and set them in output mode, and then wrote 0x55 to SODR in order to turn every other LED on. At this point, the program entered an infinite loop that did nothing.
+
+
+
+KLADD
+The program structure at this point was really simple; enable the PIO ports associated with the LED and turn them on in a given pattern, then enter an infinite loop that does nothing.
+\subsection{Buttons [unfinished]}
+
+With the LEDs up and running, the next step was to get the buttons under control. This was achieved by connecting the buttons to the PIO 0-7 ports, which are mapped to the PIOB 0-7 pins, enabling these pins as we did for the LEDs, and activating the pull-up resistors by writing 0xFF to PIOB-PUER. Now in the infinite loop, all the LEDs were first cleared and then the inverse of 0xFF & {button status register} , where & is bitwise and, was written to the {set value register}. This resulted in a program that turns on an LED when and only when the corresponding button is depressed.
+\subsection{Interrupts}
+
+Now that the program was able to read button states and manipulate the LEDs, the next step was to implement interrupt handling by following the procedure in section 2.5.2 of the compendium \cite{kompendium}.
+
+We started by creating the interrupt routine which stores the button and event states to some specified registers. Except from using a special return command, this is just like a normal routine, but since the interrupt can occur at any time, all registers that is be modified by the routine must first be stored in the memory, and then restored afterwards. A practical way to achieve this is by using a stack. This was accomplished by initializing the Stack Poiner (SP) to the built-in assembler address _stack, and using load and store instructions which update the SP.
+
+Once the routine was functional, the interrupts had to be set up. To accomplish this, the Input Enable Register (IER) is set for the pins connected to the buttons, and the Input Disable Register (IDR) is set for all other pins on PIOB to prevent unwanted events to be triggerred by noise. Afterwards the Exception Vector Base Address (EVBA) is set to zero for simplicity, and an autovector of the exception’s address and priority zero is stored in the interrupt controller’s Interrupt Priority Register 14 (IPR14), which corresponds to PIOB. Finally, the Global Interrupt Mask (GM) status register is cleared.
+
+The interrupt handler was now fully functional. However, each press generated several events due to bouncing, so the final touch was to add debouncing by waiting for a short while before processing each event.
+\subsection{Energy optimization}
+
+After all the main functionality was in place, it was time to optimize the code where possible to conserve energy. As the program is only supposed to react to interrupts, the first and most obvious step was to put the microcontroller into a sleep state while waiting for them instead of running in an infinite loop. This allows nearly all parts of the board to be shut down for most of the time, which conserves huge amounts of energy.
+
+Some more energy can be saved by making the code more efficient, i.e. execute faster, which allows the board to re-enter a sleep state earlier. Therefore, the number of instruction was reduced where possible, although there were not many places this could be performed. Branches were also exchanged with conditional instructions where possible, as clearing the whole seven step pipeline can take a lot of time. These actions were taken somewhat into account from the beginning of the assignment, but a second pass did not hurt.
+\subsection{Additional functionality [unfinished]}
+
+A little extra time allowed us to implement some additional functionality. Specifically, 
