@@ -1,7 +1,7 @@
 \documentclass[a4paper,12pt]{article}
 
 % PACKAGES
-
+\usepackage{hyperref}
 \usepackage{graphicx}
 \usepackage[utf8]{inputenc}
 
@@ -55,8 +55,33 @@
 
 \clearpage
 \section{ References}
-%TODO: Bibtex stuff!!!
+Let us test this\cite{kompendium}
 
-Bibtex will handle this part.
+And more\cite{avr32}
+
+\begin{thebibliography}{9}
+
+\bibitem{kompendium}
+  Computer Architecture and Design Group,
+  \emph{Lab Assignments in TDT4258 Energy Efficient
+Computer Systems}.
+  Department of Computer and Information Science, NTNU,
+  2013,
+  \url{http://www.idi.ntnu.no/emner/tdt4258/\_media/kompendium.pdf}.
+
+\bibitem{avr32}
+  Atmel.
+  \emph{AVR32 Architecture Document},
+  2011,
+  \url{http://www.idi.ntnu.no/emner/tdt4258/\_media/doc32000.pdf}.
+
+\bibitem{ap7000}
+  Atmel.
+  \emph{AT32AP7000 Preliminary},
+  2009,
+  \url{http://www.idi.ntnu.no/emner/tdt4258/\_media/doc32003.pdf}.
+
+
+\end{thebibliography}
 
 \end{document}
