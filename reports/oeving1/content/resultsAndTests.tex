@@ -4,29 +4,9 @@ There was no formal test-environment for this assignment and the main manner of 
 Eventually the group-members were satisfied with the resulting program’s response time and behaviour in terms of the assignment’s requirements. At that point the program was deemed finished.
 
 \subsection{Tests}
-Vent litt, lurer på om vi skal dele dem opp i mindre tester? Hvertfall ha en egen test for “loopingen”. sure
-
-Bare for å huske nummerering på LEDs og knapper:
-7-6-5-4-3-2-1-0
-Test ideas:
-Start led to the right, press left button until it reaches the leftmost location and vice versa
-Start LED at the leftmost position and press the left button to validate looping and vice versa.
-Push no buttons (LED is to stay in the same position)
-Press buttons slowly (check debouncing)
-Press buttons hard?? (or is this the worst bounce condition?)
-Tror ikke vi trenger å ta hensyn til måten vi trykker på knappene. Var tenkt som en spesifik test for å sjekke vår debouncing. Kan finne på å skape bugs, altså bra test? Men vet ikke helt hvordan man gjør debouncing verst, så kan droppe det.
-Press button x times reasonably fast and check wether it moved x spaces. Used to validate that our debouncing isn’t overly long
-
-Ok, hvordan vil vi at det skal se ut i LaTeX? Lister som her?
-
-
-
-
-
-
 
 \begin{tabular}[h]{lp{12cm}} \hline
-\textbf{\emph{Test:}} 		& \textbf{Move right}\\
+\textbf{\emph{Test 1:}} 		& \textbf{Move right}\\
 \emph{Action:} 		& Press button 0\\
 \emph{Preconditions:}	& One, and only one, LED lit. The number of the lit LED should be between 1 and 7.\\
 \emph{Wanted outcome:}	& One, and only one, LED should be lit all the time. After the button press, the LED right of the currently lit should turn on, and the previously lit should turn off.\\ \hline
@@ -34,24 +14,39 @@ Ok, hvordan vil vi at det skal se ut i LaTeX? Lister som her?
 
 
 \begin{tabular}[h]{lp{12cm}} \hline
-\textbf{\emph{Test:}} 		& \textbf{Move left}\\
+\textbf{\emph{Test 2:}} 		& \textbf{Move left}\\
 \emph{Action:} 		& Press button 2\\
 \emph{Preconditions:}	& One, and only one, LED lit. The number of the lit LED should be between 0 and 6.\\
 \emph{Wanted outcome:}	& One, and only one, LED should be lit all the time. After the button press, the LED left of the currently lit should turn on, and the previously lit should turn off. \\ \hline
 \end{tabular}
 
 \begin{tabular}[h]{lp{12cm}} \hline
-\textbf{\emph{Test:}} 		& \textbf{Wrap right}\\
+\textbf{\emph{Test 3:}} 		& \textbf{Wrap right}\\
 \emph{Action:} 		& Press button 0\\
 \emph{Preconditions:}	& LED 0 lit and all others unlit.\\
 \emph{Wanted outcome:}	& After the button press, LED 0 should turn off and LED 7 should turn on.\\ \hline
 \end{tabular}
 
 \begin{tabular}[h]{lp{12cm}} \hline
-\textbf{\emph{Test:}} 		& \textbf{Wrap left}\\
+\textbf{\emph{Test 4:}} 		& \textbf{Wrap left}\\
 \emph{Action:} 		& Press button 2\\
 \emph{Preconditions:}	& LED 7 lit and all others unlit.\\
 \emph{Wanted outcome:}	& After the button press, LED 7 should turn off and LED 0 should turn on.\\ \hline
+\end{tabular}
+
+\begin{tabular}[h]{lp{12cm}} \hline
+\textbf{\emph{Test 5:}} 		& \textbf{No action}\\
+\emph{Action:} 		& Do nothing\\
+\emph{Preconditions:}	& Precisely one LED lit\\
+\emph{Wanted outcome:}	& The same LED should remain lit for the entire period of inaction, and no other LEDs should light up.\\ \hline
+\end{tabular}
+
+\begin{tabular}[h]{lp{12cm}} \hline
+\textbf{\emph{Test 6:}} 		& \textbf{Quick click}\\
+\emph{Action:} 		& Press button 2 fast 5 times\\
+\emph{Preconditions:}	& LED 0 lit and all others unlit.\\
+\emph{Wanted outcome:}	& LED 5 lit and all others unlit.\\
+\emph{Comments:}		& This test was made to make sure the debouncing code doen’t interfere with normal speed-clicking \\ \hline
 \end{tabular}
 
 
