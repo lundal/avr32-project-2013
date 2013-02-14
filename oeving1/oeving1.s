@@ -101,8 +101,8 @@ init:
     mov r1, button_interrupt
     st.w r0[AVR32_INTC_IPR14], r1
     
-    /* Initialize with LED 0 */
-    mov r9, E_0
+    /* Initialize with LED 3 */
+    mov r9, E_3
     
     /* Disable Global Interupt Mask */
     csrf 16
