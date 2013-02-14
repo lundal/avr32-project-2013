@@ -12,12 +12,12 @@
 %For smaller margins
 \usepackage[margin=1in]{geometry}
 
-
 \usepackage{graphicx}
 \usepackage[utf8]{inputenc}
 
 % Set section numbering to Roman
-\renewcommand\thesection{\Roman{section}}
+\renewcommand \thesection{\Roman{section}}
+\renewcommand \thesubsection{\arabic{section}.\arabic{subsection}}
 
 \title{TDT4258\\ Energy Efficient Computer Design
 	\\Exercise 1}
@@ -69,7 +69,7 @@
 
 \begin{thebibliography}{9}
 
-\bibitem{kompendium}
+\bibitem{compendium}
   Computer Architecture and Design Group,
   \emph{Lab Assignments in TDT4258 Energy Efficient
 Computer Systems}.
