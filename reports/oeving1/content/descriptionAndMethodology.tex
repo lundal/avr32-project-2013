@@ -44,21 +44,20 @@ With the LEDs up and running, the next step was to get the buttons under control
 With the ability to read the buttons it was time to make them move the light. By masking the buttons statuses to find which buttons are pressed we branched to different subroutines that updates a common registry containing one and only one 1 by either shifting it left or right, and then updating the LEDs. Special checks was added so that the light would wrap around. Since each iteration of the main loop is so quick, the light appeared to move at random during normal operation, but we could see that it was working correctly with the debugger and thought implementing interrupts would fix it.
 \subsection{Interrupts}
 
-
-\begin{figure}[phtb]
- 
+\begin{figure}
   \centering
-    \includegraphics[width=\textwidth]{mainstructure}
+    \includegraphics[width=0.4\textheight]{mainstructure}
  \caption{Structure of initialization and main loop}
  \label{mainstruct}
 \end{figure}
 
-\begin{figure}[phtb]
+\begin{figure}
   \centering
-    \includegraphics[width=0.5\textwidth]{Interrupt}
+    \includegraphics[height=0.4\textheight]{Interrupt}
   \caption{Structure of interrupt handler}
   \label{interruptstruct}
 \end{figure}
+
 
 Now that the buttons and LEDs were operating correctly, the next step was to implement interrupt handling by following the procedure in section 2.5.2 of the compendium \cite{compendium}.
 
@@ -75,3 +74,68 @@ Some more energy can be saved by making the code more efficient, i.e. execute fa
 \subsection{Additional functionality}
 
 A little extra time allowed us to implement some additional functionality. Specifically, switch 5 (SW5) will make the LEDs flash toward right for a few seconds, while switch 7 (SW7) will make the LEDs flash toward left for a few seconds. Additionally, switch 6 (SW6) will make the LEDs flash both directions from the currently enabled LED.
+\subsection{Tools}
+
+\begin{itemize}
+\item GitHub for handling version control
+\item Vim as main code-editor
+\item Google Docs for report collaboration
+\item \LaTeX for report markup
+\item JTAGICE mkII for connecting the computer to the board
+\item avr32gdbproxy for connecting to JTAGICE mkII
+\item avr32-gdb for connecting to the board, allowing us to debug the code
+\end{itemize}
+\subsection{Tests}
+
+\begin{tabular}[h]{|lp{12cm}|} \hline
+\textbf{\emph{Test 1:}}  	& \textbf{Move right}\\
+\emph{Action:} 		& Press button 0\\
+\emph{Preconditions:}	& One, and only one, LED lit. The number of the lit LED should be between 1 and 7.\\
+\emph{Wanted outcome:}	& One, and only one, LED should be lit all the time. After the button press, the LED right of the currently lit should turn on, and the previously lit should turn off.\\ \hline
+\end{tabular}
+
+\vspace{1cm}
+
+\begin{tabular}[h]{|lp{12cm}|} \hline
+\textbf{\emph{Test 2:}} 		& \textbf{Move left}\\
+\emph{Action:} 		& Press button 2\\
+\emph{Preconditions:}	& One, and only one, LED lit. The number of the lit LED should be between 0 and 6.\\
+\emph{Wanted outcome:}	& One, and only one, LED should be lit all the time. After the button press, the LED left of the currently lit should turn on, and the previously lit should turn off. \\ \hline
+\end{tabular}
+
+\vspace{1cm}
+
+\begin{tabular}[h]{|lp{12cm}|} \hline
+\textbf{\emph{Test 3:}} 		& \textbf{Wrap right}\\
+\emph{Action:} 		& Press button 0\\
+\emph{Preconditions:}	& LED 0 lit and all others unlit.\\
+\emph{Wanted outcome:}	& After the button press, LED 0 should turn off and LED 7 should turn on.\\ \hline
+\end{tabular}
+
+\vspace{1cm}
+
+\begin{tabular}[h]{|lp{12cm}|} \hline
+\textbf{\emph{Test 4:}} 		& \textbf{Wrap left}\\
+\emph{Action:} 		& Press button 2\\
+\emph{Preconditions:}	& LED 7 lit and all others unlit.\\
+\emph{Wanted outcome:}	& After the button press, LED 7 should turn off and LED 0 should turn on.\\ \hline
+\end{tabular}
+
+\vspace{1cm}
+
+\begin{tabular}[h]{|lp{12cm}|} \hline
+\textbf{\emph{Test 5:}} 		& \textbf{No action}\\
+\emph{Action:} 		& Do nothing\\
+\emph{Preconditions:}	& Precisely one LED lit\\
+\emph{Wanted outcome:}	& The same LED should remain lit for the entire period of inaction, and no other LEDs should light up.\\ \hline
+\end{tabular}
+
+\vspace{1cm}
+
+\begin{tabular}[h]{|lp{12cm}|} \hline
+\textbf{\emph{Test 6:}} 		& \textbf{Quick click}\\
+\emph{Action:} 		& Press button 2 fast 5 times\\
+\emph{Preconditions:}	& LED 0 lit and all others unlit.\\
+\emph{Wanted outcome:}	& LED 5 lit and all others unlit.\\
+\emph{Comments:}		& This test was made to make sure the debouncing code doesn’t interfere with normal speed-clicking \\ \hline
+\end{tabular}
