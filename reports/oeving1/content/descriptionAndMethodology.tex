@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 The initial step in solving the task was to read up on the technical details on the AT32AP7000 \cite{ap7000} microcontroller, the STK1000 development-board and the the AVR32 instruction set \cite[Section 9]{avr32} in order to figure out how to actually solve the assignment. Then a plan of five subsequent steps was made.
-=======
-The initial step in solving the task was to read up on the technical details on the AT32AP7000 \cite{ap7000} microcontroller, the STK1000 development-board and the the AVR32 instruction set \cite{avr32} in order to figure out how to actually solve the assignment. Then a plan of five subsequent steps was made.
->>>>>>> 52953bce554cfd4d63913b5f5836678433cb4c73
 
 \begin{enumerate}
 \item Activate LEDs
@@ -78,13 +74,7 @@ After all the main functionality was in place, it was time to optimize the code 
 Some more energy can be saved by making the code more efficient, i.e. execute faster, which allows the board to re-enter a sleep state earlier. Therefore, the number of instruction was reduced where possible, although there were not many places this could be performed. Branches were also exchanged with conditional instructions where possible, as clearing the whole seven step pipeline can take a lot of time. These actions were taken somewhat into account from the beginning of the assignment, but a second pass did not hurt.
 \subsection{Additional functionality}
 
-<<<<<<< HEAD
 A little extra time allowed us to implement some additional functionality. Specifically, switch 5 (SW5) will make the LEDs flash to the right for a few seconds, while switch 7 (SW7) will make the LEDs flash to the left for a few seconds. Additionally, switch 6 (SW6) will make the LEDs flash outwards in both directions from the currently lit LED.
-=======
-A little extra time allowed us to implement some additional functionality. Specifically, switch 5 (SW5) will make the LEDs flash toward right for a few seconds, while switch 7 (SW7) will make the LEDs flash toward left for a few seconds. Additionally, switch 6 (SW6) will make the LEDs flash both directions from the currently enabled LED.
-
-
->>>>>>> 52953bce554cfd4d63913b5f5836678433cb4c73
 
 \subsection{Tools}
 
