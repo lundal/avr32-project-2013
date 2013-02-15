@@ -1,4 +1,4 @@
-The initial step in solving the task was to read up on the technical details on the AT32AP7000 microcontroller, the STK1000 development-board and the the AVR32 instruction set in order to figure out how to actually solve the assignment. Then a plan of five subsequent steps was made.
+The initial step in solving the task was to read up on the technical details on the AT32AP7000 \cite{ap7000} microcontroller, the STK1000 development-board and the the AVR32 instruction set \cite{avr32} in order to figure out how to actually solve the assignment. Then a plan of five subsequent steps was made.
 
 \begin{enumerate}
 \item Activate LEDs
@@ -59,7 +59,7 @@ With the ability to read the buttons it was time to make them move the light. By
 \end{figure}
 
 
-Now that the buttons and LEDs were operating correctly, the next step was to implement interrupt handling by following the procedure in section 2.5.2 of the compendium \cite{compendium}.
+Now that the buttons and LEDs were operating correctly, the next step was to implement interrupt handling by following the procedure in the compendium \cite[Section 2.5.2]{compendium}.
 
 We started by creating the interrupt routine which stores the button and event states to some specified registers which the main loop would then read. Except from using a special return command, this is just like a normal routine, but since the interrupt can occur at any time, all registers that is be modified by the routine must first be stored in the memory, and then restored afterwards. A practical way to achieve this is by using a stack. This was accomplished by initializing the Stack Pointer (SP) to the built-in assembler address \_stack, and using load and store instructions which update the SP. Structure of the main routine is shown in figure \ref{mainstruct}, and structure of the interrupt routine is shown in figure \ref{interruptstruct}.
 
@@ -74,7 +74,11 @@ Some more energy can be saved by making the code more efficient, i.e. execute fa
 \subsection{Additional functionality}
 
 A little extra time allowed us to implement some additional functionality. Specifically, switch 5 (SW5) will make the LEDs flash toward right for a few seconds, while switch 7 (SW7) will make the LEDs flash toward left for a few seconds. Additionally, switch 6 (SW6) will make the LEDs flash both directions from the currently enabled LED.
+
+
+
 \subsection{Tools}
+
 
 \begin{itemize}
 \item GitHub for handling version control
