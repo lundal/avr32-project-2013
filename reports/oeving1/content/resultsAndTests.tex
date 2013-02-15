@@ -1,15 +1,5 @@
-This assignment’s stated task was to create an assembly program for the STK1000 that would turn on the central LED and allow a user to shift the light either left or right by pressing buttons that are read in an interrupt routine. Specifically, this required the light-switching to be placed in the main loop.
+We designed a set of tests to check our implementation against the specifications of the assignment, see appendix A. The final version passes all tests, but there have been some problems along the way. Test 3 failed in an earlier version, where LED 6 lit up instead of LED 7. This was because mov{cond} can only take an immediate value of up to 255 and LED 7 has the value 256. However, a workaround was devised by first moving 255 to the register and then using sub{cond} with -1 as there is no add{cond} that can take immediate values.
 
-There was no formal test-environment for this assignment and the manner of testing was to visually see if the buttons and LEDs behaved as they should. This meant whether the correct lights were turned on and on time, and were turned off correctly, and on time. 
+At first we did not find an instruction called invert or similar. Since we needed to invert the button states that was read we had to hack a solution by instead nanding the number by itself. However, after a thorough read of the AVR32 instruction set \cite[Section~9]{avr32} we found the complement instruction.
 
-Eventually the group-members were satisfied with the resulting program’s response time, behaviour and test results in terms of the assignment’s requirements. At that point the program was deemed finished.
-
-\subsection{Test results}
-\begin{itemize}
-\item Test 1: Success!
-\item Test 2: Success!
-\item Test 3: Success!
-\item Test 4: Success!
-\item Test 5: Success!
-\item Test 6: Success!
-\end{itemize}
+Eventually the group-members were satisfied with the resulting program’s response time, behaviour and the fact that it passed all the tests. At that point the program was deemed finished.
