@@ -15,6 +15,8 @@
 \usepackage{graphicx}
 \usepackage[utf8]{inputenc}
 
+
+
 % Set section numbering to Roman
 \renewcommand \thesection{\Roman{section}}
 \renewcommand \thesubsection{\arabic{section}.\arabic{subsection}}
@@ -91,5 +93,10 @@ Computer Systems}.
   \url{http://www.avrfreaks.net/index.php?name=PNphpBB2&file=viewtopic&p=750034}
 
 \end{thebibliography}
+\clearpage
 
+\appendix
+\addcontentsline{toc}{section}{Appendix}
+\section{Tests}
+\input{content/tests.tex}
 \end{document}

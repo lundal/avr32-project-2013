@@ -1,58 +1,8 @@
-\subsection{Tests}
+This assignment’s stated task was to create an assembly program for the STK1000 that would turn on the central LED and allow a user to shift the light either left or right by pressing buttons that are read in an interrupt routine. Specifically, this required the light-switching to be placed in the main loop.
 
+There was no formal test-environment for this assignment and the manner of testing was to visually see if the buttons and LEDs behaved as they should. This meant whether the correct lights were turned on and on time, and were turned off correctly, and on time. 
 
-\begin{tabular}[h]{|lp{12cm}|} \hline
-\textbf{\emph{Test 1:}}   	& \textbf{Move right}\\
-\emph{Action:} 		& Press button 0\\
-\emph{Preconditions:}	& One, and only one, LED lit. The number of the lit LED should be between 1 and 7.\\
-\emph{Wanted outcome:}	& One, and only one, LED should be lit all the time. After the button press, the LED right of the currently lit should turn on, and the previously lit should turn off.\\ \hline
-\end{tabular}
-
-\vspace{1cm}
-
-\begin{tabular}[h]{|lp{12cm}|} \hline
-\textbf{\emph{Test 2:}} 		& \textbf{Move left}\\
-\emph{Action:} 		& Press button 2\\
-\emph{Preconditions:}	& One, and only one, LED lit. The number of the lit LED should be between 0 and 6.\\
-\emph{Wanted outcome:}	& One, and only one, LED should be lit all the time. After the button press, the LED left of the currently lit should turn on, and the previously lit should turn off. \\ \hline
-\end{tabular}
-
-\vspace{1cm}
-
-\begin{tabular}[h]{|lp{12cm}|} \hline
-\textbf{\emph{Test 3:}} 		& \textbf{Wrap right}\\
-\emph{Action:} 		& Press button 0\\
-\emph{Preconditions:}	& LED 0 lit and all others unlit.\\
-\emph{Wanted outcome:}	& After the button press, LED 0 should turn off and LED 7 should turn on.\\ \hline
-\end{tabular}
-
-\vspace{1cm}
-
-\begin{tabular}[h]{|lp{12cm}|} \hline
-\textbf{\emph{Test 4:}} 		& \textbf{Wrap left}\\
-\emph{Action:} 		& Press button 2\\
-\emph{Preconditions:}	& LED 7 lit and all others unlit.\\
-\emph{Wanted outcome:}	& After the button press, LED 7 should turn off and LED 0 should turn on.\\ \hline
-\end{tabular}
-
-\vspace{1cm}
-
-\begin{tabular}[h]{|lp{12cm}|} \hline
-\textbf{\emph{Test 5:}} 		& \textbf{No action}\\
-\emph{Action:} 		& Do nothing\\
-\emph{Preconditions:}	& Precisely one LED lit\\
-\emph{Wanted outcome:}	& The same LED should remain lit for the entire period of inaction, and no other LEDs should light up.\\ \hline
-\end{tabular}
-
-\vspace{1cm}
-
-\begin{tabular}[h]{|lp{12cm}|} \hline
-\textbf{\emph{Test 6:}} 		& \textbf{Quick click}\\
-\emph{Action:} 		& Press button 2 fast 5 times\\
-\emph{Preconditions:}	& LED 0 lit and all others unlit.\\
-\emph{Wanted outcome:}	& LED 5 lit and all others unlit.\\
-\emph{Comments:}		& This test was made to make sure the debouncing code doesn’t interfere with normal speed-clicking \\ \hline
-\end{tabular}
+Eventually the group-members were satisfied with the resulting program’s response time, behaviour and test results in terms of the assignment’s requirements. At that point the program was deemed finished.
 
 \subsection{Test results}
 \begin{itemize}
@@ -63,9 +13,3 @@
 \item Test 5: Success!
 \item Test 6: Success!
 \end{itemize}
-
-This assignment’s stated task was to create an assembly program for the STK1000 that would turn on the central LED and allow a user to shift the light either left or right by pressing buttons that are read in an interrupt routine. Specifically, this required the light-switching to be placed in the main loop.
-
-There was no formal test-environment for this assignment and the manner of testing was to visually see if the buttons and LEDs behaved as they should. This meant whether the correct lights were turned on and on time, and were turned off correctly, and on time. 
-
-Eventually the group-members were satisfied with the resulting program’s response time, behaviour and test results in terms of the assignment’s requirements. At that point the program was deemed finished.
