@@ -36,7 +36,7 @@ The debugger was used by running the current code one instruction at a time with
 
 As mentioned above, the first goal was to simply light up the LEDs. We used the value 0b11111111 to target all the LEDs, and started by writing the value to the Pin Enable Register (PER) and Output Enable Register (OER) of PIOC where the LEDs were connected. Then we wrote the value 0b10101010 to the Set Output Data Register (SODR) to turn every other LED on. The reason for using such a pattern was to make sure it was easy to recognize that is was our code that doing the job and not random noise. After this the program would just continue in an infinite loop.
 
-We experienced a lot of random lights turning on at first, but solved this using the debugger, and found the problem to be loading of wrong pointers.
+We experienced a lot of random lights turning on at first, but solved this using the debugger, and found the problem to probably be loading of wrong pointers.
 \subsection{Buttons}
 
 With the LEDs up and running, the next step was to get the buttons under control. We used the value 0b11111111 to target all the buttons, and started by writing the value to the Pin Enable Register (PER) and Pull-Up Enable Register (PUER) of PIOB where the buttons were connected. Now in the infinite loop, we read the Pin Data Status Register (PDSR) and invert it to get the status of the buttons where a one means that the button is down. We also masked this value against 0b11111111 to remove any unwanted noise. Then all LEDs were cleared before writing the button statuses to to SODR to light the LEDs over the pressed buttons.
@@ -44,9 +44,25 @@ With the LEDs up and running, the next step was to get the buttons under control
 With the ability to read the buttons it was time to make them move the light. By masking the buttons statuses to find which buttons are pressed we branched to different subroutines that updates a common registry containing one and only one 1 by either shifting it left or right, and then updating the LEDs. Special checks was added so that the light would wrap around. Since each iteration of the main loop is so quick, the light appeared to move at random during normal operation, but we could see that it was working correctly with the debugger and thought implementing interrupts would fix it.
 \subsection{Interrupts}
 
+
+\begin{figure}[phtb]
+ 
+  \centering
+    \includegraphics[width=\textwidth]{mainstructure}
+ \caption{Structure of initialization and main loop}
+ \label{mainstruct}
+\end{figure}
+
+\begin{figure}[phtb]
+  \centering
+    \includegraphics[width=0.5\textwidth]{Interrupt}
+  \caption{Structure of interrupt handler}
+  \label{interruptstruct}
+\end{figure}
+
 Now that the buttons and LEDs were operating correctly, the next step was to implement interrupt handling by following the procedure in section 2.5.2 of the compendium \cite{compendium}.
 
-We started by creating the interrupt routine which stores the button and event states to some specified registers which the main loop would then read. Except from using a special return command, this is just like a normal routine, but since the interrupt can occur at any time, all registers that is be modified by the routine must first be stored in the memory, and then restored afterwards. A practical way to achieve this is by using a stack. This was accomplished by initializing the Stack Pointer (SP) to the built-in assembler address \_stack, and using load and store instructions which update the SP. The final structure of the interrupt routine is seen in figure 2.
+We started by creating the interrupt routine which stores the button and event states to some specified registers which the main loop would then read. Except from using a special return command, this is just like a normal routine, but since the interrupt can occur at any time, all registers that is be modified by the routine must first be stored in the memory, and then restored afterwards. A practical way to achieve this is by using a stack. This was accomplished by initializing the Stack Pointer (SP) to the built-in assembler address \_stack, and using load and store instructions which update the SP. Structure of the main routine is shown in figure \ref{mainstruct}, and structure of the interrupt routine is shown in figure \ref{interruptstruct}.
 
 Once the routine was functional, the interrupts had to be set up. To accomplish this, the Input Enable Register (IER) is set for the pins connected to the buttons, and the Input Disable Register (IDR) is set for all other pins on PIOB to prevent unwanted events to be triggered by noise. Afterwards the Exception Vector Base Address (EVBA) is set to zero for simplicity, and an autovector of the exception’s address and priority zero is stored in the interrupt controller’s Interrupt Priority Register 14 (IPR14), which corresponds to PIOB. Finally, the Global Interrupt Mask (GM) status register is cleared.
 
@@ -59,28 +75,3 @@ Some more energy can be saved by making the code more efficient, i.e. execute fa
 \subsection{Additional functionality}
 
 A little extra time allowed us to implement some additional functionality. Specifically, switch 5 (SW5) will make the LEDs flash toward right for a few seconds, while switch 7 (SW7) will make the LEDs flash toward left for a few seconds. Additionally, switch 6 (SW6) will make the LEDs flash both directions from the currently enabled LED.
-
-\subsection{Final program structure}
-\begin{figure}[phtb]
- 
-  \centering
-    \includegraphics[width=\textwidth]{mainstructure}
- \caption{Structure of initialization and main loop}
-\end{figure}
-
-\begin{figure}[phtb]
-  \centering
-    \includegraphics[width=0.5\textwidth]{Interrupt}
-  \caption{Structure of interrupt handler}
-\end{figure}
-\subsection{Tools}
-
-
-GitHub for handling version control\\
-Vim as main code-editor\\
-Google Docs for report collaboration\\
-\LaTeX for report markup\\
-JTAGICE mkII for connecting the computer to the board\\
-avr32gdbproxy for connecting to JTAGICE mkII\\
-avr32-gdb for connecting to the board, allowing us to debug the code\\
-
