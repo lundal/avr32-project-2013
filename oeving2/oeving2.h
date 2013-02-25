@@ -32,13 +32,17 @@ static void abdac_isr(void);
 
 //self-defined protoypes, variables and macroes
 
-__int_handler *int_handler(void);
+//__int_handler *int_handler(void);
+__int_handler *abdac_handler(void);//I'm thinking this might be a good thing
+__int_handler *button_handler(void);
+
+
 
 //Struct pointers given in the compendium(3.2.4 p.44)
 //pointing to PIO B and C, Power manager and ABDAC
-volatile ac32_dac_t *dac = &AVR32_DAC;
-volatile ac32_pio_t *piob = &AVR32_PIOC;
-volatile ac32_dac_t *pioc = &AVR32_PIOB;
-volatile ac32_dsm_t *sm = &AVR32_SM;
+volatile avr32_dac_t *dac = &AVR32_DAC;
+volatile avr32_pio_t *pioc = &AVR32_PIOC;
+volatile avr32_dac_t *piob = &AVR32_PIOB;
+volatile avr32_sm_t *sm = &AVR32_SM;
 
 
