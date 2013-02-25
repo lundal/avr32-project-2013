@@ -22,7 +22,7 @@ EXE = oeving2.elf
 
 # Link ELF from object files
 $(EXE): $(OBJ)
-	$(CC) $(LDFLAGS) $(OBJ) -o $@
+	$(CC) $(OBJ) -o $@ $(LDFLAGS)
 
 # Compile object files from code
 .c.o:
