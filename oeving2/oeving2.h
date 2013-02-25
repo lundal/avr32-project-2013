@@ -32,6 +32,15 @@ static void abdac_isr(void);
 
 //self-defined protoypes, variables and macroes
 
+/*
+ACTIVATED_BUTTONS is supposed to denote the following:
+7-5 are for 3 individual music pieces
+4-3 are the volume buttons
+2 is the panic button, i.e the music, if it's playing, will stop and be ready for a new song should a button to play it, be pressed.
+*/
+#define ACTIVATED_BUTTONS 0xfc
+
+
 //__int_handler *int_handler(void);
 __int_handler *abdac_handler(void);//I'm thinking this might be a good thing
 __int_handler *button_handler(void);

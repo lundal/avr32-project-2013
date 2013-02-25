@@ -49,7 +49,14 @@ void abdac_isr(void) {}
 
 __int_handler *button_handler(void)
 {
-	piob
+	piob->per = ACTIVATED_BUTTONS; 
+	piob->puer = ACTIVATED_BUTTONS; 
+	//------enable button interrupts----
+	
+	
+	piob->ier = ACTIVATED_BUTTONS; 
+	piob->idr = ACTIVATED_BUTTONS; 
+	
 }
 
 
