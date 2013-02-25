@@ -28,15 +28,13 @@ static void button_isr(void);
 static void abdac_isr(void);
 
 
-#endif
-
 //self-defined protoypes, variables and macroes
 
 /*
 ACTIVATED_BUTTONS is supposed to denote the following:
 7-5 are for 3 individual music pieces
 4-3 are the volume buttons
-2 is the panic button, i.e the music, if it's playing, will stop and be ready for a new song should a button to play it, be pressed.
+2 is the stop button
 */
 #define ACTIVATED_BUTTONS 0xfc
 
@@ -46,12 +44,12 @@ __int_handler *abdac_handler(void);//I'm thinking this might be a good thing
 __int_handler *button_handler(void);
 
 
-
 //Struct pointers given in the compendium(3.2.4 p.44)
 //pointing to PIO B and C, Power manager and ABDAC
 volatile avr32_dac_t *dac = &AVR32_DAC;
 volatile avr32_pio_t *pioc = &AVR32_PIOC;
-volatile avr32_dac_t *piob = &AVR32_PIOB;
+volatile avr32_pio_t *piob = &AVR32_PIOB;
 volatile avr32_sm_t *sm = &AVR32_SM;
 
 
+#endif
