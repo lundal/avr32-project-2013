@@ -6,7 +6,7 @@
 
 # Compiler
 CC = avr32-gcc
-CCFLAGS = -Wall -g -c
+CCFLAGS = -Wall -g -Iinclude -c
 LDFLAGS = -Wall -g -pedantic -Llib -lavr32b-interrupts -lm
 
 # AVR32 programs
@@ -15,7 +15,7 @@ AVR32DEBUG = avr32-gdb
 
 # File names 
 SRC = oeving2.c
-OBJ = $(SRC,.c=.o)
+OBJ = $(SRC:.c=.o)
 EXE = oeving2.elf
 
 ###############################################################################
@@ -25,8 +25,8 @@ $(EXE): $(OBJ)
 	$(CC) $(LDFLAGS) $(OBJ) -o $@
 
 # Compile object files from code
-%.o: %.c
-	$(CC) $(CFLAGS) $< -o $@
+.c.o:
+	$(CC) $(CCFLAGS) $< -o $@
 
 # Upload to STK1000
 .PHONY: upload
