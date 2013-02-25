@@ -27,4 +27,9 @@ static void initHardware (void);
 static void button_isr(void);
 static void abdac_isr(void);
 
+
 #endif
+
+//self-defined protoypes, variables and macroes
+
+__int_handler *int_handler(void);
