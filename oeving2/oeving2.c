@@ -49,13 +49,13 @@ void abdac_isr(void) {}
 
 __int_handler *button_handler(void)
 {
-
+	piob
 }
 
 
 __int_handler *abdac_handler(void)
 {
-
+	dac->CR.en = 1;
 }
 
 
