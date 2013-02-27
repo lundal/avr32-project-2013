@@ -8,12 +8,25 @@
 #include "include/sys/interrupts.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 int current_button = ELEMENT_3;
-int sample_rate = 48000;
+
+// Store the sample rate
+int sample_rate = 1000;
+
+// Currently playing sample
+sample_t *current_sample = NULL;
+int current_sample_point = 0;
 
 int main (int argc, char *argv[]) {
     initHardware();
+    
+    //Generate a test sample
+    //current_sample = generate_sin_wave(440, 0.5, 0.1);
+    current_sample = generate_sin_wave(1000, 0.5, 0.2);
+    //current_sample_point = 0;
+    //generate_sin_wave(440, 0.5, 0.1);
     
     while(1);
     return 0;
@@ -66,9 +79,12 @@ void initAudio(void) {
     // Connect and activate oscillator 1
     pm->GCCTRL[6].pllsel = 0;
     pm->GCCTRL[6].oscsel = 1;
-    pm->GCCTRL[6].div = 1;
+    pm->GCCTRL[6].div = 0;
     pm->GCCTRL[6].diven = 1;
     pm->GCCTRL[6].cen = 1;
+    
+    // Set sample rate = Clock / 256 / 2 ( div + 1)
+    sample_rate = 12000000 / 256 / (2*(0+1)); // ~48kHz
     
     // Activate ABDAC
     dac->CR.en = 1;
@@ -77,6 +93,7 @@ void initAudio(void) {
     dac->IER.tx_ready = 1;
 }
 
+// Button interrupt routine
 void button_isr(void) {
     // Debounce
     volatile int i = 1000;
@@ -111,12 +128,62 @@ void button_isr(void) {
     pioc->codr = ~current_button;
 }
 
+// ABDAC interrupt routine
 void abdac_isr(void) {
-    short data = (short) rand();
+    //Generate noise
+    //short data = (short) rand();
     
-    // Send to ABDAC
+    
+    // NULL data
+    short data = 0;
+    
+    // If there is a sample loaded
+    if (current_sample != NULL) {
+        // If done playing: Remove it!
+        if (current_sample_point >= current_sample->n_points) {
+            //current_sample = NULL;
+            current_sample_point = 0;
+        }
+        // Copy data and update progress
+        else {
+            data = current_sample->points[current_sample_point];
+            current_sample_point++;
+        }
+    }
+    
+    // Send data to ABDAC
     dac->SDR.channel0 = data;
     dac->SDR.channel1 = data;
 }
 
+// Gererates a sample with a sinus wave. Frequency in hz, amplitude from 0 to 1, length in seconds.
+sample_t* generate_sin_wave(int freq, float amplitude, float length) {
 
+    sample_t *sample = (sample_t*)malloc(sizeof(sample_t));
+    sample->n_points = (int)( length * (float)sample_rate );
+    sample->points = (short*)malloc(sizeof(short) * sample->n_points);
+    float period = sample_rate / (float)freq;
+    int i;
+    for (i = 0; i < sample->n_points; i++) {
+        // Generate wave
+        float sinval = sinf( 2.0 * M_PI * (float)i / period );
+        short point = (short)( sinval * amplitude * 32768.0 );
+        /*
+        // Fade in
+        int fade_in = 100;
+        if (i < fade_in) {
+            point = point * i / fade_in;
+        }
+        
+        // Fade out
+        int fade_out = 100;
+        int remaining = sample->n_points - i;
+        if (remaining < fade_out) {
+            point = point * remaining / fade_out;
+        }
+        */
+        sample->points[i] = point;
+    }
+    
+    return sample;
+}

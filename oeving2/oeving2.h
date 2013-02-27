@@ -39,8 +39,14 @@ static void initAudio(void);
 static void button_isr(void);
 static void abdac_isr(void);
 
+// Structure to hold a sample
+typedef struct {
+    int n_points;
+    short *points;
+} sample_t;
 
-//self-defined protoypes, variables and macroes
+// Generates a sample with a sin wave
+static sample_t* generate_sin_wave(int period, float amplitude, float length);
 
 /*
 ACTIVATED_BUTTONS is supposed to denote the following:
