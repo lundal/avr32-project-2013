@@ -55,7 +55,7 @@ ACTIVATED_BUTTONS is supposed to denote the following:
 volatile avr32_abdac_t *dac = &AVR32_ABDAC;
 volatile avr32_pio_t *piob = &AVR32_PIOB;
 volatile avr32_pio_t *pioc = &AVR32_PIOC;
-volatile avr32_pm_t *sm = &AVR32_PM;
+volatile avr32_pm_t *pm = &AVR32_PM;
 
 
 #endif

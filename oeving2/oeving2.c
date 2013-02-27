@@ -6,6 +6,8 @@
 
 #include "oeving2.h"
 #include "include/sys/interrupts.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 int current_button = ELEMENT_3;
 
@@ -21,7 +23,7 @@ void initHardware (void) {
     initIntc();
     initLeds();
     initButtons();
-    //initAudio();
+    initAudio();
 }
 
 void initIntc(void) {
@@ -34,19 +36,37 @@ void initButtons(void) {
     piob->per = 0xFF;
     piob->puer = 0xFF;
     piob->ier = 0xFF;
-    /* (...) */
 }
 
 void initLeds(void) {
     pioc->per = 0xFF;
     pioc->oer = 0xFF;
     pioc->codr = 0xFF;
-    /* (...) */
 }
 
 void initAudio(void) {
     register_interrupt( abdac_isr, AVR32_ABDAC_IRQ/32, AVR32_ABDAC_IRQ % 32, ABDAC_INT_LEVEL);
-    /* (...) */
+    
+    // Release pins from PIO
+    piob->PDR.p20 = 1;
+    piob->PDR.p21 = 1;
+    
+    // Set pins to peripheral A (ABDAC)
+    piob->ASR.p20 = 1;
+    piob->ASR.p21 = 1;
+    
+    // Connect and activate  oscillator 0
+    pm->GCCTRL[6].pllsel = 0;
+    pm->GCCTRL[6].oscsel = 0;
+    pm->GCCTRL[6].div = 1;
+    pm->GCCTRL[6].diven = 1;
+    pm->GCCTRL[6].cen = 1;
+    
+    // Activate ABDAC
+    dac->CR.en = 1;
+
+    // Activate interrupts
+    dac->IER.tx_ready = 1;
 }
 
 void button_isr(void) {
@@ -84,7 +104,9 @@ void button_isr(void) {
 }
 
 void abdac_isr(void) {
-    dac->CR.en = 1;
+    short data = (short) rand();
+    dac->SDR.channel0 = data;
+    dac->SDR.channel1 = data;
 }
 
 
