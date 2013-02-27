@@ -10,6 +10,7 @@
 #include <stdlib.h>
 
 int current_button = ELEMENT_3;
+int sample_rate = 48000;
 
 int main (int argc, char *argv[]) {
     initHardware();
@@ -18,7 +19,7 @@ int main (int argc, char *argv[]) {
     return 0;
 }
 
-/* funksjon for å initialisere maskinvaren, må utvides */
+// Initializes the hardware
 void initHardware (void) {
     initIntc();
     initLeds();
@@ -26,25 +27,32 @@ void initHardware (void) {
     initAudio();
 }
 
+// Initializes the interrupt controller
 void initIntc(void) {
     set_interrupts_base((void *)AVR32_INTC_ADDRESS);
     init_interrupts();
 }
 
+// Initializes the buttons
 void initButtons(void) {
+    // Set interrupt routine
     register_interrupt( button_isr, AVR32_PIOB_IRQ/32, AVR32_PIOB_IRQ % 32, BUTTONS_INT_LEVEL);
+    
     piob->per = 0xFF;
     piob->puer = 0xFF;
     piob->ier = 0xFF;
 }
 
+// Initializes the LEDs
 void initLeds(void) {
     pioc->per = 0xFF;
     pioc->oer = 0xFF;
     pioc->codr = 0xFF;
 }
 
+// Initializes the ABDAC
 void initAudio(void) {
+    // Set interrupt routine
     register_interrupt( abdac_isr, AVR32_ABDAC_IRQ/32, AVR32_ABDAC_IRQ % 32, ABDAC_INT_LEVEL);
     
     // Release pins from PIO
@@ -55,7 +63,7 @@ void initAudio(void) {
     piob->ASR.p20 = 1;
     piob->ASR.p21 = 1;
     
-    // Connect and activate  oscillator 0
+    // Connect and activate oscillator 1
     pm->GCCTRL[6].pllsel = 0;
     pm->GCCTRL[6].oscsel = 1;
     pm->GCCTRL[6].div = 1;
@@ -76,7 +84,7 @@ void button_isr(void) {
         i--;
     }
     
-    //Read states
+    // Read states
     int event_states = piob->isr;
     int button_states = ~piob->pdsr;
     
@@ -105,6 +113,8 @@ void button_isr(void) {
 
 void abdac_isr(void) {
     short data = (short) rand();
+    
+    // Send to ABDAC
     dac->SDR.channel0 = data;
     dac->SDR.channel1 = data;
 }
