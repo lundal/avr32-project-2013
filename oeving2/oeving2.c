@@ -57,7 +57,7 @@ void initAudio(void) {
     
     // Connect and activate  oscillator 0
     pm->GCCTRL[6].pllsel = 0;
-    pm->GCCTRL[6].oscsel = 0;
+    pm->GCCTRL[6].oscsel = 1;
     pm->GCCTRL[6].div = 1;
     pm->GCCTRL[6].diven = 1;
     pm->GCCTRL[6].cen = 1;
