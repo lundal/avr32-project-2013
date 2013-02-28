@@ -21,6 +21,10 @@ track_t *track_0 = NULL;
 track_t *track_1 = NULL;
 track_t *track_2 = NULL;
 track_t *track_3 = NULL;
+track_t *track_4 = NULL;
+track_t *track_5 = NULL;
+track_t *track_6 = NULL;
+track_t *track_7 = NULL;
 
 // Test sounds
 sound_t *sound_0 = NULL;
@@ -50,6 +54,10 @@ int main (int argc, char *argv[]) {
     track_1 = track_new();
     track_2 = track_new();
     track_3 = track_new();
+    track_4 = track_new();
+    track_5 = track_new();
+    track_6 = track_new();
+    track_7 = track_new();
     
     initHardware();
     
@@ -185,22 +193,34 @@ void button_isr(void) {
     
     if (press & ELEMENT_0) {
         track_play(track_0, sound_2);
-        current_led = ELEMENT_0;
     }
     
     if (press & ELEMENT_1) {
         track_play(track_1, sound_2);
-        current_led = ELEMENT_1;
     }
     
     if (press & ELEMENT_2) {
         track_play(track_2, sound_2);
-        current_led = ELEMENT_2;
     }
     
     if (press & ELEMENT_3) {
         track_play(track_3, sound_2);
-        current_led = ELEMENT_3;
+    }
+    
+    if (press & ELEMENT_4) {
+        track_play(track_4, sound_2);
+    }
+    
+    if (press & ELEMENT_5) {
+        track_play(track_5, sound_2);
+    }
+    
+    if (press & ELEMENT_6) {
+        track_play(track_6, sound_2);
+    }
+    
+    if (press & ELEMENT_7) {
+        track_play(track_7, sound_2);
     }
     
     // Update LEDS
@@ -214,10 +234,14 @@ void abdac_isr(void) {
     short data = 0;
     
     // Get and advance track data
-    data += track_advance(track_0)/4;
-    data += track_advance(track_1)/4;
-    data += track_advance(track_2)/4;
-    data += track_advance(track_3)/4;
+    data += track_advance(track_0)/8;
+    data += track_advance(track_1)/8;
+    data += track_advance(track_2)/8;
+    data += track_advance(track_3)/8;
+    data += track_advance(track_4)/8;
+    data += track_advance(track_5)/8;
+    data += track_advance(track_6)/8;
+    data += track_advance(track_7)/8;
     
     // Send data to ABDAC
     dac->SDR.channel0 = data;
