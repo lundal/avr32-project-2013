@@ -23,10 +23,11 @@ int main (int argc, char *argv[]) {
     initHardware();
     
     //Generate a test sample
-    //current_sample = generate_sin_wave(440, 0.5, 0.1);
-    current_sample = generate_sin_wave(1000, 0.5, 0.2);
+    //current_sample = generate_sin_wave(1000, 0.5, 0.2);
     //current_sample_point = 0;
     //generate_sin_wave(440, 0.5, 0.1);
+    current_sample = generate_sin_sample(440);
+    //current_sample = generate_square_sample(440);
     
     while(1);
     return 0;
@@ -80,11 +81,14 @@ void initAudio(void) {
     pm->GCCTRL[6].pllsel = 0;
     pm->GCCTRL[6].oscsel = 1;
     pm->GCCTRL[6].div = 0;
-    pm->GCCTRL[6].diven = 1;
+    pm->GCCTRL[6].diven = 0;
     pm->GCCTRL[6].cen = 1;
     
-    // Set sample rate = Clock / 256 / 2 ( div + 1)
-    sample_rate = 12000000 / 256 / (2*(0+1)); // ~48kHz
+    // Set sample rate = clock / 256
+    sample_rate = 12000000 / 256; // ~48kHz
+    
+    // Divide by 2*(div+1) if enabled
+    //sample_rate = sample_rate / (2*(0+1);
     
     // Activate ABDAC
     dac->CR.en = 1;
@@ -96,7 +100,7 @@ void initAudio(void) {
 // Button interrupt routine
 void button_isr(void) {
     // Debounce
-    volatile int i = 1000;
+    int i = 500;
     while (i > 0) {
         i--;
     }
@@ -183,6 +187,55 @@ sample_t* generate_sin_wave(int freq, float amplitude, float length) {
         }
         */
         sample->points[i] = point;
+    }
+    
+    return sample;
+}
+
+sample_t* generate_square_sample(int freq) {
+    // Allocate memory for sample
+    sample_t *sample = (sample_t*)malloc(sizeof(sample_t));
+    
+    // Calculate sample points in one period
+    sample->n_points = sample_rate / freq;
+    
+    // Allocate memory for sample points
+    sample->points = (short*)malloc(sizeof(short) * sample->n_points);
+    
+    // For every sample point
+    int i;
+    for (i = 0; i < sample->n_points; i++) {
+        // Calculate square value
+        int val = (i > sample->n_points/2) ? 1 : -1;
+        
+        // Store adjusted value
+        sample->points[i] = (short)(val * 20000.0);
+    }
+    
+    return sample;
+}
+
+sample_t* generate_sin_sample(int freq) {
+    // Allocate memory for sample
+    sample_t *sample = (sample_t*)malloc(sizeof(sample_t));
+    
+    // Calculate sample points in one period
+    sample->n_points = sample_rate / freq;
+    
+    // Allocate memory for sample points
+    sample->points = (short*)malloc(sizeof(short) * sample->n_points);
+    
+    // For every sample point
+    int i;
+    for (i = 0; i < sample->n_points; i++) {
+        // Calculate progress ratio
+        float r = (float)i / (float)sample->n_points;
+        
+        // Calculate sinus value
+        float val = sinf(2.0 * M_PI * r);
+        
+        // Store adjusted value
+        sample->points[i] = (short)(val * 20000.0);
     }
     
     return sample;

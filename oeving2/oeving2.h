@@ -48,6 +48,12 @@ typedef struct {
 // Generates a sample with a sin wave
 static sample_t* generate_sin_wave(int period, float amplitude, float length);
 
+// Generates a tone with sinus wave of specified frequency
+static sample_t* generate_square_sample(int frequency);
+
+// Generates a tone with sinus wave of specified frequency
+static sample_t* generate_sin_sample(int frequency);
+
 /*
 ACTIVATED_BUTTONS is supposed to denote the following:
 7-5 are for 3 individual music pieces
