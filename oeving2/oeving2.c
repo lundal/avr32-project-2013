@@ -9,25 +9,94 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <stdarg.h>
 
-int current_button = ELEMENT_3;
+int current_led = ELEMENT_0;
 
-// Store the sample rate
+// Store the sample rate (calculated later)
 int sample_rate = 1000;
 
-// Currently playing sample
-sample_t *current_sample = NULL;
-int current_sample_point = 0;
+// Sound tracks
+track_t *track_0 = NULL;
+track_t *track_1 = NULL;
+track_t *track_2 = NULL;
+track_t *track_3 = NULL;
+
+// Test sounds
+sound_t *sound_0 = NULL;
+sound_t *sound_1 = NULL;
+sound_t *sound_2 = NULL;
+
+// Notes
+sample_t *A1 = NULL;
+sample_t *B1 = NULL;
+sample_t *C1 = NULL;
+sample_t *D1 = NULL;
+sample_t *E1 = NULL;
+sample_t *F1 = NULL;
+sample_t *G1 = NULL;
+sample_t *A2 = NULL;
+sample_t *B2 = NULL;
+sample_t *C2 = NULL;
+sample_t *D2 = NULL;
+sample_t *E2 = NULL;
+sample_t *F2 = NULL;
+sample_t *G2 = NULL;
+sample_t *silent = NULL;
 
 int main (int argc, char *argv[]) {
+    // Init tracks
+    track_0 = track_new();
+    track_1 = track_new();
+    track_2 = track_new();
+    track_3 = track_new();
+    
     initHardware();
     
-    //Generate a test sample
-    //current_sample = generate_sin_wave(1000, 0.5, 0.2);
-    //current_sample_point = 0;
-    //generate_sin_wave(440, 0.5, 0.1);
-    current_sample = generate_sin_sample(440);
-    //current_sample = generate_square_sample(440);
+    // Generate test samples
+    A1 = generate_square_sample(220);
+    B1 = generate_square_sample(247);
+    C1 = generate_square_sample(262);
+    D1 = generate_square_sample(294);
+    E1 = generate_square_sample(330);
+    F1 = generate_square_sample(349);
+    G1 = generate_square_sample(392);
+    A2 = generate_square_sample(440);
+    B2 = generate_square_sample(494);
+    C2 = generate_square_sample(524);
+    D2 = generate_square_sample(588);
+    E2 = generate_square_sample(660);
+    F2 = generate_square_sample(698);
+    G2 = generate_square_sample(784);
+    silent = generate_silent_sample();
+    
+    // Build test sounds
+    sound_0 = build_sound(2, A2, 1.0, 10, silent, 1.0, 100);
+    sound_1 = build_sound(1, A2, 1.0, 10);
+    sound_2 = build_sound(44,
+        C1, 0.4, 100, silent, 0.1, 0,
+        D1, 0.4, 100, silent, 0.1, 0,
+        E1, 0.4, 100, silent, 0.1, 0,
+        F1, 0.4, 100, silent, 0.1, 0,
+        G1, 0.9, 100, silent, 0.1, 0,
+        G1, 0.9, 100, silent, 0.1, 0,
+        A2, 0.4, 100, silent, 0.1, 0,
+        A2, 0.4, 100, silent, 0.1, 0,
+        A2, 0.4, 100, silent, 0.1, 0,
+        A2, 0.4, 100, silent, 0.1, 0,
+        G1, 1.9, 100, silent, 0.1, 0,
+        F1, 0.4, 100, silent, 0.1, 0,
+        F1, 0.4, 100, silent, 0.1, 0,
+        F1, 0.4, 100, silent, 0.1, 0,
+        F1, 0.4, 100, silent, 0.1, 0,
+        E1, 0.9, 100, silent, 0.1, 0,
+        E1, 0.9, 100, silent, 0.1, 0,
+        D1, 0.4, 100, silent, 0.1, 0,
+        D1, 0.4, 100, silent, 0.1, 0,
+        D1, 0.4, 100, silent, 0.1, 0,
+        D1, 0.4, 100, silent, 0.1, 0,
+        C1, 1.9, 100, silent, 0.1, 0
+    );
     
     while(1);
     return 0;
@@ -70,6 +139,9 @@ void initAudio(void) {
     register_interrupt( abdac_isr, AVR32_ABDAC_IRQ/32, AVR32_ABDAC_IRQ % 32, ABDAC_INT_LEVEL);
     
     // Release pins from PIO
+    piob->PUER.p20 = 1;
+    piob->PUER.p21 = 1;
+    // Release pins from PIO
     piob->PDR.p20 = 1;
     piob->PDR.p21 = 1;
     
@@ -111,85 +183,45 @@ void button_isr(void) {
     
     int press = event_states & button_states;
     
-    // Right press
     if (press & ELEMENT_0) {
-        current_button = current_button >> 1;
-        if (current_button < ELEMENT_0) {
-            current_button = ELEMENT_7;
-        }
+        track_play(track_0, sound_2);
+        current_led = ELEMENT_0;
     }
     
-    // Left press
+    if (press & ELEMENT_1) {
+        track_play(track_1, sound_2);
+        current_led = ELEMENT_1;
+    }
+    
     if (press & ELEMENT_2) {
-        current_button = current_button << 1;
-        if (current_button > ELEMENT_7) {
-            current_button = ELEMENT_0;
-        }
+        track_play(track_2, sound_2);
+        current_led = ELEMENT_2;
+    }
+    
+    if (press & ELEMENT_3) {
+        track_play(track_3, sound_2);
+        current_led = ELEMENT_3;
     }
     
     // Update LEDS
-    pioc->sodr = current_button;
-    pioc->codr = ~current_button;
+    pioc->sodr = current_led;
+    pioc->codr = ~current_led;
 }
 
 // ABDAC interrupt routine
 void abdac_isr(void) {
-    //Generate noise
-    //short data = (short) rand();
-    
-    
-    // NULL data
+    // Default to silence
     short data = 0;
     
-    // If there is a sample loaded
-    if (current_sample != NULL) {
-        // If done playing: Remove it!
-        if (current_sample_point >= current_sample->n_points) {
-            //current_sample = NULL;
-            current_sample_point = 0;
-        }
-        // Copy data and update progress
-        else {
-            data = current_sample->points[current_sample_point];
-            current_sample_point++;
-        }
-    }
+    // Get and advance track data
+    data += track_advance(track_0)/4;
+    data += track_advance(track_1)/4;
+    data += track_advance(track_2)/4;
+    data += track_advance(track_3)/4;
     
     // Send data to ABDAC
     dac->SDR.channel0 = data;
     dac->SDR.channel1 = data;
-}
-
-// Gererates a sample with a sinus wave. Frequency in hz, amplitude from 0 to 1, length in seconds.
-sample_t* generate_sin_wave(int freq, float amplitude, float length) {
-
-    sample_t *sample = (sample_t*)malloc(sizeof(sample_t));
-    sample->n_points = (int)( length * (float)sample_rate );
-    sample->points = (short*)malloc(sizeof(short) * sample->n_points);
-    float period = sample_rate / (float)freq;
-    int i;
-    for (i = 0; i < sample->n_points; i++) {
-        // Generate wave
-        float sinval = sinf( 2.0 * M_PI * (float)i / period );
-        short point = (short)( sinval * amplitude * 32768.0 );
-        /*
-        // Fade in
-        int fade_in = 100;
-        if (i < fade_in) {
-            point = point * i / fade_in;
-        }
-        
-        // Fade out
-        int fade_out = 100;
-        int remaining = sample->n_points - i;
-        if (remaining < fade_out) {
-            point = point * remaining / fade_out;
-        }
-        */
-        sample->points[i] = point;
-    }
-    
-    return sample;
 }
 
 sample_t* generate_square_sample(int freq) {
@@ -209,7 +241,7 @@ sample_t* generate_square_sample(int freq) {
         int val = (i > sample->n_points/2) ? 1 : -1;
         
         // Store adjusted value
-        sample->points[i] = (short)(val * 20000.0);
+        sample->points[i] = (short)(val * 32000.0);
     }
     
     return sample;
@@ -235,8 +267,105 @@ sample_t* generate_sin_sample(int freq) {
         float val = sinf(2.0 * M_PI * r);
         
         // Store adjusted value
-        sample->points[i] = (short)(val * 20000.0);
+        sample->points[i] = (short)(val * 32000.0);
     }
     
     return sample;
+}
+
+sample_t* generate_silent_sample() {
+    // Allocate memory for sample
+    sample_t *sample = (sample_t*)malloc(sizeof(sample_t));
+    
+    // Use 50 sample points
+    sample->n_points = 50;
+    
+    // Allocate memory for sample points
+    sample->points = (short*)malloc(sizeof(short) * sample->n_points);
+    
+    // For every sample point
+    int i;
+    for (i = 0; i < sample->n_points; i++) {
+        // Store zero
+        sample->points[i] = (short)0;
+    }
+    
+    return sample;
+}
+
+static sound_t* build_sound(int n_samples, ...) {
+    // Allocate memory for sound
+    sound_t *sound = (sound_t*)malloc(sizeof(sound_t));
+    
+    // Set samples
+    sound->n_samples = n_samples;
+    
+    // Allocate memory for arrays
+    sound->samples = (sample_t**)malloc(sizeof(sample_t*) * sound->n_samples);
+    sound->sample_reps = (int*)malloc(sizeof(int) * sound->n_samples);
+    sound->sample_vol = (int*)malloc(sizeof(int) * sound->n_samples);
+    
+    // Loop through arguments
+    va_list args;
+    va_start(args, n_samples);
+    int i;
+    for (i = 0; i < n_samples; i++) {
+        sample_t* sample = va_arg(args, sample_t*);
+        double duration = va_arg(args, double);
+        int volume = va_arg(args, int);
+        
+        sound->samples[i] = sample;
+        sound->sample_reps[i] = (int)(duration * (double)sample_rate / (double)sample->n_points);
+        sound->sample_vol[i] = volume;
+    }
+    
+    return sound;
+}
+
+
+short track_advance(track_t *track) {
+    // Default to silence
+    short data = 0;
+
+    // If it has a sound
+    if (track->sound != NULL) {
+        
+        // Get current sample point (assume it exists)
+        data = track->sound->samples[track->current_sample]->points[track->current_sample_point];
+        
+        // Adjust volume
+        data = (short)((int)data * track->sound->sample_vol[track->current_sample] / 100);
+        
+        track->current_sample_point++;
+        
+        if (track->current_sample_point == track->sound->samples[track->current_sample]->n_points) {
+            track->current_sample_point = 0;
+            track->current_sample_iteration++;
+        
+            if (track->current_sample_iteration == track->sound->sample_reps[track->current_sample]) {
+                track->current_sample_iteration = 0;
+                track->current_sample++;
+            
+                if (track->current_sample == track->sound->n_samples) {
+                    track->current_sample = 0;
+                    track->sound = NULL;
+                }
+            } 
+        } 
+    }
+    
+    return data;
+}
+
+track_t* track_new() {
+    track_t* track = (track_t*)malloc(sizeof(track_t));
+    track_play(track, NULL);
+    return track;
+}
+
+void track_play(track_t *track, sound_t *sound) {
+    track->sound = sound;
+    track->current_sample = 0;
+    track->current_sample_iteration = 0;
+    track->current_sample_point = 0;
 }

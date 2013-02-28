@@ -6,7 +6,7 @@
 
 # Compiler
 CC = avr32-gcc
-CCFLAGS = -Wall -g -Iinclude -c
+CCFLAGS = -Wall -g -Iinclude -O3 -c
 LDFLAGS = -Wall -g -pedantic -Llib -lavr32b-interrupts -lm
 
 # AVR32 programs

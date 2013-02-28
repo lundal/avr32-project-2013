@@ -45,14 +45,42 @@ typedef struct {
     short *points;
 } sample_t;
 
-// Generates a sample with a sin wave
-static sample_t* generate_sin_wave(int period, float amplitude, float length);
+// Holds an array of samples(pointers) and the number of times to play them
+typedef struct {
+    int n_samples;
+    sample_t **samples;
+    int *sample_reps;
+    int *sample_vol;
+} sound_t;
+
+// Holds a sound and play information
+typedef struct {
+    sound_t *sound;
+    int current_sample;
+    int current_sample_iteration;
+    int current_sample_point;
+} track_t;
 
 // Generates a tone with sinus wave of specified frequency
 static sample_t* generate_square_sample(int frequency);
 
 // Generates a tone with sinus wave of specified frequency
 static sample_t* generate_sin_sample(int frequency);
+
+// Generates a silent sample
+static sample_t* generate_silent_sample();
+
+// Combines samples into a track
+static sound_t* build_sound(int n_samples, ...);
+
+// Gets the current sample point and advances the track to the next
+static short track_advance(track_t* track);
+
+// Starts a new sound on a track
+static void track_play(track_t *track, sound_t *sound);
+
+// Creates and initializes a new track
+static track_t* track_new();
 
 /*
 ACTIVATED_BUTTONS is supposed to denote the following:
