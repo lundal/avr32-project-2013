@@ -1,4 +1,5 @@
 #include "track.h"
+#include <stdlib.h>
 
 // Creates and initializes a new track
 track_t* track_new() {

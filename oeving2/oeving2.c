@@ -252,9 +252,9 @@ void abdac_isr(void) {
     data += track_advance(track_2)/8;
     data += track_advance(track_3)/8;
     data += track_advance(track_4)/8;
-    data += track_advance(track_5)/8;
-    data += track_advance(track_6)/8;
-    data += track_advance(track_7)/8;
+    //data += track_advance(track_5)/8;
+    //data += track_advance(track_6)/8;
+    //data += track_advance(track_7)/8;
     
     // Send data to ABDAC
     dac->SDR.channel0 = data;
