@@ -1,7 +1,7 @@
 #ifndef TRACK_H
 #define TRACK_H
 
-#include <inttypes.h>
+#include <stdint.h>
 
 #include "sound.h"
 

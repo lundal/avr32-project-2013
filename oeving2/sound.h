@@ -1,9 +1,10 @@
 #ifndef SOUND_H
 #define SOUND_H
 
-#include <inttypes.h>
+#include <stdint.h>
 
-#define SAMPLE_AMPLITUDE 32000.0
+#define SAMPLE_RATE 46875 // Oscillator 1 / 256
+#define SAMPLE_AMPLITUDE 32000.0 // Approx the max value of an int16_t
 
 // Structure for a sample
 typedef struct {

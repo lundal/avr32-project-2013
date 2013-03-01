@@ -31,7 +31,7 @@ sound_t* sound_build(int16_t n_samples, ...) {
         
         // Store data
         sound->samples[i] = sample;
-        sound->sample_reps[i] = (int16_t)(duration * (double)sample_rate / (double)sample->n_points);
+        sound->sample_reps[i] = (int16_t)(duration * (double)SAMPLE_RATE / (double)sample->n_points);
         sound->sample_vol[i] = volume;
     }
     
@@ -65,7 +65,7 @@ sample_t* sample_gen_square(int16_t freq) {
     sample_t *sample = (sample_t*)malloc(sizeof(sample_t));
     
     // Calculate sample points in one period
-    sample->n_points = sample_rate / freq;
+    sample->n_points = SAMPLE_RATE / freq;
     
     // Allocate memory for sample points
     sample->points = (int16_t*)malloc(sizeof(int16_t) * sample->n_points);
@@ -89,7 +89,7 @@ sample_t* sample_gen_sin(int16_t freq) {
     sample_t *sample = (sample_t*)malloc(sizeof(sample_t));
     
     // Calculate sample points in one period
-    sample->n_points = sample_rate / freq;
+    sample->n_points = SAMPLE_RATE / freq;
     
     // Allocate memory for sample points
     sample->points = (int16_t*)malloc(sizeof(int16_t) * sample->n_points);

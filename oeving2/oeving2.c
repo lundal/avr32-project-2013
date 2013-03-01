@@ -192,15 +192,15 @@ void initAudio(void) {
     // Connect and activate oscillator 1
     pm->GCCTRL[6].pllsel = 0;
     pm->GCCTRL[6].oscsel = 1;
-    pm->GCCTRL[6].div = 0;
-    pm->GCCTRL[6].diven = 0;
+    //pm->GCCTRL[6].div = 100; // These two does not
+    //pm->GCCTRL[6].diven = 1; // seem to work at all...
     pm->GCCTRL[6].cen = 1;
     
     // Set sample rate = clock / 256
     sample_rate = 12000000 / 256; // ~48kHz
     
     // Divide by 2*(div+1) if enabled
-    //sample_rate = sample_rate / (2*(0+1);
+    //sample_rate = sample_rate / (2*(0+1));
     
     // Activate ABDAC
     dac->CR.en = 1;
