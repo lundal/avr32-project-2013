@@ -37,7 +37,7 @@ volatile avr32_pio_t *pioc = &AVR32_PIOC;
 volatile avr32_pm_t *pm = &AVR32_PM;
 
 // Prototypes
-int main (int argc, char *argv[]);
+int32_t main (int32_t argc, char *argv[]);
 static void initHardware (void);
 static void initIntc(void);
 static void initButtons(void);
