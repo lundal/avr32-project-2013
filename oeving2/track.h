@@ -2,9 +2,8 @@
 #define TRACK_H
 
 #include "sound.h"
-#include <stdlib.h>
 
-// Structure for a sound and play information
+// Structure for a sound and playback information
 typedef struct {
     sound_t *sound;
     int current_sample;
