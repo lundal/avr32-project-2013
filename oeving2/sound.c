@@ -4,6 +4,8 @@
 #include <math.h>
 
 // Combines samples into a track
+// Arguments should be on the repeating form:
+// Sample(sample_t*), Duration(float, seconds), Volume(int, %), ...
 sound_t* build_sound(int n_samples, ...) {
     // Allocate memory for sound
     sound_t *sound = (sound_t*)malloc(sizeof(sound_t));
