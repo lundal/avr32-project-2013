@@ -4,6 +4,7 @@
 #include "sound.h"
 
 // Tone vars
+sample_t *silence;
 sample_t *A_1;
 sample_t *Ax1;
 sample_t *B_1;
@@ -28,7 +29,6 @@ sample_t *F_2;
 sample_t *Fx2;
 sample_t *G_2;
 sample_t *Gx2;
-sample_t *silent;
 
 // Prototypes
 void tones_init();

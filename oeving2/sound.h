@@ -1,6 +1,8 @@
 #ifndef SOUND_H
 #define SOUND_H
 
+#define SAMPLE_AMPLITUDE 32000.0
+
 // Structure for a sample
 typedef struct {
     int n_points;
@@ -19,9 +21,9 @@ typedef struct {
 int sample_rate;
 
 // Prototypes
-sound_t* build_sound(int n_samples, ...);
-sample_t* generate_square_sample(int frequency);
-sample_t* generate_sin_sample(int frequency);
-sample_t* generate_silent_sample();
+sound_t* sound_build(int n_samples, ...);
+sample_t* sample_gen_silence();
+sample_t* sample_gen_square(int frequency);
+sample_t* sample_gen_sin(int frequency);
 
 #endif

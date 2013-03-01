@@ -15,106 +15,100 @@
 
 int current_led = ELEMENT_0;
 
-// Sound tracks
-track_t *track_0 = NULL;
-track_t *track_1 = NULL;
-track_t *track_2 = NULL;
-track_t *track_3 = NULL;
-track_t *track_4 = NULL;
-track_t *track_5 = NULL;
-track_t *track_6 = NULL;
-track_t *track_7 = NULL;
-
 // Test sounds
 sound_t *sound_lisa = NULL;
 sound_t *sound_lisa2 = NULL;
-sound_t *sound_sotw = NULL;
+sound_t *sound_sotw1 = NULL;
+sound_t *sound_sotw2 = NULL;
 
 // Notes
 
 int main (int argc, char *argv[]) {
-    // Init tracks
-    track_0 = track_new();
-    track_1 = track_new();
-    track_2 = track_new();
-    track_3 = track_new();
-    track_4 = track_new();
-    track_5 = track_new();
-    track_6 = track_new();
-    track_7 = track_new();
-    
+    tracks_init();
     initHardware();
     
-    // Init notes
+    // Init sound
     tones_init();
     
-    // Generate test samples
-    silent = generate_silent_sample();
-    
     // Build test sounds
-    sound_lisa = build_sound(22*2,
-        C_1, 0.4, 100, silent, 0.1, 0,
-        D_1, 0.4, 100, silent, 0.1, 0,
-        E_1, 0.4, 100, silent, 0.1, 0,
-        F_1, 0.4, 100, silent, 0.1, 0,
-        G_1, 0.9, 100, silent, 0.1, 0,
-        G_1, 0.9, 100, silent, 0.1, 0,
-        A_2, 0.4, 100, silent, 0.1, 0,
-        A_2, 0.4, 100, silent, 0.1, 0,
-        A_2, 0.4, 100, silent, 0.1, 0,
-        A_2, 0.4, 100, silent, 0.1, 0,
-        G_1, 1.9, 100, silent, 0.1, 0,
-        F_1, 0.4, 100, silent, 0.1, 0,
-        F_1, 0.4, 100, silent, 0.1, 0,
-        F_1, 0.4, 100, silent, 0.1, 0,
-        F_1, 0.4, 100, silent, 0.1, 0,
-        E_1, 0.9, 100, silent, 0.1, 0,
-        E_1, 0.9, 100, silent, 0.1, 0,
-        D_1, 0.4, 100, silent, 0.1, 0,
-        D_1, 0.4, 100, silent, 0.1, 0,
-        D_1, 0.4, 100, silent, 0.1, 0,
-        D_1, 0.4, 100, silent, 0.1, 0,
-        C_1, 1.9, 100, silent, 0.1, 0
+    sound_lisa = sound_build(22*2,
+        C_1, 0.4, 100, silence, 0.1, 0,
+        D_1, 0.4, 100, silence, 0.1, 0,
+        E_1, 0.4, 100, silence, 0.1, 0,
+        F_1, 0.4, 100, silence, 0.1, 0,
+        G_1, 0.9, 100, silence, 0.1, 0,
+        G_1, 0.9, 100, silence, 0.1, 0,
+        A_2, 0.4, 100, silence, 0.1, 0,
+        A_2, 0.4, 100, silence, 0.1, 0,
+        A_2, 0.4, 100, silence, 0.1, 0,
+        A_2, 0.4, 100, silence, 0.1, 0,
+        G_1, 1.9, 100, silence, 0.1, 0,
+        F_1, 0.4, 100, silence, 0.1, 0,
+        F_1, 0.4, 100, silence, 0.1, 0,
+        F_1, 0.4, 100, silence, 0.1, 0,
+        F_1, 0.4, 100, silence, 0.1, 0,
+        E_1, 0.9, 100, silence, 0.1, 0,
+        E_1, 0.9, 100, silence, 0.1, 0,
+        D_1, 0.4, 100, silence, 0.1, 0,
+        D_1, 0.4, 100, silence, 0.1, 0,
+        D_1, 0.4, 100, silence, 0.1, 0,
+        D_1, 0.4, 100, silence, 0.1, 0,
+        C_1, 1.9, 100, silence, 0.1, 0
     );
     
-    sound_lisa2 = build_sound(22*2,
-        A_1, 0.4, 100, silent, 0.1, 0,
-        B_1, 0.4, 100, silent, 0.1, 0,
-        C_1, 0.4, 100, silent, 0.1, 0,
-        D_1, 0.4, 100, silent, 0.1, 0,
-        E_1, 0.9, 100, silent, 0.1, 0,
-        E_1, 0.9, 100, silent, 0.1, 0,
-        F_1, 0.4, 100, silent, 0.1, 0,
-        F_1, 0.4, 100, silent, 0.1, 0,
-        F_1, 0.4, 100, silent, 0.1, 0,
-        F_1, 0.4, 100, silent, 0.1, 0,
-        E_1, 1.9, 100, silent, 0.1, 0,
-        D_1, 0.4, 100, silent, 0.1, 0,
-        D_1, 0.4, 100, silent, 0.1, 0,
-        D_1, 0.4, 100, silent, 0.1, 0,
-        D_1, 0.4, 100, silent, 0.1, 0,
-        C_1, 0.9, 100, silent, 0.1, 0,
-        C_1, 0.9, 100, silent, 0.1, 0,
-        B_1, 0.4, 100, silent, 0.1, 0,
-        B_1, 0.4, 100, silent, 0.1, 0,
-        B_1, 0.4, 100, silent, 0.1, 0,
-        B_1, 0.4, 100, silent, 0.1, 0,
-        A_1, 1.9, 100, silent, 0.1, 0
+    sound_lisa2 = sound_build(22*2,
+        A_1, 0.4, 100, silence, 0.1, 0,
+        B_1, 0.4, 100, silence, 0.1, 0,
+        C_1, 0.4, 100, silence, 0.1, 0,
+        D_1, 0.4, 100, silence, 0.1, 0,
+        E_1, 0.9, 100, silence, 0.1, 0,
+        E_1, 0.9, 100, silence, 0.1, 0,
+        F_1, 0.4, 100, silence, 0.1, 0,
+        F_1, 0.4, 100, silence, 0.1, 0,
+        F_1, 0.4, 100, silence, 0.1, 0,
+        F_1, 0.4, 100, silence, 0.1, 0,
+        E_1, 1.9, 100, silence, 0.1, 0,
+        D_1, 0.4, 100, silence, 0.1, 0,
+        D_1, 0.4, 100, silence, 0.1, 0,
+        D_1, 0.4, 100, silence, 0.1, 0,
+        D_1, 0.4, 100, silence, 0.1, 0,
+        C_1, 0.9, 100, silence, 0.1, 0,
+        C_1, 0.9, 100, silence, 0.1, 0,
+        B_1, 0.4, 100, silence, 0.1, 0,
+        B_1, 0.4, 100, silence, 0.1, 0,
+        B_1, 0.4, 100, silence, 0.1, 0,
+        B_1, 0.4, 100, silence, 0.1, 0,
+        A_1, 1.9, 100, silence, 0.1, 0
     );
     
-    sound_sotw = build_sound(12*2,
-        E_1, 0.4, 100, silent, 0.1, 0,
-        G_1, 0.4, 100, silent, 0.1, 0,
-        A_2, 0.65, 100, silent, 0.1, 0,
-        E_1, 0.4, 100, silent, 0.1, 0,
-        G_1, 0.4, 100, silent, 0.1, 0,
-        Ax2, 0.15, 100, silent, 0.1, 0,
-        A_2, 0.9, 100, silent, 0.1, 0,
-        E_1, 0.4, 100, silent, 0.1, 0,
-        G_1, 0.4, 100, silent, 0.1, 0,
-        A_2, 0.65, 100, silent, 0.1, 0,
-        G_1, 0.4, 100, silent, 0.1, 0,
-        E_1, 1.65, 100, silent, 0.1, 0
+    sound_sotw1 = sound_build(12*2,
+        E_1, 0.4, 100, silence, 0.1, 0,
+        G_1, 0.4, 100, silence, 0.1, 0,
+        A_2, 0.65, 100, silence, 0.1, 0,
+        E_1, 0.4, 100, silence, 0.1, 0,
+        G_1, 0.4, 100, silence, 0.1, 0,
+        Ax2, 0.15, 100, silence, 0.1, 0,
+        A_2, 0.9, 100, silence, 0.1, 0,
+        E_1, 0.4, 100, silence, 0.1, 0,
+        G_1, 0.4, 100, silence, 0.1, 0,
+        A_2, 0.65, 100, silence, 0.1, 0,
+        G_1, 0.4, 100, silence, 0.1, 0,
+        E_1, 1.65, 100, silence, 0.1, 0
+    );
+    
+    sound_sotw2 = sound_build(12*2,
+        B_2, 0.4, 100, silence, 0.1, 0,
+        D_2, 0.4, 100, silence, 0.1, 0,
+        E_2, 0.65, 100, silence, 0.1, 0,
+        B_2, 0.4, 100, silence, 0.1, 0,
+        D_2, 0.4, 100, silence, 0.1, 0,
+        F_2, 0.15, 100, silence, 0.1, 0,
+        E_2, 0.9, 100, silence, 0.1, 0,
+        B_2, 0.4, 100, silence, 0.1, 0,
+        D_2, 0.4, 100, silence, 0.1, 0,
+        E_2, 0.65, 100, silence, 0.1, 0,
+        D_2, 0.4, 100, silence, 0.1, 0,
+        B_2, 1.65, 100, silence, 0.1, 0
     );
     
     
@@ -204,36 +198,37 @@ void button_isr(void) {
     int press = event_states & button_states;
     
     if (press & ELEMENT_0) {
-        track_play(track_0, sound_lisa);
-        track_play(track_1, sound_lisa2);
+        track_play(tracks[0], sound_lisa);
+        track_play(tracks[1], sound_lisa2);
     }
     
     if (press & ELEMENT_1) {
-        track_play(track_2, sound_sotw);
+        track_play(tracks[0], sound_sotw1);
+        track_play(tracks[1], sound_sotw2);
     }
     
     if (press & ELEMENT_2) {
-        track_play(track_2, sound_lisa);
+        track_play(tracks[2], sound_lisa);
     }
     
     if (press & ELEMENT_3) {
-        track_play(track_3, sound_lisa);
+        track_play(tracks[3], sound_lisa);
     }
     
     if (press & ELEMENT_4) {
-        track_play(track_4, sound_lisa);
+        track_play(tracks[4], sound_lisa);
     }
     
     if (press & ELEMENT_5) {
-        track_play(track_5, sound_lisa);
+        track_play(tracks[5], sound_lisa);
     }
     
     if (press & ELEMENT_6) {
-        track_play(track_6, sound_lisa);
+        track_play(tracks[6], sound_lisa);
     }
     
     if (press & ELEMENT_7) {
-        track_play(track_7, sound_lisa);
+        track_play(tracks[7], sound_lisa);
     }
     
     // Update LEDS
@@ -244,19 +239,18 @@ void button_isr(void) {
 // ABDAC interrupt routine
 void abdac_isr(void) {
     // Default to silence
-    short data = 0;
+    int data = 0;
     
     // Get and advance track data
-    data += track_advance(track_0)/8;
-    data += track_advance(track_1)/8;
-    data += track_advance(track_2)/8;
-    data += track_advance(track_3)/8;
-    data += track_advance(track_4)/8;
-    //data += track_advance(track_5)/8;
-    //data += track_advance(track_6)/8;
-    //data += track_advance(track_7)/8;
+    int i;
+    for (i = 0; i < TRACKS_TOTAL; i++) {
+        data += track_advance(tracks[i]);
+    }
+    
+    // Normalize by number of tracks and volume
+    short output = (short)(data / (TRACKS_TOTAL*100));
     
     // Send data to ABDAC
-    dac->SDR.channel0 = data;
-    dac->SDR.channel1 = data;
+    dac->SDR.channel0 = output;
+    dac->SDR.channel1 = output;
 }

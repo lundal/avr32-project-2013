@@ -6,7 +6,7 @@
 // Combines samples into a track
 // Arguments should be on the repeating form:
 // Sample(sample_t*), Duration(float, seconds), Volume(int, %), ...
-sound_t* build_sound(int n_samples, ...) {
+sound_t* sound_build(int n_samples, ...) {
     // Allocate memory for sound
     sound_t *sound = (sound_t*)malloc(sizeof(sound_t));
     
@@ -38,12 +38,12 @@ sound_t* build_sound(int n_samples, ...) {
 }
 
 // Generates a silent sample
-sample_t* generate_silent_sample() {
+sample_t* sample_gen_silence() {
     // Allocate memory for sample
     sample_t *sample = (sample_t*)malloc(sizeof(sample_t));
     
-    // Use 50 sample points
-    sample->n_points = 50;
+    // Use some sample points
+    sample->n_points = 100;
     
     // Allocate memory for sample points
     sample->points = (short*)malloc(sizeof(short) * sample->n_points);
@@ -59,7 +59,7 @@ sample_t* generate_silent_sample() {
 }
 
 // Generates a square wave with specified frequency
-sample_t* generate_square_sample(int freq) {
+sample_t* sample_gen_square(int freq) {
     // Allocate memory for sample
     sample_t *sample = (sample_t*)malloc(sizeof(sample_t));
     
@@ -76,14 +76,14 @@ sample_t* generate_square_sample(int freq) {
         int val = (i > sample->n_points/2) ? 1 : -1;
         
         // Store adjusted value
-        sample->points[i] = (short)(val * 32000.0);
+        sample->points[i] = (short)(val * SAMPLE_AMPLITUDE);
     }
     
     return sample;
 }
 
 // Generates a sine wave with specified frequency
-sample_t* generate_sin_sample(int freq) {
+sample_t* sample_gen_sin(int freq) {
     // Allocate memory for sample
     sample_t *sample = (sample_t*)malloc(sizeof(sample_t));
     
@@ -103,7 +103,7 @@ sample_t* generate_sin_sample(int freq) {
         float val = sinf(2.0 * M_PI * r);
         
         // Store adjusted value
-        sample->points[i] = (short)(val * 32000.0);
+        sample->points[i] = (short)(val * SAMPLE_AMPLITUDE);
     }
     
     return sample;

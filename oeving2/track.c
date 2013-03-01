@@ -1,6 +1,15 @@
 #include "track.h"
 #include <stdlib.h>
 
+// Initialize tracks
+void tracks_init() {
+    // Create tracks
+    int i;
+    for (i = 0; i < TRACKS_TOTAL; i++) {
+        tracks[i] = track_new();
+    }
+}
+
 // Creates and initializes a new track
 track_t* track_new() {
     // Allocate memory
@@ -23,19 +32,19 @@ void track_play(track_t *track, sound_t *sound) {
     track->current_sample_point = 0;
 }
 
-// Gets the current sample point and advances to the next
-short track_advance(track_t *track) {
+// Gets the current sample point (100 times as loud, reduced in interrupt) and advances to the next
+int track_advance(track_t *track) {
     // Default to silence
-    short data = 0;
+    int data = 0;
     
     // If it has a sound
     if (track->sound != NULL) {
         
         // Get current sample point (assume it exists)
-        data = track->sound->samples[track->current_sample]->points[track->current_sample_point];
+        data = (int)track->sound->samples[track->current_sample]->points[track->current_sample_point];
         
         // Adjust volume
-        data = (short)((int)data * track->sound->sample_vol[track->current_sample] / 100);
+        data = data * track->sound->sample_vol[track->current_sample];
         
         // Go to next sample point
         track->current_sample_point++;
@@ -56,7 +65,8 @@ short track_advance(track_t *track) {
                     track->sound = NULL;
                 }
             } 
-        } 
+        }
+        
     }
     
     return data;
