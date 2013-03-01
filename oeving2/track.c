@@ -1,4 +1,5 @@
 #include "track.h"
+
 #include <stdlib.h>
 
 // Initialize tracks

@@ -18,6 +18,7 @@ int current_led = ELEMENT_0;
 // Test sounds
 sound_t *sound_lisa = NULL;
 sound_t *sound_lisa2 = NULL;
+sound_t *sound_lisa_dark = NULL;
 sound_t *sound_sotw1 = NULL;
 sound_t *sound_sotw2 = NULL;
 
@@ -31,86 +32,111 @@ int main (int argc, char *argv[]) {
     tones_init();
     
     // Build test sounds
+    
     sound_lisa = sound_build(22*2,
-        C_1, 0.4, 100, silence, 0.1, 0,
-        D_1, 0.4, 100, silence, 0.1, 0,
-        E_1, 0.4, 100, silence, 0.1, 0,
-        F_1, 0.4, 100, silence, 0.1, 0,
-        G_1, 0.9, 100, silence, 0.1, 0,
-        G_1, 0.9, 100, silence, 0.1, 0,
-        A_2, 0.4, 100, silence, 0.1, 0,
-        A_2, 0.4, 100, silence, 0.1, 0,
-        A_2, 0.4, 100, silence, 0.1, 0,
-        A_2, 0.4, 100, silence, 0.1, 0,
-        G_1, 1.9, 100, silence, 0.1, 0,
-        F_1, 0.4, 100, silence, 0.1, 0,
-        F_1, 0.4, 100, silence, 0.1, 0,
-        F_1, 0.4, 100, silence, 0.1, 0,
-        F_1, 0.4, 100, silence, 0.1, 0,
-        E_1, 0.9, 100, silence, 0.1, 0,
-        E_1, 0.9, 100, silence, 0.1, 0,
-        D_1, 0.4, 100, silence, 0.1, 0,
-        D_1, 0.4, 100, silence, 0.1, 0,
-        D_1, 0.4, 100, silence, 0.1, 0,
-        D_1, 0.4, 100, silence, 0.1, 0,
-        C_1, 1.9, 100, silence, 0.1, 0
+        C_5, 0.4, 100, silence, 0.1, 0,
+        D_5, 0.4, 100, silence, 0.1, 0,
+        E_5, 0.4, 100, silence, 0.1, 0,
+        F_5, 0.4, 100, silence, 0.1, 0,
+        G_5, 0.9, 100, silence, 0.1, 0,
+        G_5, 0.9, 100, silence, 0.1, 0,
+        A_5, 0.4, 100, silence, 0.1, 0,
+        A_5, 0.4, 100, silence, 0.1, 0,
+        A_5, 0.4, 100, silence, 0.1, 0,
+        A_5, 0.4, 100, silence, 0.1, 0,
+        G_5, 1.9, 100, silence, 0.1, 0,
+        F_5, 0.4, 100, silence, 0.1, 0,
+        F_5, 0.4, 100, silence, 0.1, 0,
+        F_5, 0.4, 100, silence, 0.1, 0,
+        F_5, 0.4, 100, silence, 0.1, 0,
+        E_5, 0.9, 100, silence, 0.1, 0,
+        E_5, 0.9, 100, silence, 0.1, 0,
+        D_5, 0.4, 100, silence, 0.1, 0,
+        D_5, 0.4, 100, silence, 0.1, 0,
+        D_5, 0.4, 100, silence, 0.1, 0,
+        D_5, 0.4, 100, silence, 0.1, 0,
+        C_5, 1.9, 100, silence, 0.1, 0
     );
     
     sound_lisa2 = sound_build(22*2,
-        A_1, 0.4, 100, silence, 0.1, 0,
-        B_1, 0.4, 100, silence, 0.1, 0,
-        C_1, 0.4, 100, silence, 0.1, 0,
-        D_1, 0.4, 100, silence, 0.1, 0,
-        E_1, 0.9, 100, silence, 0.1, 0,
-        E_1, 0.9, 100, silence, 0.1, 0,
-        F_1, 0.4, 100, silence, 0.1, 0,
-        F_1, 0.4, 100, silence, 0.1, 0,
-        F_1, 0.4, 100, silence, 0.1, 0,
-        F_1, 0.4, 100, silence, 0.1, 0,
-        E_1, 1.9, 100, silence, 0.1, 0,
-        D_1, 0.4, 100, silence, 0.1, 0,
-        D_1, 0.4, 100, silence, 0.1, 0,
-        D_1, 0.4, 100, silence, 0.1, 0,
-        D_1, 0.4, 100, silence, 0.1, 0,
-        C_1, 0.9, 100, silence, 0.1, 0,
-        C_1, 0.9, 100, silence, 0.1, 0,
-        B_1, 0.4, 100, silence, 0.1, 0,
-        B_1, 0.4, 100, silence, 0.1, 0,
-        B_1, 0.4, 100, silence, 0.1, 0,
-        B_1, 0.4, 100, silence, 0.1, 0,
-        A_1, 1.9, 100, silence, 0.1, 0
+        A_5, 0.4, 100, silence, 0.1, 0,
+        B_5, 0.4, 100, silence, 0.1, 0,
+        C_5, 0.4, 100, silence, 0.1, 0,
+        D_5, 0.4, 100, silence, 0.1, 0,
+        E_5, 0.9, 100, silence, 0.1, 0,
+        E_5, 0.9, 100, silence, 0.1, 0,
+        F_5, 0.4, 100, silence, 0.1, 0,
+        F_5, 0.4, 100, silence, 0.1, 0,
+        F_5, 0.4, 100, silence, 0.1, 0,
+        F_5, 0.4, 100, silence, 0.1, 0,
+        E_5, 1.9, 100, silence, 0.1, 0,
+        D_5, 0.4, 100, silence, 0.1, 0,
+        D_5, 0.4, 100, silence, 0.1, 0,
+        D_5, 0.4, 100, silence, 0.1, 0,
+        D_5, 0.4, 100, silence, 0.1, 0,
+        C_5, 0.9, 100, silence, 0.1, 0,
+        C_5, 0.9, 100, silence, 0.1, 0,
+        B_5, 0.4, 100, silence, 0.1, 0,
+        B_5, 0.4, 100, silence, 0.1, 0,
+        B_5, 0.4, 100, silence, 0.1, 0,
+        B_5, 0.4, 100, silence, 0.1, 0,
+        A_5, 1.9, 100, silence, 0.1, 0
+    );
+    
+    sound_lisa_dark = sound_build(22*2,
+        C_4, 0.4, 100, silence, 0.1, 0,
+        D_4, 0.4, 100, silence, 0.1, 0,
+        E_4, 0.4, 100, silence, 0.1, 0,
+        F_4, 0.4, 100, silence, 0.1, 0,
+        G_4, 0.9, 100, silence, 0.1, 0,
+        G_4, 0.9, 100, silence, 0.1, 0,
+        A_4, 0.4, 100, silence, 0.1, 0,
+        A_4, 0.4, 100, silence, 0.1, 0,
+        A_4, 0.4, 100, silence, 0.1, 0,
+        A_4, 0.4, 100, silence, 0.1, 0,
+        G_4, 1.9, 100, silence, 0.1, 0,
+        F_4, 0.4, 100, silence, 0.1, 0,
+        F_4, 0.4, 100, silence, 0.1, 0,
+        F_4, 0.4, 100, silence, 0.1, 0,
+        F_4, 0.4, 100, silence, 0.1, 0,
+        E_4, 0.9, 100, silence, 0.1, 0,
+        E_4, 0.9, 100, silence, 0.1, 0,
+        D_4, 0.4, 100, silence, 0.1, 0,
+        D_4, 0.4, 100, silence, 0.1, 0,
+        D_4, 0.4, 100, silence, 0.1, 0,
+        D_4, 0.4, 100, silence, 0.1, 0,
+        C_4, 1.9, 100, silence, 0.1, 0
     );
     
     sound_sotw1 = sound_build(12*2,
-        E_1, 0.4, 100, silence, 0.1, 0,
-        G_1, 0.4, 100, silence, 0.1, 0,
-        A_2, 0.65, 100, silence, 0.1, 0,
-        E_1, 0.4, 100, silence, 0.1, 0,
-        G_1, 0.4, 100, silence, 0.1, 0,
-        Ax2, 0.15, 100, silence, 0.1, 0,
-        A_2, 0.9, 100, silence, 0.1, 0,
-        E_1, 0.4, 100, silence, 0.1, 0,
-        G_1, 0.4, 100, silence, 0.1, 0,
-        A_2, 0.65, 100, silence, 0.1, 0,
-        G_1, 0.4, 100, silence, 0.1, 0,
-        E_1, 1.65, 100, silence, 0.1, 0
+        E_5, 0.4, 100, silence, 0.1, 0,
+        G_5, 0.4, 100, silence, 0.1, 0,
+        A_5, 0.65, 100, silence, 0.1, 0,
+        E_5, 0.4, 100, silence, 0.1, 0,
+        G_5, 0.4, 100, silence, 0.1, 0,
+        Ax5, 0.15, 100, silence, 0.1, 0,
+        A_5, 0.9, 100, silence, 0.1, 0,
+        E_5, 0.4, 100, silence, 0.1, 0,
+        G_5, 0.4, 100, silence, 0.1, 0,
+        A_5, 0.65, 100, silence, 0.1, 0,
+        G_5, 0.4, 100, silence, 0.1, 0,
+        E_5, 1.65, 100, silence, 0.1, 0
     );
     
     sound_sotw2 = sound_build(12*2,
-        B_2, 0.4, 100, silence, 0.1, 0,
-        D_2, 0.4, 100, silence, 0.1, 0,
-        E_2, 0.65, 100, silence, 0.1, 0,
-        B_2, 0.4, 100, silence, 0.1, 0,
-        D_2, 0.4, 100, silence, 0.1, 0,
-        F_2, 0.15, 100, silence, 0.1, 0,
-        E_2, 0.9, 100, silence, 0.1, 0,
-        B_2, 0.4, 100, silence, 0.1, 0,
-        D_2, 0.4, 100, silence, 0.1, 0,
-        E_2, 0.65, 100, silence, 0.1, 0,
-        D_2, 0.4, 100, silence, 0.1, 0,
-        B_2, 1.65, 100, silence, 0.1, 0
+        B_5, 0.4, 100, silence, 0.1, 0,
+        D_6, 0.4, 100, silence, 0.1, 0,
+        E_6, 0.65, 100, silence, 0.1, 0,
+        B_5, 0.4, 100, silence, 0.1, 0,
+        D_6, 0.4, 100, silence, 0.1, 0,
+        F_6, 0.15, 100, silence, 0.1, 0,
+        E_6, 0.9, 100, silence, 0.1, 0,
+        B_5, 0.4, 100, silence, 0.1, 0,
+        D_6, 0.4, 100, silence, 0.1, 0,
+        E_6, 0.65, 100, silence, 0.1, 0,
+        D_6, 0.4, 100, silence, 0.1, 0,
+        B_5, 1.65, 100, silence, 0.1, 0
     );
-    
     
     while(1);
     return 0;
@@ -200,11 +226,13 @@ void button_isr(void) {
     if (press & ELEMENT_0) {
         track_play(tracks[0], sound_lisa);
         track_play(tracks[1], sound_lisa2);
+        current_led = ELEMENT_0;
     }
     
     if (press & ELEMENT_1) {
         track_play(tracks[0], sound_sotw1);
         track_play(tracks[1], sound_sotw2);
+        current_led = ELEMENT_1;
     }
     
     if (press & ELEMENT_2) {
@@ -228,7 +256,7 @@ void button_isr(void) {
     }
     
     if (press & ELEMENT_7) {
-        track_play(tracks[7], sound_lisa);
+        track_play(tracks[7], sound_lisa_dark);
     }
     
     // Update LEDS
