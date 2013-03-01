@@ -1,7 +1,7 @@
 #ifndef TONES_H
 #define TONES_H
 
-#include <inttypes.h>
+#include <stdint.h>
 
 #include "sound.h"
 

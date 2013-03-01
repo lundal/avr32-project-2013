@@ -13,7 +13,7 @@ void tones_init() {
     
     // Generate tones from octave [0,5)
     int16_t i;
-    for (i = 3; i < 5 ; i++) {
+    for (i = 4; i < 5 ; i++) {
         int16_t base = i * 12;
         int16_t mult = pow( 2, (5-i) );
         

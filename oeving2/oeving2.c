@@ -13,7 +13,7 @@
 #include "tones.h"
 #include "track.h"
 
-int32_t current_led = ELEMENT_0;
+int current_led = ELEMENT_0;
 
 // Test sounds
 sound_t *sound_lisa = NULL;
