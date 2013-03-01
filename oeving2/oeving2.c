@@ -212,16 +212,16 @@ void initAudio(void) {
 // Button interrupt routine
 void button_isr(void) {
     // Debounce
-    int i = 500;
+    int16_t i = 500;
     while (i > 0) {
         i--;
     }
     
     // Read states
-    int event_states = piob->isr;
-    int button_states = ~piob->pdsr;
+    int32_t event_states = piob->isr;
+    int32_t button_states = ~piob->pdsr;
     
-    int press = event_states & button_states;
+    int32_t press = event_states & button_states;
     
     if (press & ELEMENT_0) {
         track_play(tracks[0], sound_lisa);
@@ -267,16 +267,16 @@ void button_isr(void) {
 // ABDAC interrupt routine
 void abdac_isr(void) {
     // Default to silence
-    int data = 0;
+    int32_t data = 0;
     
     // Get and advance track data
-    int i;
+    int32_t i;
     for (i = 0; i < TRACKS_TOTAL; i++) {
         data += track_advance(tracks[i]);
     }
     
     // Normalize by number of tracks and volume
-    short output = (short)(data / (TRACKS_TOTAL*100));
+    int16_t output = (int16_t)(data / (TRACKS_TOTAL*100));
     
     // Send data to ABDAC
     dac->SDR.channel0 = output;

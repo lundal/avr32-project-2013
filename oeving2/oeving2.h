@@ -9,6 +9,8 @@
 #ifndef OEVING_2_H
 #define OEVING_2_H
 
+#include <stdint.h>
+
 // Include Atmel header files
 #include <avr32/ap7000.h>
 #include <sys/interrupts.h>

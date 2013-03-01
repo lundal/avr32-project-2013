@@ -5,7 +5,7 @@
 // Initialize tracks
 void tracks_init() {
     // Create tracks
-    int i;
+    int16_t i;
     for (i = 0; i < TRACKS_TOTAL; i++) {
         tracks[i] = track_new();
     }
@@ -34,15 +34,15 @@ void track_play(track_t *track, sound_t *sound) {
 }
 
 // Gets the current sample point (100 times as loud, reduced in interrupt) and advances to the next
-int track_advance(track_t *track) {
+int32_t track_advance(track_t *track) {
     // Default to silence
-    int data = 0;
+    int32_t data = 0;
     
     // If it has a sound
     if (track->sound != NULL) {
         
         // Get current sample point (assume it exists)
-        data = (int)track->sound->samples[track->current_sample]->points[track->current_sample_point];
+        data = (int32_t)track->sound->samples[track->current_sample]->points[track->current_sample_point];
         
         // Adjust volume
         data = data * track->sound->sample_vol[track->current_sample];

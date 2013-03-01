@@ -12,10 +12,10 @@ void tones_init() {
     silence = sample_gen_silence();
     
     // Generate tones from octave [0,5)
-    int i;
-    for (i = 4; i < 5 ; i++) {
-        int base = i * 12;
-        int mult = pow( 2, (5-i) );
+    int16_t i;
+    for (i = 3; i < 5 ; i++) {
+        int16_t base = i * 12;
+        int16_t mult = pow( 2, (5-i) );
         
         tones[base + 0] = sample_gen_square(262 / mult);
         tones[base + 1] = sample_gen_square(277 / mult);
@@ -33,8 +33,8 @@ void tones_init() {
     
     // Generate tones from octave [5,10)
     for (i = 5; i < 10 ; i++) {
-        int base = i * 12;
-        int mult = pow( 2, (i-5) );
+        int16_t base = i * 12;
+        int16_t mult = pow( 2, (i-5) );
         
         tones[base + 0] = sample_gen_square(262 * mult);
         tones[base + 1] = sample_gen_square(277 * mult);
