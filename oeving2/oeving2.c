@@ -21,18 +21,46 @@ sound_t *sound_lisa2 = NULL;
 sound_t *sound_lisa_dark = NULL;
 sound_t *sound_sotw1 = NULL;
 sound_t *sound_sotw2 = NULL;
+sound_t *sound_pitch = NULL;
+sound_t *sound_vol = NULL;
 
 // Notes
 
 int main (int argc, char *argv[]) {
+    // Init sound
     tracks_init();
+    tones_init();
+
     initHardware();
     
-    // Init sound
-    tones_init();
+    sound_pitch = sound_build(11,
+        tone_C, -5, 100, 1000,
+        tone_C, -4, 100, 1000,
+        tone_C, -3, 100, 1000,
+        tone_C, -2, 100, 1000,
+        tone_C, -1, 100, 1000,
+        tone_C, 0, 100, 1000,
+        tone_C, 1, 100, 1000,
+        tone_C, 2, 100, 1000,
+        tone_C, 3, 100, 1000,
+        tone_C, 4, 100, 1000,
+        tone_C, 5, 100, 1000
+    );
     
+    sound_vol = sound_build(10,
+        tone_C, 0, 10, 1000,
+        tone_C, 0, 20, 1000,
+        tone_C, 0, 30, 1000,
+        tone_C, 0, 40, 1000,
+        tone_C, 0, 50, 1000,
+        tone_C, 0, 60, 1000,
+        tone_C, 0, 70, 1000,
+        tone_C, 0, 80, 1000,
+        tone_C, 0, 90, 1000,
+        tone_C, 0, 100, 1000
+    );
     // Build test sounds
-    
+    /*
     sound_lisa = sound_build(22*2,
         C_5, 0.4, 100, silence, 0.1, 0,
         D_5, 0.4, 100, silence, 0.1, 0,
@@ -137,7 +165,7 @@ int main (int argc, char *argv[]) {
         D_6, 0.4, 100, silence, 0.1, 0,
         B_5, 1.65, 100, silence, 0.1, 0
     );
-    
+    */
     while(1);
     return 0;
 }
@@ -222,33 +250,33 @@ void button_isr(void) {
     }
     
     if (press & ELEMENT_1) {
-        track_play(tracks[0], sound_sotw1);
-        track_play(tracks[1], sound_sotw2);
+        track_play(tracks[0], sound_vol);
+        track_play(tracks[1], sound_vol);
         current_led = ELEMENT_1;
     }
     
     if (press & ELEMENT_2) {
-        track_play(tracks[2], sound_lisa);
+        track_play(tracks[2], sound_vol);
     }
     
     if (press & ELEMENT_3) {
-        track_play(tracks[3], sound_lisa);
+        track_play(tracks[3], sound_vol);
     }
     
     if (press & ELEMENT_4) {
-        track_play(tracks[4], sound_lisa);
+        track_play(tracks[4], sound_vol);
     }
     
     if (press & ELEMENT_5) {
-        track_play(tracks[5], sound_lisa);
+        track_play(tracks[5], sound_vol);
     }
     
     if (press & ELEMENT_6) {
-        track_play(tracks[6], sound_lisa);
+        track_play(tracks[6], sound_vol);
     }
     
     if (press & ELEMENT_7) {
-        track_play(tracks[7], sound_lisa_dark);
+        track_play(tracks[7], sound_vol);
     }
     
     // Update LEDS

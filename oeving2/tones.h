@@ -89,6 +89,19 @@
 sample_t **tones;
 sample_t *silence;
 
+sample_t *tone_C;
+sample_t *tone_Cx;
+sample_t *tone_D;
+sample_t *tone_Dx;
+sample_t *tone_E;
+sample_t *tone_F;
+sample_t *tone_Fx;
+sample_t *tone_G;
+sample_t *tone_Gx;
+sample_t *tone_A;
+sample_t *tone_Ax;
+sample_t *tone_B;
+
 // Prototypes
 void tones_init();
 

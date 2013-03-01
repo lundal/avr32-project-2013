@@ -18,6 +18,7 @@ typedef struct {
     sample_t **samples;
     int16_t *sample_reps;
     int16_t *sample_vol;
+    int16_t *sample_pitch;
 } sound_t;
 
 // Set samplerate (updated when initAudio is called in oeving2.c)

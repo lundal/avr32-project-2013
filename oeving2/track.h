@@ -5,14 +5,14 @@
 
 #include "sound.h"
 
-#define TRACKS_TOTAL 8
+#define TRACKS_TOTAL 6
 
 // Structure for a sound and playback information
 typedef struct {
     sound_t *sound;
     int16_t current_sample;
     int16_t current_sample_iteration;
-    int16_t current_sample_point;
+    int32_t current_sample_point;
 } track_t;
 
 track_t **tracks;
