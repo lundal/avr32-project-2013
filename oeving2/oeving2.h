@@ -9,15 +9,15 @@
 #ifndef OEVING_2_H
 #define OEVING_2_H
 
-/* Include Atmel header files */
+// Include Atmel header files
 #include <avr32/ap7000.h>
 #include <sys/interrupts.h>
 
-/* Interrupt priority levels */
+// Interrupt priority levels
 #define ABDAC_INT_LEVEL 0
 #define BUTTONS_INT_LEVEL 0
 
-/* Convenient references for buttons and LEDs */
+// Convenient references for buttons and LEDs
 #define ELEMENT_0 0x01
 #define ELEMENT_1 0x02
 #define ELEMENT_2 0x04
@@ -28,74 +28,20 @@
 #define ELEMENT_7 0x80
 #define ELEMENT_ALL 0xFF
 
-/* Prototypes */
+// Convenient pointers to I/O devices
+volatile avr32_abdac_t *dac = &AVR32_ABDAC;
+volatile avr32_pio_t *piob = &AVR32_PIOB;
+volatile avr32_pio_t *pioc = &AVR32_PIOC;
+volatile avr32_pm_t *pm = &AVR32_PM;
+
+// Prototypes
 int main (int argc, char *argv[]);
 static void initHardware (void);
 static void initIntc(void);
 static void initButtons(void);
 static void initLeds(void);
 static void initAudio(void);
-
 static void button_isr(void);
 static void abdac_isr(void);
-
-// Structure to hold a sample
-typedef struct {
-    int n_points;
-    short *points;
-} sample_t;
-
-// Holds an array of samples(pointers) and the number of times to play them
-typedef struct {
-    int n_samples;
-    sample_t **samples;
-    int *sample_reps;
-    int *sample_vol;
-} sound_t;
-
-// Holds a sound and play information
-typedef struct {
-    sound_t *sound;
-    int current_sample;
-    int current_sample_iteration;
-    int current_sample_point;
-} track_t;
-
-// Generates a tone with sinus wave of specified frequency
-static sample_t* generate_square_sample(int frequency);
-
-// Generates a tone with sinus wave of specified frequency
-static sample_t* generate_sin_sample(int frequency);
-
-// Generates a silent sample
-static sample_t* generate_silent_sample();
-
-// Combines samples into a track
-static sound_t* build_sound(int n_samples, ...);
-
-// Gets the current sample point and advances the track to the next
-static short track_advance(track_t* track);
-
-// Starts a new sound on a track
-static void track_play(track_t *track, sound_t *sound);
-
-// Creates and initializes a new track
-static track_t* track_new();
-
-/*
-ACTIVATED_BUTTONS is supposed to denote the following:
-7-5 are for 3 individual music pieces
-4-3 are the volume buttons
-2 is the stop button
-*/
-#define ACTIVATED_BUTTONS 0xfc
-
-
-/* Convenient pointers to I/O devices */
-volatile avr32_abdac_t *dac = &AVR32_ABDAC;
-volatile avr32_pio_t *piob = &AVR32_PIOB;
-volatile avr32_pio_t *pioc = &AVR32_PIOC;
-volatile avr32_pm_t *pm = &AVR32_PM;
-
 
 #endif

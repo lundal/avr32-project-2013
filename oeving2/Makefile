@@ -14,7 +14,7 @@ AVR32PROGRAM = avr32program
 AVR32DEBUG = avr32-gdb
 
 # File names 
-SRC = oeving2.c
+SRC = oeving2.c sound.c tones.c track.c
 OBJ = $(SRC:.c=.o)
 EXE = oeving2.elf
 
