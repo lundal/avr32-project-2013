@@ -3,15 +3,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+int division;
+
+int num_tracks;
+buffer_t **tracks;
+event_t **events;
+
 int main (int argc, char *argv[]) {
     buffer_t* buffer = read_file("test.mid");
-    
-    /*
-    int i;
-    for (i = 0; i < buffer->length; i++) {
-        printf("%02X ", (int)buffer->data[i]);
-    }
-    */
     
     parse_midi(buffer);
     
@@ -23,43 +22,69 @@ void parse_midi(buffer_t *buffer) {
     int id = parse_int(buffer, 4);
     int length = parse_int(buffer, 4);
     int format = parse_int(buffer, 2);
-    int tracks = parse_int(buffer, 2);
-    int division = parse_int(buffer, 2);
+    num_tracks = parse_int(buffer, 2);
+    division = parse_int(buffer, 2);
     
-    // TODO: Set sample_points per tick
-    printf("Midi - Format: %d, Tracks: %d, Division: %d\n", format, tracks, division);
+    printf("Midi - Format: %d, Tracks: %d, Division: %d\n", format, num_tracks, division);
     
-    // Parse tracks
+    // Allocate memory
+    tracks = (buffer_t**)malloc(sizeof(buffer_t*) * num_tracks);
+    events = (event_t**)malloc(sizeof(event_t*) * num_tracks);
+    
+    // Read tracks to separate buffers
     int i;
-    for (i = 0; i < tracks; i++) {
-        parse_track(buffer);
+    for (i = 0; i < num_tracks; i++) {
+        tracks[i] = read_track(buffer);
+        events[i] = next_event(tracks[i]);
     }
+    
+    // TODO: Calculate sample_points per tick
+    
+    // TODO: Get next event from all tracks
+    
+    // TODO: Add to single event_t array
+    
+    // TODO: Output to struct
     
     printf("Midi - End\n");
 }
 
-void parse_track(buffer_t *buffer) {
+buffer_t* read_track(buffer_t *buffer) {
     // Read data
     int id = parse_int(buffer, 4);
     int length = parse_int(buffer, 4);
     
-    printf("Track - Length: %d\n", length);
+    // Create buffer
+    buffer_t *track = (buffer_t*)malloc(sizeof(buffer_t));
+    track->position = 0;
+    track->length = length;
+    track->data = (char*)malloc(track->length);
     
-    // Parse events
-    int data_end = buffer->position + length;
-    while (buffer->position < data_end) {
-        parse_event(buffer); 
+    // Copy data
+    int i;
+    for (i = 0; i < track->length; i++) {
+        track->data[i] = buffer->data[buffer->position++];
     }
     
-    printf("Track - End\n");
+    return track;
 }
 
-void parse_event(buffer_t *buffer) {
+event_t* next_event(buffer_t *buffer) {
+    event_t* event = NULL;
+    while (event == NULL) {
+        event = read_event(buffer);
+    }
+    return event;
+}
+
+event_t* read_event(buffer_t *buffer) {
     // Read data
     int delta_time = parse_varint(buffer);
     int first_byte = parse_int(buffer, 1);
     int type = (first_byte & 0xF0) >> 4;
     int channel = first_byte & 0x0F;
+    
+    event_t* event = NULL;
     
     switch (type) {
         // Note off
@@ -68,8 +93,13 @@ void parse_event(buffer_t *buffer) {
             int note = parse_int(buffer, 1);
             int velocity = parse_int(buffer, 1);
             
-            // TODO
-            printf("Delta %d, Channel %d, Note %d off (%d)\n", delta_time, channel, note, velocity);
+            // Store event
+            event = (event_t*)malloc(sizeof(event));
+            event->delta_time = delta_time;
+            event->channel = channel;
+            event->tone = note;
+            event->volume = 0;
+            
             break;
         }
         // Note on
@@ -78,8 +108,13 @@ void parse_event(buffer_t *buffer) {
             int note = parse_int(buffer, 1);
             int velocity = parse_int(buffer, 1);
             
-            // TODO
-            printf("Delta %d, Channel %d, Note %d on (%d)\n", delta_time, channel, note, velocity);
+            // Store event
+            event = (event_t*)malloc(sizeof(event));
+            event->delta_time = delta_time;
+            event->channel = channel;
+            event->tone = note;
+            event->volume = velocity;
+            
             break;
         }
         // Note aftertouch
@@ -149,6 +184,8 @@ void parse_event(buffer_t *buffer) {
             break;
         }
     }
+    
+    return event;
 }
 
 int parse_int(buffer_t *buffer, int num_bytes) {
