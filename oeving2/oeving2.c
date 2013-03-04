@@ -34,8 +34,55 @@ const midi_soundtrack_t sotw = {
         {0.50 * SAMPLE_RATE, 0, A_5, 100},
         {0.75 * SAMPLE_RATE, 0, G_5, 100},
         {0.50 * SAMPLE_RATE, 0, E_5, 100},
-        {1.75 * SAMPLE_RATE, 0,   0,   0},
+        {0.75 * SAMPLE_RATE, 0,   0,   0},
         {1.00 * SAMPLE_RATE, 0,   0,   0},
+    }
+};
+
+const midi_soundtrack_t sotw2 = {
+    28,
+    {
+        {0.00 * SAMPLE_RATE, 0, D_5, 100},
+        {0.00 * SAMPLE_RATE, 1, G_5, 100},
+
+        {0.50 * SAMPLE_RATE, 0, F_5, 100},
+        {0.00 * SAMPLE_RATE, 1, Ax5, 100},
+
+        {0.50 * SAMPLE_RATE, 0, G_5, 100},
+        {0.00 * SAMPLE_RATE, 1, C_6, 100},
+
+        {0.75 * SAMPLE_RATE, 0, D_5, 100},
+        {0.00 * SAMPLE_RATE, 1, G_5, 100},
+
+        {0.50 * SAMPLE_RATE, 0, F_5, 100},
+        {0.00 * SAMPLE_RATE, 1, Ax5, 100},
+
+        {0.50 * SAMPLE_RATE, 0, Gx5, 100},
+        {0.00 * SAMPLE_RATE, 1, Cx6, 100},
+
+        {0.25 * SAMPLE_RATE, 0, G_5, 100},
+        {0.00 * SAMPLE_RATE, 1, C_6, 100},
+
+        {1.00 * SAMPLE_RATE, 0, D_5, 100},
+        {0.00 * SAMPLE_RATE, 1, G_5, 100},
+
+        {0.50 * SAMPLE_RATE, 0, F_5, 100},
+        {0.00 * SAMPLE_RATE, 1, Ax5, 100},
+
+        {0.50 * SAMPLE_RATE, 0, G_5, 100},
+        {0.00 * SAMPLE_RATE, 1, C_6, 100},
+
+        {0.75 * SAMPLE_RATE, 0, F_5, 100},
+        {0.00 * SAMPLE_RATE, 1, Ax5, 100},
+
+        {0.50 * SAMPLE_RATE, 0, D_5, 100},
+        {0.00 * SAMPLE_RATE, 1, G_5, 100},
+
+        {0.75 * SAMPLE_RATE, 0,   0,   0},
+        {0.00 * SAMPLE_RATE, 1,   0,   0},
+
+        {1.00 * SAMPLE_RATE, 0,   0,   0},
+        {0.00 * SAMPLE_RATE, 1,   0,   0},
     }
 };
 
@@ -92,6 +139,7 @@ void initAudio(void) {
     // Release pins from PIO
     piob->PUER.p20 = 1;
     piob->PUER.p21 = 1;
+    
     // Release pins from PIO
     piob->PDR.p20 = 1;
     piob->PDR.p21 = 1;
@@ -127,10 +175,12 @@ void button_isr(void) {
     int32_t press = event_states & button_states;
     
     if (press & ELEMENT_0) {
+        midi_play(&sotw);
         current_led = ELEMENT_0;
     }
     
     if (press & ELEMENT_1) {
+        midi_play(&sotw2);
         current_led = ELEMENT_1;
     }
     
