@@ -1,171 +1,54 @@
 /*****************************************************************************
  * 
- * Øving 2 UCSysDes
+ * Øving 2 Code file
  *
  *****************************************************************************/
 
 #include "oeving2.h"
+
 #include "include/sys/interrupts.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 
-#include "sound.h"
+#include "sample.h"
 #include "tones.h"
-#include "track.h"
+#include "midi.h"
 
-int current_led = ELEMENT_0;
+int32_t current_led = ELEMENT_0;
 
 // Test sounds
-sound_t *sound_lisa = NULL;
-sound_t *sound_lisa2 = NULL;
-sound_t *sound_lisa_dark = NULL;
-sound_t *sound_sotw1 = NULL;
-sound_t *sound_sotw2 = NULL;
-sound_t *sound_pitch = NULL;
-sound_t *sound_vol = NULL;
 
-// Notes
+const midi_soundtrack_t sotw = {
+    14,
+    {
+        {0.00 * SAMPLE_RATE, 0, E_5, 100},
+        {0.50 * SAMPLE_RATE, 0, G_5, 100},
+        {0.50 * SAMPLE_RATE, 0, A_5, 100},
+        {0.75 * SAMPLE_RATE, 0, E_5, 100},
+        {0.50 * SAMPLE_RATE, 0, G_5, 100},
+        {0.50 * SAMPLE_RATE, 0, Ax5, 100},
+        {0.25 * SAMPLE_RATE, 0, A_5, 100},
+        {1.00 * SAMPLE_RATE, 0, E_5, 100},
+        {0.50 * SAMPLE_RATE, 0, G_5, 100},
+        {0.50 * SAMPLE_RATE, 0, A_5, 100},
+        {0.75 * SAMPLE_RATE, 0, G_5, 100},
+        {0.50 * SAMPLE_RATE, 0, E_5, 100},
+        {1.75 * SAMPLE_RATE, 0,   0,   0},
+        {1.00 * SAMPLE_RATE, 0,   0,   0},
+    }
+};
 
 int main (int argc, char *argv[]) {
     // Init sound
-    tracks_init();
     tones_init();
-
+    midi_init();
+    midi_play(&sotw);
+    
+    // Init hardware
     initHardware();
     
-    sound_pitch = sound_build(11,
-        tone_C, -5, 100, 1000,
-        tone_C, -4, 100, 1000,
-        tone_C, -3, 100, 1000,
-        tone_C, -2, 100, 1000,
-        tone_C, -1, 100, 1000,
-        tone_C, 0, 100, 1000,
-        tone_C, 1, 100, 1000,
-        tone_C, 2, 100, 1000,
-        tone_C, 3, 100, 1000,
-        tone_C, 4, 100, 1000,
-        tone_C, 5, 100, 1000
-    );
-    
-    sound_vol = sound_build(10,
-        tone_C, 0, 10, 1000,
-        tone_C, 0, 20, 1000,
-        tone_C, 0, 30, 1000,
-        tone_C, 0, 40, 1000,
-        tone_C, 0, 50, 1000,
-        tone_C, 0, 60, 1000,
-        tone_C, 0, 70, 1000,
-        tone_C, 0, 80, 1000,
-        tone_C, 0, 90, 1000,
-        tone_C, 0, 100, 1000
-    );
-    // Build test sounds
-    /*
-    sound_lisa = sound_build(22*2,
-        C_5, 0.4, 100, silence, 0.1, 0,
-        D_5, 0.4, 100, silence, 0.1, 0,
-        E_5, 0.4, 100, silence, 0.1, 0,
-        F_5, 0.4, 100, silence, 0.1, 0,
-        G_5, 0.9, 100, silence, 0.1, 0,
-        G_5, 0.9, 100, silence, 0.1, 0,
-        A_5, 0.4, 100, silence, 0.1, 0,
-        A_5, 0.4, 100, silence, 0.1, 0,
-        A_5, 0.4, 100, silence, 0.1, 0,
-        A_5, 0.4, 100, silence, 0.1, 0,
-        G_5, 1.9, 100, silence, 0.1, 0,
-        F_5, 0.4, 100, silence, 0.1, 0,
-        F_5, 0.4, 100, silence, 0.1, 0,
-        F_5, 0.4, 100, silence, 0.1, 0,
-        F_5, 0.4, 100, silence, 0.1, 0,
-        E_5, 0.9, 100, silence, 0.1, 0,
-        E_5, 0.9, 100, silence, 0.1, 0,
-        D_5, 0.4, 100, silence, 0.1, 0,
-        D_5, 0.4, 100, silence, 0.1, 0,
-        D_5, 0.4, 100, silence, 0.1, 0,
-        D_5, 0.4, 100, silence, 0.1, 0,
-        C_5, 1.9, 100, silence, 0.1, 0
-    );
-    
-    sound_lisa2 = sound_build(22*2,
-        A_5, 0.4, 100, silence, 0.1, 0,
-        B_5, 0.4, 100, silence, 0.1, 0,
-        C_5, 0.4, 100, silence, 0.1, 0,
-        D_5, 0.4, 100, silence, 0.1, 0,
-        E_5, 0.9, 100, silence, 0.1, 0,
-        E_5, 0.9, 100, silence, 0.1, 0,
-        F_5, 0.4, 100, silence, 0.1, 0,
-        F_5, 0.4, 100, silence, 0.1, 0,
-        F_5, 0.4, 100, silence, 0.1, 0,
-        F_5, 0.4, 100, silence, 0.1, 0,
-        E_5, 1.9, 100, silence, 0.1, 0,
-        D_5, 0.4, 100, silence, 0.1, 0,
-        D_5, 0.4, 100, silence, 0.1, 0,
-        D_5, 0.4, 100, silence, 0.1, 0,
-        D_5, 0.4, 100, silence, 0.1, 0,
-        C_5, 0.9, 100, silence, 0.1, 0,
-        C_5, 0.9, 100, silence, 0.1, 0,
-        B_5, 0.4, 100, silence, 0.1, 0,
-        B_5, 0.4, 100, silence, 0.1, 0,
-        B_5, 0.4, 100, silence, 0.1, 0,
-        B_5, 0.4, 100, silence, 0.1, 0,
-        A_5, 1.9, 100, silence, 0.1, 0
-    );
-    
-    sound_lisa_dark = sound_build(22*2,
-        C_4, 0.4, 100, silence, 0.1, 0,
-        D_4, 0.4, 100, silence, 0.1, 0,
-        E_4, 0.4, 100, silence, 0.1, 0,
-        F_4, 0.4, 100, silence, 0.1, 0,
-        G_4, 0.9, 100, silence, 0.1, 0,
-        G_4, 0.9, 100, silence, 0.1, 0,
-        A_4, 0.4, 100, silence, 0.1, 0,
-        A_4, 0.4, 100, silence, 0.1, 0,
-        A_4, 0.4, 100, silence, 0.1, 0,
-        A_4, 0.4, 100, silence, 0.1, 0,
-        G_4, 1.9, 100, silence, 0.1, 0,
-        F_4, 0.4, 100, silence, 0.1, 0,
-        F_4, 0.4, 100, silence, 0.1, 0,
-        F_4, 0.4, 100, silence, 0.1, 0,
-        F_4, 0.4, 100, silence, 0.1, 0,
-        E_4, 0.9, 100, silence, 0.1, 0,
-        E_4, 0.9, 100, silence, 0.1, 0,
-        D_4, 0.4, 100, silence, 0.1, 0,
-        D_4, 0.4, 100, silence, 0.1, 0,
-        D_4, 0.4, 100, silence, 0.1, 0,
-        D_4, 0.4, 100, silence, 0.1, 0,
-        C_4, 1.9, 100, silence, 0.1, 0
-    );
-    
-    sound_sotw1 = sound_build(12*2,
-        E_5, 0.4, 100, silence, 0.1, 0,
-        G_5, 0.4, 100, silence, 0.1, 0,
-        A_5, 0.65, 100, silence, 0.1, 0,
-        E_5, 0.4, 100, silence, 0.1, 0,
-        G_5, 0.4, 100, silence, 0.1, 0,
-        Ax5, 0.15, 100, silence, 0.1, 0,
-        A_5, 0.9, 100, silence, 0.1, 0,
-        E_5, 0.4, 100, silence, 0.1, 0,
-        G_5, 0.4, 100, silence, 0.1, 0,
-        A_5, 0.65, 100, silence, 0.1, 0,
-        G_5, 0.4, 100, silence, 0.1, 0,
-        E_5, 1.65, 100, silence, 0.1, 0
-    );
-    
-    sound_sotw2 = sound_build(12*2,
-        B_5, 0.4, 100, silence, 0.1, 0,
-        D_6, 0.4, 100, silence, 0.1, 0,
-        E_6, 0.65, 100, silence, 0.1, 0,
-        B_5, 0.4, 100, silence, 0.1, 0,
-        D_6, 0.4, 100, silence, 0.1, 0,
-        F_6, 0.15, 100, silence, 0.1, 0,
-        E_6, 0.9, 100, silence, 0.1, 0,
-        B_5, 0.4, 100, silence, 0.1, 0,
-        D_6, 0.4, 100, silence, 0.1, 0,
-        E_6, 0.65, 100, silence, 0.1, 0,
-        D_6, 0.4, 100, silence, 0.1, 0,
-        B_5, 1.65, 100, silence, 0.1, 0
-    );
-    */
+    // Busywaiting is FUN!
     while(1);
     return 0;
 }
@@ -244,39 +127,35 @@ void button_isr(void) {
     int32_t press = event_states & button_states;
     
     if (press & ELEMENT_0) {
-        track_play(tracks[0], sound_lisa);
-        track_play(tracks[1], sound_lisa2);
         current_led = ELEMENT_0;
     }
     
     if (press & ELEMENT_1) {
-        track_play(tracks[0], sound_vol);
-        track_play(tracks[1], sound_vol);
         current_led = ELEMENT_1;
     }
     
     if (press & ELEMENT_2) {
-        track_play(tracks[2], sound_vol);
+        current_led = ELEMENT_2;
     }
     
     if (press & ELEMENT_3) {
-        track_play(tracks[3], sound_vol);
+        current_led = ELEMENT_3;
     }
     
     if (press & ELEMENT_4) {
-        track_play(tracks[4], sound_vol);
+        current_led = ELEMENT_4;
     }
     
     if (press & ELEMENT_5) {
-        track_play(tracks[5], sound_vol);
+        current_led = ELEMENT_5;
     }
     
     if (press & ELEMENT_6) {
-        track_play(tracks[6], sound_vol);
+        current_led = ELEMENT_6;
     }
     
     if (press & ELEMENT_7) {
-        track_play(tracks[7], sound_vol);
+        current_led = ELEMENT_7;
     }
     
     // Update LEDS
@@ -286,17 +165,8 @@ void button_isr(void) {
 
 // ABDAC interrupt routine
 void abdac_isr(void) {
-    // Default to silence
-    int32_t data = 0;
-    
-    // Get and advance track data
-    int32_t i;
-    for (i = 0; i < TRACKS_TOTAL; i++) {
-        data += track_advance(tracks[i]);
-    }
-    
-    // Normalize by number of tracks and volume
-    int16_t output = (int16_t)(data / (TRACKS_TOTAL*100));
+    // Get data from midi player
+    int16_t output = midi_tick();
     
     // Send data to ABDAC
     dac->SDR.channel0 = output;
