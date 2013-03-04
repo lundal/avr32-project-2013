@@ -35,14 +35,22 @@ void parse_midi(buffer_t *buffer) {
     int i;
     for (i = 0; i < num_tracks; i++) {
         tracks[i] = read_track(buffer);
-        events[i] = next_event(tracks[i]);
+        events[i] = next_useful_event(tracks[i]);
     }
     
     // TODO: Calculate sample_points per tick
     
-    // TODO: Get next event from all tracks
+    // Get first
+    event_t *event = next_event();
     
-    // TODO: Add to single event_t array
+    // While there are events
+    while (event != NULL) {
+        
+        printf("Event - DT=%d, CH=%d, NOTE=%d, VOL=%d.\n", event->delta_time, event->channel, event->note, event->volume);
+        
+        // Get next
+        event = next_event();
+    }
     
     // TODO: Output to struct
     
@@ -69,16 +77,56 @@ buffer_t* read_track(buffer_t *buffer) {
     return track;
 }
 
-event_t* next_event(buffer_t *buffer) {
-    event_t* event = NULL;
-    while (event == NULL) {
+event_t* next_event() {
+    int time_to_next = 1000000000;
+    int next_event_id = -1;
+    
+    int i;
+    
+    // Find next event
+    for (i = 0; i < num_tracks; i++) {
+        if (events[i] != NULL) {
+            if (events[i]->delta_time < time_to_next) {
+                time_to_next = events[i]->delta_time;
+                next_event_id = i;
+            }
+        }
+    }
+    
+    // No event found
+    if (next_event_id == -1) {
+        return NULL;
+    }
+    
+    // Update delta_times
+    for (i = 0; i < num_tracks; i++) {
+        if (events[i] != NULL && i != next_event_id) {
+            events[i]->delta_time -= time_to_next;
+        }
+    }
+    
+    // This is the next event
+    event_t *next_event = events[next_event_id];
+    
+    // Update list with next event from track;
+    events[next_event_id] = next_useful_event(tracks[next_event_id]);
+    
+    return next_event;
+}
+
+event_t* next_useful_event(buffer_t *buffer) {
+    event_t *event = NULL;
+    
+    // Read events from track until non-NULL or end of track
+    while (event == NULL && buffer->position < buffer->length) {
         event = read_event(buffer);
     }
+    
     return event;
 }
 
 event_t* read_event(buffer_t *buffer) {
-    // Read data
+    // Read data 
     int delta_time = parse_varint(buffer);
     int first_byte = parse_int(buffer, 1);
     int type = (first_byte & 0xF0) >> 4;
@@ -94,10 +142,10 @@ event_t* read_event(buffer_t *buffer) {
             int velocity = parse_int(buffer, 1);
             
             // Store event
-            event = (event_t*)malloc(sizeof(event));
+            event = (event_t*)malloc(sizeof(event_t));
             event->delta_time = delta_time;
             event->channel = channel;
-            event->tone = note;
+            event->note = note;
             event->volume = 0;
             
             break;
@@ -109,10 +157,10 @@ event_t* read_event(buffer_t *buffer) {
             int velocity = parse_int(buffer, 1);
             
             // Store event
-            event = (event_t*)malloc(sizeof(event));
+            event = (event_t*)malloc(sizeof(event_t));
             event->delta_time = delta_time;
             event->channel = channel;
-            event->tone = note;
+            event->note = note;
             event->volume = velocity;
             
             break;

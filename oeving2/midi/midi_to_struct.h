@@ -2,7 +2,7 @@
 typedef struct {
     int delta_time;
     int channel;
-    int tone;
+    int note;
     int volume;
 } event_t;
 
@@ -17,7 +17,8 @@ typedef struct {
 int main (int argc, char *argv[]);
 void parse_midi(buffer_t *buffer);
 buffer_t* read_track(buffer_t *buffer);
-event_t* next_event(buffer_t *buffer);
+event_t* next_event();
+event_t* next_useful_event(buffer_t *buffer);
 event_t* read_event(buffer_t *buffer);
 int parse_int(buffer_t *buffer, int num_bytes);
 int parse_varint(buffer_t *buffer);
