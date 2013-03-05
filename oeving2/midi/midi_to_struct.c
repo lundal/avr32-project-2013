@@ -3,11 +3,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-int division;
+int tpb;
+int bpm;
 
 int num_tracks;
 buffer_t **tracks;
 event_t **events;
+
+int num_channels;
+int *channels;
 
 int main (int argc, char *argv[]) {
     buffer_t* buffer = read_file("test.mid");
@@ -23,9 +27,8 @@ void parse_midi(buffer_t *buffer) {
     int length = parse_int(buffer, 4);
     int format = parse_int(buffer, 2);
     num_tracks = parse_int(buffer, 2);
-    division = parse_int(buffer, 2);
-    
-    printf("Midi - Format: %d, Tracks: %d, Division: %d\n", format, num_tracks, division);
+    tpb = parse_int(buffer, 2); // Assume ticks per second (not frames)
+    bpm = 120; // Default value
     
     // Allocate memory
     tracks = (buffer_t**)malloc(sizeof(buffer_t*) * num_tracks);
@@ -38,23 +41,77 @@ void parse_midi(buffer_t *buffer) {
         events[i] = next_useful_event(tracks[i]);
     }
     
-    // TODO: Calculate sample_points per tick
+    printf("const midi_soundtrack_t name = {\n");
+    printf("    .events = {\n");
+    
+    // To keep track of number of events
+    int num_events = 0;
+    
+    // Vars to keep track of available channels
+    num_channels = 12; // Same as in player!
+    channels = (int*)malloc(sizeof(int) * num_channels);
+    for (i = 0; i < num_channels; i++) {
+        channels[i] = -1;
+    }
     
     // Get first
     event_t *event = next_event();
     
     // While there are events
     while (event != NULL) {
+        double tps = (double)tpb * (double)bpm / 60.0;
+        double seconds = (double)event->delta_time / (double)tps;
         
-        printf("Event - DT=%d, CH=%d, NOTE=%d, VOL=%d.\n", event->delta_time, event->channel, event->note, event->volume);
+        // Determine correct channel
+        int channel = -1;
+        if (event->volume > 0) {
+            // Find available channel
+            for (i = 0; i < num_channels; i++) {
+                if (channels[i] == -1) {
+                    // Store what the channel is used for
+                    channels[i] = (event->channel << 8) + event->note;
+                    
+                    // Return channel
+                    channel = i;
+                    break;
+                }
+            }
+        }
+        else {
+            // Recover channel
+            for (i = 0; i < num_channels; i++) {
+                int id = (event->channel << 8) + event->note;
+                if (channels[i] == id) {
+                    // Set available
+                    channels[i] = -1;
+                    
+                    // Return channel
+                    channel = i;
+                    break;
+                }
+            }
+        }
+        
+        // Check for channel overflow
+        if (channel == -1) {
+            fprintf(stderr, "Not enough channels");
+            return;
+        }
+        
+        printf("        {%e * SAMPLE_RATE, %d, %d, %d},\n", seconds, channel, event->note, event->volume);
+        
+        // Count events
+        num_events++;
+        
+        // TODO: Cut unnecessary events?
         
         // Get next
         event = next_event();
     }
     
-    // TODO: Output to struct
-    
-    printf("Midi - End\n");
+    printf("    },\n");
+    printf("    .num_events = %d\n", num_events);
+    printf("};\n");
 }
 
 buffer_t* read_track(buffer_t *buffer) {
@@ -126,7 +183,7 @@ event_t* next_useful_event(buffer_t *buffer) {
 }
 
 event_t* read_event(buffer_t *buffer) {
-    // Read data 
+    // Read data  
     int delta_time = parse_varint(buffer);
     int first_byte = parse_int(buffer, 1);
     int type = (first_byte & 0xF0) >> 4;
@@ -137,7 +194,7 @@ event_t* read_event(buffer_t *buffer) {
     switch (type) {
         // Note off
         case 0x8: {
-            // Read data
+            // Read  data
             int note = parse_int(buffer, 1);
             int velocity = parse_int(buffer, 1);
             
@@ -281,7 +338,7 @@ buffer_t* read_file(char *name) {
     // Open file
     file = fopen(name, "rb");
     if (!file) {
-        fprintf(stderr, "Unable to open file %S", name);
+        fprintf(stderr, "Unable to open file %s", name);
         return NULL;
     }
     
