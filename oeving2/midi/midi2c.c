@@ -2,11 +2,13 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 int tpb;
 int bpm;
 
 int num_tracks;
+int *track_event_type;
 buffer_t **tracks;
 event_t **events;
 
@@ -15,16 +17,16 @@ int *channels;
 
 int main (int argc, char *argv[]) {
     if (argc > 1) {
-        buffer_t* buffer = read_file(argv[1]);
-        parse_midi(buffer);
+        buffer_t* buffer = read_file(strcat(argv[1], ".mid"));
+        parse_midi(buffer, argv[1]);
     }
     else {
-        printf("Usage: midi2c <midi file> [> <file>]\n");
+        printf("Usage: midi2c <midi file (without extension)> [> <file>]\n");
     }
     return 0;
 }
 
-void parse_midi(buffer_t *buffer) {
+void parse_midi(buffer_t *buffer, char *name) {
     // Read data
     int id = parse_int(buffer, 4);
     int length = parse_int(buffer, 4);
@@ -37,14 +39,18 @@ void parse_midi(buffer_t *buffer) {
     tracks = (buffer_t**)malloc(sizeof(buffer_t*) * num_tracks);
     events = (event_t**)malloc(sizeof(event_t*) * num_tracks);
     
+    //num_tracks = 1;
+    track_event_type = (int*)malloc(sizeof(int) * num_tracks);
+    
     // Read tracks to separate buffers
     int i;
     for (i = 0; i < num_tracks; i++) {
         tracks[i] = read_track(buffer);
-        events[i] = next_useful_event(tracks[i]);
+        events[i] = next_useful_event(i);
+        //printf("Ne
     }
     
-    printf("const midi_soundtrack_t name = {\n");
+    printf("const midi_soundtrack_t %s = {\n", name);
     printf("    .events = {\n");
     
     // To keep track of number of events
@@ -97,7 +103,7 @@ void parse_midi(buffer_t *buffer) {
         
         // Check for channel overflow
         if (channel == -1) {
-            fprintf(stderr, "Not enough channels");
+            fprintf(stderr, "Not enough channels\n");
             return;
         }
         
@@ -127,70 +133,95 @@ buffer_t* read_track(buffer_t *buffer) {
     track->position = 0;
     track->length = length;
     track->data = (char*)malloc(track->length);
-    
+    //printf("Track: %02X \n", id);
     // Copy data
     int i;
     for (i = 0; i < track->length; i++) {
         track->data[i] = buffer->data[buffer->position++];
     }
-    
+    /*printf("\n");
+    printf("Events:\n");
+    while (track->position < track->length) {
+        printf("Bytes: ");
+        for (i = 0; i < 4; i++) {
+            printf("%03d(%02X) ", track->data[track->position + i], track->data[track->position + i]);
+        }
+        printf("\n");
+        read_event(1);
+    };
+    printf("End\n");
+    track->position = 0;
+    */
     return track;
 }
 
 event_t* next_event() {
     int time_to_next = 1000000000;
-    int next_event_id = -1;
+    int next_event_track = -1;
     
     int i;
-    
     // Find next event
     for (i = 0; i < num_tracks; i++) {
         if (events[i] != NULL) {
             if (events[i]->delta_time < time_to_next) {
                 time_to_next = events[i]->delta_time;
-                next_event_id = i;
+                next_event_track = i;
             }
         }
     }
     
     // No event found
-    if (next_event_id == -1) {
+    if (next_event_track == -1) {
         return NULL;
     }
     
     // Update delta_times
     for (i = 0; i < num_tracks; i++) {
-        if (events[i] != NULL && i != next_event_id) {
+        if (events[i] != NULL && i != next_event_track) {
             events[i]->delta_time -= time_to_next;
         }
     }
     
     // This is the next event
-    event_t *next_event = events[next_event_id];
+    event_t *next_event = events[next_event_track];
     
     // Update list with next event from track;
-    events[next_event_id] = next_useful_event(tracks[next_event_id]);
+    events[next_event_track] = next_useful_event(next_event_track);
     
     return next_event;
 }
 
-event_t* next_useful_event(buffer_t *buffer) {
+event_t* next_useful_event(int track_id) {
     event_t *event = NULL;
     
     // Read events from track until non-NULL or end of track
-    while (event == NULL && buffer->position < buffer->length) {
-        event = read_event(buffer);
+    while (event == NULL && tracks[track_id]->position < tracks[track_id]->length) {
+        event = read_event(track_id);
     }
     
     return event;
 }
 
-event_t* read_event(buffer_t *buffer) {
-    // Read data  
+event_t* read_event(int track_id) {
+    buffer_t *buffer = tracks[track_id];
+    // Read data
     int delta_time = parse_varint(buffer);
     int first_byte = parse_int(buffer, 1);
-    int type = (first_byte & 0xF0) >> 4;
-    int channel = first_byte & 0x0F;
+    //printf("Event\n");
+    // Check if same type
+    if ((first_byte & (1 << 7)) == 0) {
+        // Move buffer back one byte
+        buffer->position -= 1;
+    }
+    else {
+        // Update event type
+        track_event_type[track_id] = first_byte;
+    }
+    
+    int event_type = track_event_type[track_id];
+    
+    int type = (event_type & 0xF0) >> 4;
+    int channel = event_type & 0x0F;
     
     event_t* event = NULL;
     
@@ -207,7 +238,7 @@ event_t* read_event(buffer_t *buffer) {
             event->channel = channel;
             event->note = note;
             event->volume = 0;
-            
+            //printf("Note off: DT=%d, CH=%01X, NOTE=%02X, VEL=%02X\n", delta_time, channel, note, velocity);
             break;
         }
         // Note on
@@ -222,6 +253,7 @@ event_t* read_event(buffer_t *buffer) {
             event->channel = channel;
             event->note = note;
             event->volume = velocity;
+            //printf("Note on: DT=%d, CH=%d, NOTE=%d, VEL=%d\n", delta_time, channel, note, velocity);
             
             break;
         }
@@ -230,6 +262,7 @@ event_t* read_event(buffer_t *buffer) {
             // Read data
             int note = parse_int(buffer, 1);
             int value = parse_int(buffer, 1);
+            //printf("Note aftertouch\n");
             
             // Skip
             break;
@@ -239,6 +272,7 @@ event_t* read_event(buffer_t *buffer) {
             // Read data
             int number = parse_int(buffer, 1);
             int data = parse_int(buffer, 1);
+            //printf("Controller\n");
             
             // Skip
             break;
@@ -247,6 +281,7 @@ event_t* read_event(buffer_t *buffer) {
         case 0xC: {
             // Read data
             int number = parse_int(buffer, 1);
+            //printf("Program change\n");
             
             // Skip
             break;
@@ -255,6 +290,7 @@ event_t* read_event(buffer_t *buffer) {
         case 0xD: {
             // Read data
             int value = parse_int(buffer, 1);
+            //printf("Channel aftertouch\n");
             
             // Skip
             break;
@@ -264,6 +300,7 @@ event_t* read_event(buffer_t *buffer) {
             // Read data
             int low_val = parse_int(buffer, 1);
             int high_val = parse_int(buffer, 1);
+            //printf("Pitch bend\n");
             
             // Skip
             break;
@@ -274,6 +311,7 @@ event_t* read_event(buffer_t *buffer) {
             if (channel == 0x0 || channel == 0x7) {
                 // Read data
                 int sysex_length = parse_varint(buffer);
+                //printf("SysEx\n");
                 
                 // Skip rest
                 buffer->position += sysex_length;
@@ -283,6 +321,7 @@ event_t* read_event(buffer_t *buffer) {
                 // Read data
                 int meta_type = parse_int(buffer, 1);
                 int meta_length = parse_varint(buffer);
+                //printf("Meta\n");
                 
                 //TODO: Parse Set Tempo?
                 
