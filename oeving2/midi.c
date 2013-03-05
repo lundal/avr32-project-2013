@@ -7,7 +7,7 @@
 
 // Playback data
 midi_channel_t *midi_channels;
-midi_soundtrack_t *midi_soundtrack;
+const midi_soundtrack_t *midi_soundtrack;
 int32_t midi_current_event;
 int32_t midi_time_passed;
 
@@ -24,7 +24,7 @@ void midi_init() {
 }
 
 // Sets the soundtrack to play
-void midi_play(midi_soundtrack_t *soundtrack) {
+void midi_play(const midi_soundtrack_t *soundtrack) {
     midi_soundtrack = soundtrack;
     midi_current_event = 0;
     midi_time_passed = 0;
@@ -41,7 +41,6 @@ void midi_play(midi_soundtrack_t *soundtrack) {
 
 // Advances the midi player one tick and gets output
 int16_t midi_tick() {
-    
     // Process event(s)
     if (midi_time_passed >= midi_soundtrack->events[midi_current_event].delta_time) {
         // Get event

@@ -17,80 +17,17 @@
 
 int32_t current_led = ELEMENT_0;
 
-// Test sounds
-
-const midi_soundtrack_t sotw = {
-    14,
-    {
-        {0.00 * SAMPLE_RATE, 0, E_5, 100},
-        {0.50 * SAMPLE_RATE, 0, G_5, 100},
-        {0.50 * SAMPLE_RATE, 0, A_5, 100},
-        {0.75 * SAMPLE_RATE, 0, E_5, 100},
-        {0.50 * SAMPLE_RATE, 0, G_5, 100},
-        {0.50 * SAMPLE_RATE, 0, Ax5, 100},
-        {0.25 * SAMPLE_RATE, 0, A_5, 100},
-        {1.00 * SAMPLE_RATE, 0, E_5, 100},
-        {0.50 * SAMPLE_RATE, 0, G_5, 100},
-        {0.50 * SAMPLE_RATE, 0, A_5, 100},
-        {0.75 * SAMPLE_RATE, 0, G_5, 100},
-        {0.50 * SAMPLE_RATE, 0, E_5, 100},
-        {0.75 * SAMPLE_RATE, 0,   0,   0},
-        {1.00 * SAMPLE_RATE, 0,   0,   0},
-    }
-};
-
-const midi_soundtrack_t sotw2 = {
-    28,
-    {
-        {0.00 * SAMPLE_RATE, 0, D_5, 100},
-        {0.00 * SAMPLE_RATE, 1, G_5, 100},
-
-        {0.50 * SAMPLE_RATE, 0, F_5, 100},
-        {0.00 * SAMPLE_RATE, 1, Ax5, 100},
-
-        {0.50 * SAMPLE_RATE, 0, G_5, 100},
-        {0.00 * SAMPLE_RATE, 1, C_6, 100},
-
-        {0.75 * SAMPLE_RATE, 0, D_5, 100},
-        {0.00 * SAMPLE_RATE, 1, G_5, 100},
-
-        {0.50 * SAMPLE_RATE, 0, F_5, 100},
-        {0.00 * SAMPLE_RATE, 1, Ax5, 100},
-
-        {0.50 * SAMPLE_RATE, 0, Gx5, 100},
-        {0.00 * SAMPLE_RATE, 1, Cx6, 100},
-
-        {0.25 * SAMPLE_RATE, 0, G_5, 100},
-        {0.00 * SAMPLE_RATE, 1, C_6, 100},
-
-        {1.00 * SAMPLE_RATE, 0, D_5, 100},
-        {0.00 * SAMPLE_RATE, 1, G_5, 100},
-
-        {0.50 * SAMPLE_RATE, 0, F_5, 100},
-        {0.00 * SAMPLE_RATE, 1, Ax5, 100},
-
-        {0.50 * SAMPLE_RATE, 0, G_5, 100},
-        {0.00 * SAMPLE_RATE, 1, C_6, 100},
-
-        {0.75 * SAMPLE_RATE, 0, F_5, 100},
-        {0.00 * SAMPLE_RATE, 1, Ax5, 100},
-
-        {0.50 * SAMPLE_RATE, 0, D_5, 100},
-        {0.00 * SAMPLE_RATE, 1, G_5, 100},
-
-        {0.75 * SAMPLE_RATE, 0,   0,   0},
-        {0.00 * SAMPLE_RATE, 1,   0,   0},
-
-        {1.00 * SAMPLE_RATE, 0,   0,   0},
-        {0.00 * SAMPLE_RATE, 1,   0,   0},
-    }
-};
+// Midi sound files
+#include "midi/mario.c"
+#include "midi/still_alive.c"
+#include "midi/happy_birthday.c"
+#include "midi/zelda.c"
 
 int main (int argc, char *argv[]) {
     // Init sound
     tones_init();
     midi_init();
-    midi_play(&sotw);
+    midi_play(&mario);
     
     // Init hardware
     initHardware();
@@ -117,7 +54,7 @@ void initIntc(void) {
 // Initializes the buttons
 void initButtons(void) {
     // Set interrupt routine
-    register_interrupt( button_isr, AVR32_PIOB_IRQ/32, AVR32_PIOB_IRQ % 32, BUTTONS_INT_LEVEL);
+    register_interrupt(button_isr, AVR32_PIOB_IRQ/32, AVR32_PIOB_IRQ % 32, BUTTONS_INT_LEVEL);
     
     piob->per = 0xFF;
     piob->puer = 0xFF;
@@ -134,7 +71,7 @@ void initLeds(void) {
 // Initializes the ABDAC
 void initAudio(void) {
     // Set interrupt routine
-    register_interrupt( abdac_isr, AVR32_ABDAC_IRQ/32, AVR32_ABDAC_IRQ % 32, ABDAC_INT_LEVEL);
+    register_interrupt(abdac_isr, AVR32_ABDAC_IRQ/32, AVR32_ABDAC_IRQ % 32, ABDAC_INT_LEVEL);
     
     // Release pins from PIO
     piob->PUER.p20 = 1;
@@ -175,20 +112,22 @@ void button_isr(void) {
     int32_t press = event_states & button_states;
     
     if (press & ELEMENT_0) {
-        midi_play(&sotw);
+        midi_play(&mario);
         current_led = ELEMENT_0;
     }
     
     if (press & ELEMENT_1) {
-        midi_play(&sotw2);
+        midi_play(&still_alive);
         current_led = ELEMENT_1;
     }
     
     if (press & ELEMENT_2) {
+        midi_play(&happy_birthday);
         current_led = ELEMENT_2;
     }
     
     if (press & ELEMENT_3) {
+        midi_play(&zelda);
         current_led = ELEMENT_3;
     }
     

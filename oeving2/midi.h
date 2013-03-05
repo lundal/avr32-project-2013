@@ -2,7 +2,7 @@
 #define MIDI_H
 
 #define MIDI_PITCH_SHIFT 5 // Shift playback numbers up to allow pitch reduction (by up to this amount)
-#define MIDI_CHANNELS 8
+#define MIDI_CHANNELS 12
 
 #include "sample.h"
 
@@ -28,7 +28,7 @@ typedef struct {
 
 // Prototypes
 void midi_init();
-void midi_play(midi_soundtrack_t *soundtrack);
+void midi_play(const midi_soundtrack_t *soundtrack);
 int16_t midi_tick();
 int32_t midi_channel_advance(midi_channel_t *channel);
 

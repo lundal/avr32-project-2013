@@ -17,11 +17,11 @@ int *channels;
 
 int main (int argc, char *argv[]) {
     if (argc > 1) {
-        buffer_t* buffer = read_file(strcat(argv[1], ".mid"));
+        buffer_t* buffer = read_file(argv[1]);
         parse_midi(buffer, argv[1]);
     }
     else {
-        printf("Usage: midi2c <midi file (without extension)> [> <file>]\n");
+        printf("Usage: midi2c <midi file> [ > <file>]\n");
     }
     return 0;
 }
@@ -164,6 +164,10 @@ event_t* next_event() {
     for (i = 0; i < num_tracks; i++) {
         if (events[i] != NULL) {
             if (events[i]->delta_time < time_to_next) {
+                time_to_next = events[i]->delta_time;
+                next_event_track = i;
+            }
+            if (events[i]->delta_time == time_to_next && events[i]->volume == 0) {
                 time_to_next = events[i]->delta_time;
                 next_event_track = i;
             }

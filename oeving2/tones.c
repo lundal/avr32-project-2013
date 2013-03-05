@@ -24,4 +24,18 @@ void tones_init() {
     tones[ 9] = sample_gen_square(440);
     tones[10] = sample_gen_square(466);
     tones[11] = sample_gen_square(494);
+    tones[ 0] = sample_gen_square(262);
+    /*
+    tones[ 1] = sample_gen_sin(277);
+    tones[ 2] = sample_gen_sin(294);
+    tones[ 3] = sample_gen_sin(311);
+    tones[ 4] = sample_gen_sin(330);
+    tones[ 5] = sample_gen_sin(349);
+    tones[ 6] = sample_gen_sin(370);
+    tones[ 7] = sample_gen_sin(392);
+    tones[ 8] = sample_gen_sin(415);
+    tones[ 9] = sample_gen_sin(440);
+    tones[10] = sample_gen_sin(466);
+    tones[11] = sample_gen_sin(494);
+    */
 }
