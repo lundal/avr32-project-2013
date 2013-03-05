@@ -1,4 +1,4 @@
-#include "midi_to_struct.h"
+#include "midi2c.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -14,10 +14,13 @@ int num_channels;
 int *channels;
 
 int main (int argc, char *argv[]) {
-    buffer_t* buffer = read_file("test.mid");
-    
-    parse_midi(buffer);
-    
+    if (argc > 1) {
+        buffer_t* buffer = read_file(argv[1]);
+        parse_midi(buffer);
+    }
+    else {
+        printf("Usage: midi2c <midi file> [> <file>]\n");
+    }
     return 0;
 }
 
