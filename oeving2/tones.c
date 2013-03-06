@@ -12,30 +12,17 @@ void tones_init() {
     silence = sample_gen_silence();
     
     // Generate tones (C5 - B5)
-    tones[ 0] = sample_gen_square(262);
-    tones[ 1] = sample_gen_square(277);
-    tones[ 2] = sample_gen_square(294);
-    tones[ 3] = sample_gen_square(311);
-    tones[ 4] = sample_gen_square(330);
-    tones[ 5] = sample_gen_square(349);
-    tones[ 6] = sample_gen_square(370);
-    tones[ 7] = sample_gen_square(392);
-    tones[ 8] = sample_gen_square(415);
-    tones[ 9] = sample_gen_square(440);
-    tones[10] = sample_gen_square(466);
-    tones[11] = sample_gen_square(494);
-    tones[ 0] = sample_gen_square(262);
-    /*
-    tones[ 1] = sample_gen_sin(277);
-    tones[ 2] = sample_gen_sin(294);
-    tones[ 3] = sample_gen_sin(311);
-    tones[ 4] = sample_gen_sin(330);
-    tones[ 5] = sample_gen_sin(349);
-    tones[ 6] = sample_gen_sin(370);
-    tones[ 7] = sample_gen_sin(392);
-    tones[ 8] = sample_gen_sin(415);
-    tones[ 9] = sample_gen_sin(440);
-    tones[10] = sample_gen_sin(466);
-    tones[11] = sample_gen_sin(494);
-    */
+	int16_t wave_type = WAVE_SQUARE;
+    tones[ 0] = sample_gen(262, wave_type);
+    tones[ 1] = sample_gen(277, wave_type);
+    tones[ 2] = sample_gen(294, wave_type);
+    tones[ 3] = sample_gen(311, wave_type);
+    tones[ 4] = sample_gen(330, wave_type);
+    tones[ 5] = sample_gen(349, wave_type);
+    tones[ 6] = sample_gen(370, wave_type);
+    tones[ 7] = sample_gen(392, wave_type);
+    tones[ 8] = sample_gen(415, wave_type);
+    tones[ 9] = sample_gen(440, wave_type);
+    tones[10] = sample_gen(466, wave_type);
+    tones[11] = sample_gen(494, wave_type);
 }
