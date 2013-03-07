@@ -22,6 +22,7 @@ int32_t current_led = ELEMENT_0;
 #include "midi/still_alive.c"
 #include "midi/happy_birthday.c"
 #include "midi/zelda.c"
+#include "midi/hes_a_pirate.c"
 
 int main (int argc, char *argv[]) {
     // Init sound
@@ -132,6 +133,7 @@ void button_isr(void) {
     }
     
     if (press & ELEMENT_4) {
+        midi_play(&hes_a_pirate);
         current_led = ELEMENT_4;
     }
     
