@@ -157,8 +157,8 @@ track_t* track_next() {
         
         // If track buffer har more data
         if (buffer->position < buffer->length ) {
-            // If the event on this track comes sooner
-            if (track->delta_time < time_to_next) {
+            // If the event on this track comes sooner (but prioritize note off events if the time is the same)
+            if ( (track->delta_time < time_to_next) || ( (track->delta_time == time_to_next) && type_from_value(track->type_channel) == NOTE_OFF) ) {
                 // Set this track as next
                 time_to_next = track->delta_time;
                 next_track = track;
@@ -249,8 +249,7 @@ int track_process_event(track_t *track) {
     
     // Determine event
     switch (type) {
-        // Note off
-        case 0x8: {
+        case NOTE_OFF: {
             // Read  data
             int note = parse_int(buffer, 1);
             int velocity = parse_int(buffer, 1);
@@ -271,8 +270,7 @@ int track_process_event(track_t *track) {
             
             return 1;
         }
-        // Note on
-        case 0x9: {
+        case NOTE_ON: {
             // Read data
             int note = parse_int(buffer, 1);
             int velocity = parse_int(buffer, 1);
@@ -293,8 +291,7 @@ int track_process_event(track_t *track) {
             
             return 1;
         }
-        // Note aftertouch
-        case 0xA: {
+        case NOTE_AFTERTOUCH: {
             // Read data
             int note = parse_int(buffer, 1);
             int value = parse_int(buffer, 1);
@@ -304,8 +301,7 @@ int track_process_event(track_t *track) {
             // Skip
             return 0;
         }
-        // Controller
-        case 0xB: {
+        case CONTROLLER: {
             // Read data
             int number = parse_int(buffer, 1);
             int data = parse_int(buffer, 1);
@@ -315,8 +311,7 @@ int track_process_event(track_t *track) {
             // Skip
             return 0;
         }
-        // Program change
-        case 0xC: {
+        case PROGRAM_CHANGE: {
             // Read data
             int number = parse_int(buffer, 1);
             
@@ -325,8 +320,7 @@ int track_process_event(track_t *track) {
             // Skip
             return 0;
         }
-        // Channel aftertouch
-        case 0xD: {
+        case CHANNEL_AFTERTOUCH: {
             // Read data
             int value = parse_int(buffer, 1);
             
@@ -335,8 +329,7 @@ int track_process_event(track_t *track) {
             // Skip
             return 0;
         }
-        // Pitch bend
-        case 0xE: {
+        case PITCH_BEND: {
             // Read data
             int low_val = parse_int(buffer, 1);
             int high_val = parse_int(buffer, 1);
@@ -346,10 +339,9 @@ int track_process_event(track_t *track) {
             // Skip
             return 0;
         }
-        // SysEx or Meta event
-        case 0xF: {
+        case SYSEX_OR_META: {
             // SysEx event
-            if (channel == 0x0 || channel == 0x7) {
+            if (channel == SYSEX_BEGIN || channel == SYSEX_CONTINUE) {
                 // Read data
                 int sysex_length = parse_varint(buffer);
             
@@ -362,41 +354,27 @@ int track_process_event(track_t *track) {
             }
             
             // Meta event
-            if (channel == 0xF) {
+            if (channel == META) {
                 // Read data
                 int meta_type = parse_int(buffer, 1);
                 int meta_length = parse_varint(buffer);
                 
                 // Determine type
                 switch (meta_type) {
-                    // Sequence number
-                    case 0x00:
-                    // Text event
-                    case 0x01:
-                    // Copyright notice
-                    case 0x02:
-                    // Sequence/Track name
-                    case 0x03:
-                    // Instrument name
-                    case 0x04:
-                    // Lyrics
-                    case 0x05:
-                    // Marker
-                    case 0x06:
-                    // Cue point
-                    case 0x07:
-                    // MIDI channel prefix
-                    case 0x20:
-                    // End of track
-                    case 0x2F:
-                    // SMPTE offset
-                    case 0x54:
-                    // Time signature
-                    case 0x58:
-                    // Key signature
-                    case 0x59:
-                    // Sequencer spesific
-                    case 0x7F: {
+                    case META_SEQUENCE_NUMBER:
+                    case META_TEXT_EVENT:
+                    case META_COPYRIGHT_NOTICE:
+                    case META_TRACK_NAME:
+                    case META_INSTRUMENT_NAME:
+                    case META_LYRICS:
+                    case META_MARKER:
+                    case META_CUE_POINT:
+                    case META_CHANNEL_PREFIX:
+                    case META_END_OF_TRACK:
+                    case META_SMPTE_OFFSET:
+                    case META_TIME_SIGNATURE:
+                    case META_KEY_SIGNATURE:
+                    case META_SEQUENCER_SPESIFIC: {
                         // Skip
                         buffer->position += meta_length;
                         
@@ -404,8 +382,7 @@ int track_process_event(track_t *track) {
                         
                         return 0;
                     }
-                    // Set tempo
-                    case 0x51: {
+                    case META_SET_TEMPO: {
                         // Microseconds per quarter note
                         int mspqn = parse_int(buffer, 3);
                         
