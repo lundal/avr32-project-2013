@@ -260,9 +260,11 @@ int track_process_event(track_t *track) {
             
             // Check for errors
             if (channel == -1) {
-                fprintf(stderr, "Note off event for note that is not on!\n");
+                fprintf(stderr, "Error: Received note off event for note that is not on!\n");
                 return -1;
             }
+            
+            //printf("//Note off\n");
             
             // Add event
             printf("{%e * SAMPLE_RATE, %d, %d, %d},\n", seconds_from_ticks(track->delta_time), channel, note, 0);
@@ -275,15 +277,32 @@ int track_process_event(track_t *track) {
             int note = parse_int(buffer, 1);
             int velocity = parse_int(buffer, 1);
             
-            // Find available channel
+            // Recover channel in case this is used as an aftertouch or off event (Damn those ignoring the specs!)
             int id = (channel << 8) + note;
-            int channel = channel_find(id);
+            int channel = channel_recover(id); 
+            
+            // If this actually is a note off event
+            if (channel != -1 && velocity == 0) {
+                
+                //printf("//Note on (but really off)\n");
+                
+                // Add off event
+                printf("{%e * SAMPLE_RATE, %d, %d, %d},\n", seconds_from_ticks(track->delta_time), channel, note, 0);
+                num_events++;
+                
+                return 1;
+            }
+            
+            // Find available channel
+            channel = channel_find(id);
             
             // Check for errors
             if (channel == -1) {
-                fprintf(stderr, "Channel overflow!\n");
+                fprintf(stderr, "Error: Channel overflow!\n");
                 return -1;
             }
+            
+            //printf("//Note on\n");
             
             // Add event
             printf("{%e * SAMPLE_RATE, %d, %d, %d},\n", seconds_from_ticks(track->delta_time), channel, note, velocity);
@@ -384,7 +403,7 @@ int track_process_event(track_t *track) {
                     }
                     case META_SET_TEMPO: {
                         // Microseconds per quarter note
-                        int mspqn = parse_int(buffer, 3);
+                        int mspqn = parse_int(buffer, meta_length);
                         
                         // Microseconds per minute
                         int mspm = 60000000;
@@ -397,12 +416,20 @@ int track_process_event(track_t *track) {
                         return 0;
                     }
                 }
+                
+                // Unknown meta event
+                fprintf(stderr, "Warning: Unknown meta event! (0x%02X)\n", meta_type);
+                
+                // Skip
+                buffer->position += meta_length;
+                
+                return 0;
             }
         }
     }
     
     // No event was matched
-    fprintf(stderr, "Unknown event! (TYPE=%01X, CH=%01X)\n", type, channel);
+    fprintf(stderr, "Error: Unknown event! (TYPE=0x%01X, CH=0x%01X)\n", type, channel);
     
     return -1;
 }
