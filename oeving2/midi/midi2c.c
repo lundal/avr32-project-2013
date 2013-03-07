@@ -4,231 +4,250 @@
 #include <stdio.h>
 #include <string.h>
 
+// Time vars
 int tpb;
-int bpm;
+int bpm = 120;
 
+// Track and event vars
+int num_events = 0;
 int num_tracks;
-int *track_event_type;
-buffer_t **tracks;
-event_t **events;
+track_t **tracks;
 
-int num_channels;
+// Channel vars
+int num_channels = 12;
 int *channels;
 
 int main (int argc, char *argv[]) {
     if (argc > 1) {
-        buffer_t* buffer = read_file(argv[1]);
-        parse_midi(buffer, argv[1]);
+        char *name = argv[1];
+        char *filename = strcat(strdup(name), ".mid");
+        buffer_t* buffer = read_file(filename);
+        parse_midi(buffer, name);
     }
     else {
-        printf("Usage: midi2c <midi file> [ > <file>]\n");
+        printf("Usage: midi2c <midi file name without extension> [ > <file>]\n");
     }
     return 0;
 }
 
+// Parses a midi file stored in a buffer and outputs it to stdout
+// name is the soundtrack variable name in the output
 void parse_midi(buffer_t *buffer, char *name) {
     // Read data
     int id = parse_int(buffer, 4);
     int length = parse_int(buffer, 4);
     int format = parse_int(buffer, 2);
     num_tracks = parse_int(buffer, 2);
-    tpb = parse_int(buffer, 2); // Assume ticks per second (not frames)
-    bpm = 120; // Default value
+    tpb = parse_int(buffer, 2); // Assume ticks per second (never seen frames used anyway)
     
-    // Allocate memory
-    tracks = (buffer_t**)malloc(sizeof(buffer_t*) * num_tracks);
-    events = (event_t**)malloc(sizeof(event_t*) * num_tracks);
-    
-    //num_tracks = 1;
-    track_event_type = (int*)malloc(sizeof(int) * num_tracks);
-    
-    // Read tracks to separate buffers
-    int i;
-    for (i = 0; i < num_tracks; i++) {
-        tracks[i] = read_track(buffer);
-        events[i] = next_useful_event(i);
-        //printf("Ne
-    }
-    
-    printf("const midi_soundtrack_t %s = {\n", name);
-    printf("    .events = {\n");
-    
-    // To keep track of number of events
-    int num_events = 0;
-    
-    // Vars to keep track of available channels
-    num_channels = 12; // Same as in player!
+    // Vars to remember available channels
     channels = (int*)malloc(sizeof(int) * num_channels);
+    int i;
     for (i = 0; i < num_channels; i++) {
         channels[i] = -1;
     }
     
-    // Get first
-    event_t *event = next_event();
+    // Allocate memory to tracks
+    tracks = (track_t**)malloc(sizeof(track_t*) * num_tracks);
     
-    // While there are events
-    while (event != NULL) {
-        double tps = (double)tpb * (double)bpm / 60.0;
-        double seconds = (double)event->delta_time / (double)tps;
-        
-        // Determine correct channel
-        int channel = -1;
-        if (event->volume > 0) {
-            // Find available channel
-            for (i = 0; i < num_channels; i++) {
-                if (channels[i] == -1) {
-                    // Store what the channel is used for
-                    channels[i] = (event->channel << 8) + event->note;
-                    
-                    // Return channel
-                    channel = i;
-                    break;
-                }
-            }
-        }
-        else {
-            // Recover channel
-            for (i = 0; i < num_channels; i++) {
-                int id = (event->channel << 8) + event->note;
-                if (channels[i] == id) {
-                    // Set available
-                    channels[i] = -1;
-                    
-                    // Return channel
-                    channel = i;
-                    break;
-                }
-            }
-        }
-        
-        // Check for channel overflow
-        if (channel == -1) {
-            fprintf(stderr, "Not enough channels\n");
-            return;
-        }
-        
-        printf("        {%e * SAMPLE_RATE, %d, %d, %d},\n", seconds, channel, event->note, event->volume);
-        
-        // Count events
-        num_events++;
-        
-        // TODO: Cut unnecessary events?
-        
-        // Get next
-        event = next_event();
+    // Create tracks from buffer
+    for (i = 0; i < num_tracks; i++) {
+        tracks[i] = track_create(buffer);
     }
     
-    printf("    },\n");
-    printf("    .num_events = %d\n", num_events);
+    // Print struct start
+    printf("const midi_soundtrack_t %s = {\n", name);
+    printf(".events = {\n");
+    
+    // Process all events
+    events_process();
+    
+    // Print count and struct end
+    printf("},\n");
+    printf(".num_events = %d\n", num_events);
     printf("};\n");
 }
 
-buffer_t* read_track(buffer_t *buffer) {
+// Creates a track by reading from specified buffer
+track_t* track_create(buffer_t *buffer) {
     // Read data
     int id = parse_int(buffer, 4);
     int length = parse_int(buffer, 4);
     
+    // Create track
+    track_t *track = (track_t*)malloc(sizeof(track_t));
+    track->type_channel = 0;
+    
     // Create buffer
-    buffer_t *track = (buffer_t*)malloc(sizeof(buffer_t));
-    track->position = 0;
-    track->length = length;
-    track->data = (char*)malloc(track->length);
-    //printf("Track: %02X \n", id);
-    // Copy data
+    track->buffer = (buffer_t*)malloc(sizeof(buffer_t));
+    track->buffer->position = 0;
+    track->buffer->length = length;
+    track->buffer->data = (char*)malloc(track->buffer->length);
+    
+    // Copy to buffer
     int i;
-    for (i = 0; i < track->length; i++) {
-        track->data[i] = buffer->data[buffer->position++];
+    for (i = 0; i < track->buffer->length; i++) {
+        track->buffer->data[i] = buffer->data[buffer->position++];
     }
-    /*printf("\n");
-    printf("Events:\n");
-    while (track->position < track->length) {
-        printf("Bytes: ");
-        for (i = 0; i < 4; i++) {
-            printf("%03d(%02X) ", track->data[track->position + i], track->data[track->position + i]);
-        }
-        printf("\n");
-        read_event(1);
-    };
-    printf("End\n");
-    track->position = 0;
-    */
+    
+    // Process first event info
+    track_process_info(track);
+    
     return track;
 }
 
-event_t* next_event() {
+// Processes all events from all tracks in chronological order
+void events_process() {
+    while (1) {
+        // Get track with soonest event
+        track_t *track = track_next();
+        
+        // If no tracks with events
+        if (track == NULL) {
+            // Done!
+            return;
+        }
+        
+        // Process the event (and get result)
+        int res = track_process_event(track);
+        
+        // If something went wrong
+        if (res == -1) {
+            // Stop
+            fprintf(stderr, "Stopping!\n");
+            //TODO: Delete file?
+            return;
+        }
+        
+        // Get time
+        int delta_time = track->delta_time;
+        
+        // If event consumed time
+        if (res == 1) {
+            // Decrease delta time of other events by it
+            int i;
+            for (i = 0; i < num_tracks; i++) {
+                tracks[i]->delta_time -= delta_time;
+            }
+        }
+        
+        // Advance used track
+        track_process_info(track);
+        
+        // If event didn't consume time
+        if (res == 0) {
+            // Increase delta time of next event in the track by it
+            track->delta_time += delta_time;
+        }
+    }
+}
+
+// Gets the track with the soonest event
+track_t* track_next() {
+    // Set time to a rediculously large number
     int time_to_next = 1000000000;
-    int next_event_track = -1;
+    track_t *next_track = NULL;
     
+    // Find track with least delta_time
     int i;
-    // Find next event
     for (i = 0; i < num_tracks; i++) {
-        if (events[i] != NULL) {
-            if (events[i]->delta_time < time_to_next) {
-                time_to_next = events[i]->delta_time;
-                next_event_track = i;
-            }
-            if (events[i]->delta_time == time_to_next && events[i]->volume == 0) {
-                time_to_next = events[i]->delta_time;
-                next_event_track = i;
+        // Simplify access to vars
+        track_t *track = tracks[i];
+        buffer_t *buffer = track->buffer;
+        
+        // If track buffer har more data
+        if (buffer->position < buffer->length ) {
+            // If the event on this track comes sooner
+            if (track->delta_time < time_to_next) {
+                // Set this track as next
+                time_to_next = track->delta_time;
+                next_track = track;
             }
         }
     }
     
-    // No event found
-    if (next_event_track == -1) {
-        return NULL;
-    }
-    
-    // Update delta_times
-    for (i = 0; i < num_tracks; i++) {
-        if (events[i] != NULL && i != next_event_track) {
-            events[i]->delta_time -= time_to_next;
+    return next_track;
+}
+
+// Finds an available channel and mark it as used
+// Returns -1 if a channel is not found
+int channel_find(int id) {
+    int i;
+    for (i = 0; i < num_channels; i++) {
+        if (channels[i] == -1) {
+            // Store what the channel is used for
+            channels[i] = id;
+            
+            // Return channel
+            return i;
         }
     }
-    
-    // This is the next event
-    event_t *next_event = events[next_event_track];
-    
-    // Update list with next event from track;
-    events[next_event_track] = next_useful_event(next_event_track);
-    
-    return next_event;
+    return -1;
 }
 
-event_t* next_useful_event(int track_id) {
-    event_t *event = NULL;
-    
-    // Read events from track until non-NULL or end of track
-    while (event == NULL && tracks[track_id]->position < tracks[track_id]->length) {
-        event = read_event(track_id);
+// Finds the channel used by id and mark it as unused
+// Returns -1 if the channel is not found
+int channel_recover(int id) {
+    int i;
+    for (i = 0; i < num_channels; i++) {
+        if (channels[i] == id) {
+            // Set available
+            channels[i] = -1;
+            
+            // Return channel
+            return i;
+        }
     }
-    
-    return event;
+    return -1;
 }
 
-event_t* read_event(int track_id) {
-    buffer_t *buffer = tracks[track_id];
-    // Read data
-    int delta_time = parse_varint(buffer);
-    int first_byte = parse_int(buffer, 1);
-    //printf("Event\n");
-    // Check if same type
-    if ((first_byte & (1 << 7)) == 0) {
-        // Move buffer back one byte
-        buffer->position -= 1;
+// Calculates seconds from ticks
+double seconds_from_ticks(int ticks) {
+    double tps = (double)tpb * (double)bpm / 60.0;
+    double seconds = (double)ticks / (double)tps;
+    return seconds;
+}
+
+// Get the type value from a type_channel byte (first 4 bits)
+int type_from_value(int value) {
+    return (value & 0xF0) >> 4;
+}
+
+// Get the channel value from a type_channel byte (last 4 bits)
+int channel_from_value(int value) {
+    return value & 0x0F;
+}
+
+// Updates the track with delta_time and type_channel for next event
+void track_process_info(track_t *track) {
+    // Update delta time
+    track->delta_time = parse_varint(track->buffer);
+    
+    // Read type and channel
+    int type_channel = parse_int(track->buffer, 1);
+    
+    // If repeated event
+    if (type_channel < 0x80) {
+        // Backtrack buffer (read value is a parameter for next event)
+        track->buffer->position--;
     }
     else {
-        // Update event type
-        track_event_type[track_id] = first_byte;
+        // Update type and channel
+        track->type_channel = type_channel;
     }
+}
+
+// Processes the next event from a track
+// Returns 1 if the event consumes the delta_time, 0 if it does not and -1 if error
+int track_process_event(track_t *track) {
+    // Get event type and channel
+    int type = type_from_value(track->type_channel);
+    int channel = channel_from_value(track->type_channel);
     
-    int event_type = track_event_type[track_id];
+    // Simplify access to vars
+    buffer_t *buffer = track->buffer;
     
-    int type = (event_type & 0xF0) >> 4;
-    int channel = event_type & 0x0F;
-    
-    event_t* event = NULL;
-    
+    // Determine event
     switch (type) {
         // Note off
         case 0x8: {
@@ -236,14 +255,21 @@ event_t* read_event(int track_id) {
             int note = parse_int(buffer, 1);
             int velocity = parse_int(buffer, 1);
             
-            // Store event
-            event = (event_t*)malloc(sizeof(event_t));
-            event->delta_time = delta_time;
-            event->channel = channel;
-            event->note = note;
-            event->volume = 0;
-            //printf("Note off: DT=%d, CH=%01X, NOTE=%02X, VEL=%02X\n", delta_time, channel, note, velocity);
-            break;
+            // Recover channel
+            int id = (channel << 8) + note;
+            int channel = channel_recover(id);
+            
+            // Check for errors
+            if (channel == -1) {
+                fprintf(stderr, "Note off event for note that is not on!\n");
+                return -1;
+            }
+            
+            // Add event
+            printf("{%e * SAMPLE_RATE, %d, %d, %d},\n", seconds_from_ticks(track->delta_time), channel, note, 0);
+            num_events++;
+            
+            return 1;
         }
         // Note on
         case 0x9: {
@@ -251,63 +277,74 @@ event_t* read_event(int track_id) {
             int note = parse_int(buffer, 1);
             int velocity = parse_int(buffer, 1);
             
-            // Store event
-            event = (event_t*)malloc(sizeof(event_t));
-            event->delta_time = delta_time;
-            event->channel = channel;
-            event->note = note;
-            event->volume = velocity;
-            //printf("Note on: DT=%d, CH=%d, NOTE=%d, VEL=%d\n", delta_time, channel, note, velocity);
+            // Find available channel
+            int id = (channel << 8) + note;
+            int channel = channel_find(id);
             
-            break;
+            // Check for errors
+            if (channel == -1) {
+                fprintf(stderr, "Channel overflow!\n");
+                return -1;
+            }
+            
+            // Add event
+            printf("{%e * SAMPLE_RATE, %d, %d, %d},\n", seconds_from_ticks(track->delta_time), channel, note, velocity);
+            num_events++;
+            
+            return 1;
         }
         // Note aftertouch
         case 0xA: {
             // Read data
             int note = parse_int(buffer, 1);
             int value = parse_int(buffer, 1);
-            //printf("Note aftertouch\n");
+            
+            printf("// Note aftertouch\n");
             
             // Skip
-            break;
+            return 0;
         }
         // Controller
         case 0xB: {
             // Read data
             int number = parse_int(buffer, 1);
             int data = parse_int(buffer, 1);
-            //printf("Controller\n");
+            
+            printf("//Controller\n");
             
             // Skip
-            break;
+            return 0;
         }
         // Program change
         case 0xC: {
             // Read data
             int number = parse_int(buffer, 1);
-            //printf("Program change\n");
+            
+            printf("//Program change\n");
             
             // Skip
-            break;
+            return 0;
         }
         // Channel aftertouch
         case 0xD: {
             // Read data
             int value = parse_int(buffer, 1);
-            //printf("Channel aftertouch\n");
+            
+            printf("//Channel aftertouch\n");
             
             // Skip
-            break;
+            return 0;
         }
         // Pitch bend
         case 0xE: {
             // Read data
             int low_val = parse_int(buffer, 1);
             int high_val = parse_int(buffer, 1);
-            //printf("Pitch bend\n");
+            
+            printf("//Pitch bend\n");
             
             // Skip
-            break;
+            return 0;
         }
         // SysEx or Meta event
         case 0xF: {
@@ -315,30 +352,85 @@ event_t* read_event(int track_id) {
             if (channel == 0x0 || channel == 0x7) {
                 // Read data
                 int sysex_length = parse_varint(buffer);
-                //printf("SysEx\n");
+            
+                printf("//SysEx\n");
                 
                 // Skip rest
                 buffer->position += sysex_length;
+                
+                return 0;
             }
+            
             // Meta event
             if (channel == 0xF) {
                 // Read data
                 int meta_type = parse_int(buffer, 1);
                 int meta_length = parse_varint(buffer);
-                //printf("Meta\n");
                 
-                //TODO: Parse Set Tempo?
-                
-                // Skip rest
-                buffer->position += meta_length;
+                // Determine type
+                switch (meta_type) {
+                    // Sequence number
+                    case 0x00:
+                    // Text event
+                    case 0x01:
+                    // Copyright notice
+                    case 0x02:
+                    // Sequence/Track name
+                    case 0x03:
+                    // Instrument name
+                    case 0x04:
+                    // Lyrics
+                    case 0x05:
+                    // Marker
+                    case 0x06:
+                    // Cue point
+                    case 0x07:
+                    // MIDI channel prefix
+                    case 0x20:
+                    // End of track
+                    case 0x2F:
+                    // SMPTE offset
+                    case 0x54:
+                    // Time signature
+                    case 0x58:
+                    // Key signature
+                    case 0x59:
+                    // Sequencer spesific
+                    case 0x7F: {
+                        // Skip
+                        buffer->position += meta_length;
+                        
+                        printf("//Meta\n");
+                        
+                        return 0;
+                    }
+                    // Set tempo
+                    case 0x51: {
+                        // Microseconds per quarter note
+                        int mspqn = parse_int(buffer, 3);
+                        
+                        // Microseconds per minute
+                        int mspm = 60000000;
+                        
+                        // Calculate bpm
+                        bpm = mspm / mspqn;
+                        
+                        printf("//Set tempo\n");
+                        
+                        return 0;
+                    }
+                }
             }
-            break;
         }
     }
     
-    return event;
+    // No event was matched
+    fprintf(stderr, "Unknown event! (TYPE=%01X, CH=%01X)\n", type, channel);
+    
+    return -1;
 }
 
+// Reads a number of bytes from the buffer into an integer
 int parse_int(buffer_t *buffer, int num_bytes) {
     int value = 0;
     
@@ -354,6 +446,7 @@ int parse_int(buffer_t *buffer, int num_bytes) {
     return value;
 }
 
+// Reads a variable sized integer from the buffer
 int parse_varint(buffer_t *buffer) {
     int value = 0;
     
@@ -376,6 +469,8 @@ int parse_varint(buffer_t *buffer) {
     return value;
 }
 
+// Reads a file into a buffer
+// Return NULL if error
 buffer_t* read_file(char *name) {
     // Vars
     FILE *file;
