@@ -39,16 +39,21 @@ sample_t* sample_gen(int16_t freq, int8_t wavetype) {
 	for (i = 0; i < sample->n_points; i++) {
 		double val;
 		switch (wavetype) {
-			case WAVE_SQUARE:
-				// Calculate square value
-        		val = (i > sample->n_points/2) ? 1.0 : -1.0;
-				break;
-			case WAVE_SINE:
-        		// Calculate progress ratio
-        		double r = (double)i / (double)sample->n_points;
- 		       	// Calculate sinus value
-        		val = sin(2.0 * M_PI * r);
-				break;
+			case WAVE_SQUARE: {
+                // Calculate square value
+                val = (i > sample->n_points/2) ? 1.0 : -1.0;
+                
+                break;
+            }
+            case WAVE_SINE: {
+                // Calculate progress ratio
+                double r = (double)i / (double)sample->n_points;
+                
+                // Calculate sinus value
+                val = sin(2.0 * M_PI * r);
+                
+                break;
+            }
 		}
 		// Store adjusted value
 		sample->points[i] = (int16_t)(val * SAMPLE_AMPLITUDE);
