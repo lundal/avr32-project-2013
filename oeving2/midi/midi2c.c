@@ -260,8 +260,8 @@ int track_process_event(track_t *track) {
             
             // Check for errors
             if (channel == -1) {
-                fprintf(stderr, "Error: Received note off event for note that is not on!\n");
-                return -1;
+                fprintf(stderr, "Warning: Note off event for note that is not on! (0x%02X)\n", note);
+                return 0;
             }
             
             //printf("//Note off\n");
