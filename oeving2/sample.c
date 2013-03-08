@@ -34,6 +34,15 @@ sample_t* sample_gen(int16_t freq, int8_t wavetype) {
                 
                 break;
             }
+            case WAVE_FLAT_SINE: {
+                // Calculate progress ratio
+                double r = (double)i / (double)sample->n_points;
+                
+                // Calculate sinus value
+                val = sin(2.0 * M_PI * r) / SAMPLE_AMPLITUDE;
+                
+                break;
+            }
 		}
 		// Store adjusted value
 		sample->points[i] = (int16_t)(val * SAMPLE_AMPLITUDE);

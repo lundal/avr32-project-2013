@@ -58,6 +58,14 @@ int16_t midi_tick() {
         // Update channel volume
         midi_channels[event.channel].volume = event.volume;
         
+        // Experimental noise reduction
+        if (event.volume == 0) {
+            midi_channels[event.channel].sample = silence;
+            midi_channels[event.channel].pitch_up = 0;
+            midi_channels[event.channel].pitch_down = 3;
+            midi_channels[event.channel].volume = 100;
+        }
+        
         // Next event (loop)
         midi_current_event = (midi_current_event + 1) % midi_soundtrack->num_events;
         midi_time_passed = 0;
