@@ -306,7 +306,7 @@ int track_process_event(track_t *track) {
             //printf("//Note off\n");
             
             // Add event
-            printf("{%e * SAMPLE_RATE, %d, %d, %d},\n", seconds_from_ticks(track->delta_time), channel, note, 0);
+            printf("{%e * SAMPLE_RATE, %d, %d, %d},\n", seconds_from_ticks(track->delta_time), channel, 12, 1);
             num_events++;
             
             return 1;
@@ -326,7 +326,7 @@ int track_process_event(track_t *track) {
                 //printf("//Note on (but really off)\n");
                 
                 // Add off event
-                printf("{%e * SAMPLE_RATE, %d, %d, %d},\n", seconds_from_ticks(track->delta_time), channel, note, 0);
+                printf("{%e * SAMPLE_RATE, %d, %d, %d},\n", seconds_from_ticks(track->delta_time), channel, 12, 1);
                 num_events++;
                 
                 return 1;
