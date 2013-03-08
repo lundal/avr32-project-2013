@@ -53,7 +53,7 @@ void parse_midi(buffer_t *buffer, char *name);
 track_t* track_create(buffer_t *buffer);
 void events_process();
 track_t* track_next();
-int channel_find(int id);
+int channel_find(int id, int vol);
 int channel_recover(int id);
 double seconds_from_ticks(int ticks);
 int type_from_value(int value);

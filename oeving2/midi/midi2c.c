@@ -16,8 +16,15 @@ track_t **tracks;
 // Channel vars
 int num_channels = 12;
 int *channels;
+int *channels_vol;
+int channels_steal = 0;
 
 int main (int argc, char *argv[]) {
+    if (argc > 2) {
+        if (strcmp(argv[2], "-s") == 0) {
+            channels_steal = 1;
+        }
+    }
     if (argc > 1) {
         char *name = argv[1];
         char *filename = strcat(strdup(name), ".mid");
@@ -25,7 +32,12 @@ int main (int argc, char *argv[]) {
         parse_midi(buffer, name);
     }
     else {
-        printf("Usage: midi2c <midi file name without extension> [ > <file>]\n");
+        printf("Usage:\n");
+        printf("    midi2c <src> [-s] [ > <dest>]\n");
+        printf("Explanations:\n");
+        printf("    <src>: MIDI file name without extension. This will also be the name of the output struct.\n");
+        printf("    <dest>: Output destination file (with extension).\n");
+        printf("    -s: Enable stealing of channels to allow parsing to continue when overflowing. This may produce a lot of warnings.\n");
     }
     return 0;
 }
@@ -42,9 +54,11 @@ void parse_midi(buffer_t *buffer, char *name) {
     
     // Vars to remember available channels
     channels = (int*)malloc(sizeof(int) * num_channels);
+    channels_vol = (int*)malloc(sizeof(int) * num_channels);
     int i;
     for (i = 0; i < num_channels; i++) {
         channels[i] = -1;
+        channels_vol[i] = 0;
     }
     
     // Allocate memory to tracks
@@ -171,17 +185,42 @@ track_t* track_next() {
 
 // Finds an available channel and mark it as used
 // Returns -1 if a channel is not found
-int channel_find(int id) {
+int channel_find(int id, int vol) {
     int i;
     for (i = 0; i < num_channels; i++) {
         if (channels[i] == -1) {
             // Store what the channel is used for
             channels[i] = id;
+            channels_vol[i] = vol;
             
             // Return channel
             return i;
         }
     }
+    
+    // Steal a channel if enabled
+    if (channels_steal == 1) {
+        int channel = -1;
+        int vol_min = 128;
+        
+        // Find the channel with the lowest volume
+        for (i = 0; i < num_channels; i++) {
+            if (channels_vol[i] < vol_min) {
+                channel = i;
+                vol_min = channels_vol[i];
+            }
+        }
+        
+        fprintf(stderr, "Info: Stealing channel!\n");
+        
+        // Store what the channel is used for
+        channels[channel] = id;
+        channels_vol[channel] = vol;
+        
+        // Return channel
+        return channel;
+    }
+    
     return -1;
 }
 
@@ -294,7 +333,7 @@ int track_process_event(track_t *track) {
             }
             
             // Find available channel
-            channel = channel_find(id);
+            channel = channel_find(id, velocity);
             
             // Check for errors
             if (channel == -1) {
@@ -483,7 +522,7 @@ buffer_t* read_file(char *name) {
     // Open file
     file = fopen(name, "rb");
     if (!file) {
-        fprintf(stderr, "Unable to open file %s", name);
+        fprintf(stderr, "Unable to open file %s\n", name);
         return NULL;
     }
     
@@ -499,7 +538,7 @@ buffer_t* read_file(char *name) {
     // Allocate memory to data
     buffer->data = (char*)malloc(buffer->length);
     if (!buffer->data) {
-        fprintf(stderr, "Memory error!");
+        fprintf(stderr, "Memory error!\n");
         fclose(file);
         free(buffer);
         return NULL;
