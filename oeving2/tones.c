@@ -9,7 +9,7 @@ void tones_init() {
     tones = (sample_t**)malloc(sizeof(sample_t*) * 12);
     
     // Generate silent sample
-    silence = sample_gen(100, WAVE_FLAT_SINE);
+    silence = sample_gen(100, WAVE_FLAT);
     
     // Generate tones (C5 - B5)
 	int16_t wave_type = WAVE_SQUARE;

@@ -26,6 +26,7 @@ int32_t current_led = ELEMENT_0;
 #include "midi/back_to_the_future.c"
 #include "midi/sacrificial.c"
 #include "midi/under_pressure.c"
+#include "midi/under_pressure2.c"
 
 int main (int argc, char *argv[]) {
     // Init sound
@@ -146,12 +147,12 @@ void button_isr(void) {
     }
     
     if (press & ELEMENT_6) {
-        midi_play(&sacrificial);
+        midi_play(&under_pressure);
         current_led = ELEMENT_6;
     }
     
     if (press & ELEMENT_7) {
-        midi_play(&under_pressure);
+        midi_play(&under_pressure2);
         current_led = ELEMENT_7;
     }
     
