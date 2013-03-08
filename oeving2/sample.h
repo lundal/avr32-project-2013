@@ -3,10 +3,11 @@
 
 #include <stdint.h>
 
-#define SAMPLE_RATE 46875/2 // Oscillator 1 / 256
+#define SAMPLE_RATE (46875/2) // Oscillator 1 / 256 / 2
 #define SAMPLE_AMPLITUDE 32000.0 // Approx the max value of an int16_t
-#define WAVE_SQUARE 0
-#define WAVE_SINE 1
+#define WAVE_FLAT 0
+#define WAVE_SQUARE 1
+#define WAVE_SINE 2
 
 // Structure for a sample
 typedef struct {
@@ -15,7 +16,6 @@ typedef struct {
 } sample_t;
 
 // Prototypes
-sample_t* sample_gen_silence();
 sample_t* sample_gen(int16_t frequency, int8_t wavetype);
 
 #endif
