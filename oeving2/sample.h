@@ -8,7 +8,7 @@
 #define WAVE_FLAT 0
 #define WAVE_SQUARE 1
 #define WAVE_SINE 2
-#define WAVE_FLAT_SINE 2
+#define WAVE_FLAT_SINE 3
 
 // Structure for a sample
 typedef struct {
