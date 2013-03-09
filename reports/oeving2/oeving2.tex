@@ -1,0 +1,102 @@
+\documentclass[a4paper,12pt]{article}
+
+
+% PACKAGES
+
+%For \url
+\usepackage{hyperref}
+
+%For line skip paragraphs
+\usepackage[parfill]{parskip}
+
+%For smaller margins
+\usepackage[margin=1in]{geometry}
+
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+
+
+
+% Set section numbering to Roman
+\renewcommand \thesection{\Roman{section}}
+\renewcommand \thesubsection{\arabic{section}.\arabic{subsection}}
+
+\title{TDT4258\\ Energy Efficient Computer Design
+	\\Exercise 2}
+\author{
+    Lundal, Per Thomas\\
+    \texttt{perthol@stud.ntnu.no}
+    \and
+    Normann, Kristian\\
+    \texttt{krinorm@stud.ntnu.no}
+    \and
+    Selvik, Andreas Løve\\
+    \texttt{andrels@stud.ntnu.no}
+}
+\date{\today}
+\begin{document}
+\maketitle
+
+\clearpage
+\begin{abstract}
+    \input{content/abstract.tex}
+
+\end{abstract}
+
+\clearpage
+\tableofcontents
+
+\clearpage
+\section{ Introduction}
+    \input{content/introduction.tex}
+
+\clearpage
+\section{ Description and methodology}
+    \input{content/descriptionAndMethodology.tex}
+
+\clearpage
+\section{ Results and tests}
+    \input{content/resultsAndTests.tex}
+
+\clearpage
+\section{ Evaluation of assignment}
+    \input{content/evaluation.tex}
+
+\clearpage
+\section{ Conclusion}
+    \input{content/conclusion.tex}
+
+\clearpage
+
+\begin{thebibliography}{9}
+
+\bibitem{compendium}
+  Computer Architecture and Design Group,
+  \emph{Lab Assignments in TDT4258 Energy Efficient
+Computer Systems}.
+  Department of Computer and Information Science, NTNU,
+  2013,
+  \url{http://www.idi.ntnu.no/emner/tdt4258/\_media/kompendium.pdf}.
+
+\bibitem{avr32}
+  Atmel.
+  \emph{AVR32 Architecture Document},
+  2011,
+  \url{http://www.idi.ntnu.no/emner/tdt4258/\_media/doc32000.pdf}.
+
+\bibitem{ap7000}
+  Atmel.
+  \emph{AT32AP7000 Preliminary},
+  2009,
+  \url{http://www.idi.ntnu.no/emner/tdt4258/\_media/doc32003.pdf}.
+\bibitem{gdbforum}
+  \url{http://www.avrfreaks.net/index.php?name=PNphpBB2&file=viewtopic&p=750034}
+
+\end{thebibliography}
+\clearpage
+
+\appendix
+\addcontentsline{toc}{section}{Appendix}
+\section{Tests}
+\input{content/tests.tex}
+\end{document}

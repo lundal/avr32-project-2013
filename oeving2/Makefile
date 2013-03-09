@@ -6,7 +6,7 @@
 
 # Compiler
 CC = avr32-gcc
-CCFLAGS = -Wall -g -Iinclude -c
+CCFLAGS = -Wall -g -Iinclude -O3 -c
 LDFLAGS = -Wall -g -pedantic -Llib -lavr32b-interrupts -lm
 
 # AVR32 programs
@@ -14,7 +14,8 @@ AVR32PROGRAM = avr32program
 AVR32DEBUG = avr32-gdb
 
 # File names 
-SRC = oeving2.c
+SRC = all_in_one.c
+#SRC = oeving2.c sound.c tones.c track.c
 OBJ = $(SRC:.c=.o)
 EXE = oeving2.elf
 
