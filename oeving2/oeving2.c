@@ -105,7 +105,7 @@ void initAudio(void) {
 // Button interrupt routine
 void button_isr(void) {
     // Debounce
-    int16_t i = 500;
+    volatile int16_t i = 500;
     while (i > 0) {
         i--;
     }
