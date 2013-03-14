@@ -37,10 +37,10 @@
 
 \begin{document}
 \maketitle
-
+\clearpage
 \begin{abstract}
 
-Trololo
+This report presents a MIDI player implemented on an AVR32 microcontroller. This is the result of assignment 2 given in TDT4258, for which the requirements are to make a program that allows one to play different sound effects by pushing buttons on the STK1000. It is done by first parsing the MIDI files into a simpler intermediate event-based format which can be played efficiently by the STK1000.
 
 \end{abstract}
 
@@ -49,32 +49,50 @@ Trololo
 
 \clearpage
 \section{Introduction}
+Our focus for this assignment was to generate as smooth a sound as possible. As opposed to the previous assignment, this time around we did not give much thought to energy efficiency and tried instead to make sure the resulting music would be able to make use of as many tones as possible without loss of notable speed, while also minimizing background noise.
 
-
-
-A little about notes and octaves. 
-
-A little about MIDI.
-
-Something about sound generation on STK1000?
----------------------------------------------------WHAT-----------------------------------------------------------------
-The assignment was to write a C-program that would let us play at least 3 different sounds when different buttons were pushed on the STK1000 board. Furthermore, the code has to run directly on the board, that is, without an operating system.  
-
-
----------------------------------------------------HOW-----------------------------------------------------------------
-Physically, sound is longitudinal waves that propagate through a medium, often the air. Which means that we have to produce waves, and that gives us the properties of waves to work with; frequency, amplitude, waveform and interference. Frequency is the property that decides the perceived pitch of the sound,  amplitude the loudness and the waveform, see figure \ref{figure}, has impact on multiple aspects of the sound, the most prominent being that the average amplitude is higher and thereby it is louder. When there is multiple sounds, that is, basic harmonic waves, at the same time they interfere, which gives the result of the amplitude in a given point being the sum of the amplitude in all the waves in that point. 
+Physically, sound is longitudinal waves that propagate through a medium, often the air. Which means that we have to produce waves, and that gives us the properties of waves to work with; frequency, amplitude, waveform and interference. Frequency is the property that decides the perceived pitch of the sound and  amplitude, see figure \ref{sinwave}, decides the loudness. The waveform, see figure \ref{waveform}, has impact on multiple aspects of the sound, the most prominent being that the average amplitude is higher and thereby sound produced will be louder, it also changes sounds characteristics. When there is multiple sounds, that is, basic harmonic waves, at the same time they interfere, which gives the result of the amplitude in a given point being the sum of the amplitude in all the waves in that point. 
 
 To produce sound digitally, one has to be able to generate samples. A sample is the numerical value of the current wave amplitude in a point. In order to capture the frequency of the intended wave, the frequency of the samples have to be at least twice the maximum frequency of the sound produced. Humans are capable of perceiving sound with a frequency between 20Hz and 20kHz, so in order to produce the whole range we would need a sample rate above 40kHz. As we’ll see, we have a sample rate of 23.4kHz, which means that we can produce sound with a maximum frequency of 11.7kHz. 
 
 
-The STK1000 card has a ABDAC: write about it here \thiswillgivelatexerror
+The STK1000 board has an ABDAC: write about it here \thiswillgivelatexerror
 
-By hooking an interrupt routine up with a clock, we were able to deliver samples to the ABDIAC at a consistent rate.
+By hooking an interrupt routine up with a clock, we were able to deliver samples to the ABDAC at a consistent rate.
+
+A little about notes and octaves.
+
 Talk about midi and vaguely about structure of application.
-
----------------------------------------------------PROBLEMS?-------------------------------------------------------
 During the development we got to face the limited computing power of the STK1000.
 Oh yes! Per-Thomas?
+
+
+\begin{figure}[b]
+        \centering
+        \begin{subfigure}[b]{0.57\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{sinwave}
+                \caption{A wave}
+                \label{sinwave}
+        \end{subfigure}%
+        ~ 
+        \begin{subfigure}[b]{0.52\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{digwave}
+                \caption{Samples of a wave}
+                \label{digwave}
+        \end{subfigure}
+    \caption{Sound waves}
+   \label{waves}
+\end{figure}
+\begin{figure}[b]
+        \centering
+            \includegraphics[width=\textwidth]{waveforms}
+            \caption{Different waveform in audacity}
+            \label{waveforms}
+\end{figure}
+
+
 
 \clearpage
 \section{Description And Methodology}
@@ -85,7 +103,7 @@ The assignment was solved in the following steps:
 \begin{enumerate}
 \item Implement the first assignment in C
 \item Generate noise with the ABDAC
-\item Generate tones with different wavetypes and frequencies
+\item Generate tones with different wave types and frequencies
 \item Play MIDI tunes
 \end{enumerate} 
 
@@ -124,12 +142,55 @@ pm->GCCTRL[6].oscsel = 1;
 pm->GCCTRL[6].cen = 1;
 \end{verbatim}
 
-Finally we activated the ABDAC by writing 1 to its enable bit in CR (Control Register) and set the interrupt routine to write random data to SDR (Set Data Register). This made the board output white noise, which meant we could proceed to generating some sweet tunes.
+Finally we activated the ABDAC by writing 1 to its enable bit in CR (Control Register) and set the interrupt routine to write random data to SDR (Set Data Register). This made the board output white noise, which meant we could proceed to generating some tones.
 
 \subsection{Tones}
-At the the beginning of the main method we initialize a set of twelve notes (an octave) corresponding to the wavetype parameter given to the tones initialization function. The notes are built from this wavetype and and a given, hardcoded frequency. Depending on this wavetype, a value 
+At the the beginning of the main method we initialize a set of twelve notes (an octave) corresponding to the wave type parameter given to the tones initialization function. The notes are built from this wave type and and a given, hardcoded frequency. Each note is an oscillation variable computed by multiplying the sample\_amplitude with some value corresponding the the wave type. $A * f$, (where A is the amplitude, f is the wave type function).
 
 \subsection{MIDI}
+With the ability to play different tones and the desire to play some sweet tunes in mind, we decided to implement a system for playing MIDI files. Since the raw MIDI format is not especially well designed for playback on the board, and we would like to play as many simultaneous tones as possible, it was decided to create a simplified format. In addition, some means to pass the data to the board and access it was required. This was accomplished by designing a set of structs to hold the data:
+
+\begin{verbatim}
+typedef struct {
+    int32_t delta_time;
+    int8_t channel;
+    int8_t tone;
+    int8_t volume;
+} midi_event_t;
+
+typedef struct {
+    int32_t num_events;
+    midi_event_t events[];
+} midi_soundtrack_t;
+\end{verbatim}
+
+This solution uses 7 bytes of data for each event, which is slightly more than the average for MIDI. In addition, it only supports up to 128 simultaneous tones (opposed to the 4096 of MIDI), and does not take instrument types into account. But there is only one stream of events compared to the possible $2^(16)$ of MIDI, which makes it much easier to process for the board.
+
+Next up was the playback system. It was needed to keep track of all playing tones and their volume. Additionally, we didn’t want to create different samples for all 128 tones as this would require a lot of memory. Therefore we also needed to keep track of the pitch shift which essentially changes the playback speed. This was accomplished by creating yet another struct:
+
+\begin{verbatim}
+typedef struct {
+    sample_t *sample;
+    int32_t sample_point;
+    int8_t pitch_up;
+    int8_t pitch_down;
+    int8_t volume;
+} midi_channel_t;
+\end{verbatim}
+
+The reason for both pitch\_up and pitch\_down instead of a single variable for pitch\_shift is so that we avoid an if-test in the playback procedure to determine the shift direction, which in turn allows us to play more tones simultaneously. A single global variable is used to keep track of the current soundtrack.
+
+Now we could focus on the main playback procedure midi_tick(), which is to be called once for each ABDAC interrupt and return the next output value. We started by implementing the event processing. For this we needed to keep track of the next event and the time passed since last event, which we stored in global variables. Then, on each call the time passed is compared to the next event’s delta_time. If it is greater, then it sets a new sample, pitch and volume for a channel as specified by the event. Afterwards, it prepares for processing the next event by resetting the time passed and updating the next event counter. The tone and pitch is calculated as in the following pseudocode:
+
+\begin{verbatim}
+// Retrieve tone and pitch
+sample = event.tone  % 12;
+pitch = event.tone / 12;
+\end{verbatim}
+
+After processing events, the time is incremented. Then it advances and pulls output data from all channels by calling midi_channel_advance for each of them. The output is summed and then normalized by dividing by 128, which is the maximum MIDI volume, and the number of channels. This ensures that the final output signal will have the same maximum amplitude as the individual samples.
+
+
 
 
 \begin{figure}
@@ -155,13 +216,13 @@ At the the beginning of the main method we initialize a set of twelve notes (an 
 Issues during development:
 
 At one point during development, we noticed that with eight tracks enabled, we could play two tracks simultaneously without loss of speed and clarity of sound(i.e no particularly greater amount of crackling, or noise in the background). Any more tracks played at the same time however, would result in slower and more faded sound.
-	After some inquiries we came upon this stackoverflow post (http://stackoverflow.com/questions/9742934/multiple-source-file-executable-slower-than-single-source-file-executable), which submitted that having multiple source files(which we did), decreased run-time performance. We then made an “all” c file that included all the c files and compiled this “all” file. We are inclined to believe that the post’s claim was correct as doing this let us play a whole eight tracks without loss of speed and seemingly, clarity of sound as well, though it should be noted at this point that we observe in Audacity that the sound isn’t quite as we expect[kanskje legge inn screenshot av Audacity bildet] and we wonder if this might be on account of hardware deterioration.
+	After some inquiries we came upon this stackoverflow post (http://stackoverflow.com/questions/9742934/multiple-source-file-executable-slower-than-single-source-file-executable), which submitted that having multiple source files(which we do), decreased run-time performance. We then made an “all” c file that included all the c files and compiled this “all” file. We are inclined to believe that the post’s claim was correct as doing this let us play a whole eight tracks without loss of speed and seemingly, clarity of sound as well, though it should be noted at this point that we observe in Audacity that the sound isn’t quite as we expect[kanskje legge inn screenshot av Audacity bildet] and we wonder if this might be on account of hardware deterioration.
 
 
 Tools
 
 \begin{itemize}
-\item Audacity for observing and measuring sound output
+\item Audacity for observing and measuring sound output and waveforms
 \item GitHub for handling version control
 \item Vim as main code-editor
 \item Google Docs for report collaboration
@@ -173,7 +234,7 @@ Tools
 
 \clearpage
 \section{Results And Tests}
-We designed some tests for the final implementation, see Appendix A. The final version passed all of these tests, save one instance during development. The  “Two interleaving button-clicks” test failed when including button SW0 in the test. As it turned out, this was because the ‘debounce-loop’ was removed in optimization by the compiler. This was fixed by making the debounce-variable volatile. After this all tests worked flawlessly.
+We designed some tests for the final implementation, see Appendix A. The final version passed all of these tests, save one instance during development. The  “Two interleaving button-clicks” test failed when including button SW0 in the test. As it turned out, this was because the ‘debounce-loop’ was removed in optimization by the compiler. This was fixed by making the debounce-variable volatile. After this all tests worked without fault.
 
 \clearpage
 \section{Evaluation Of Assignment}
@@ -196,12 +257,13 @@ Challenge: MIDI files can theoretically play 16*128 = 2048 notes simultaneously,
 
 Oscillator division seems not to be working, therefore we just pretend it is running at targeted speed and make the ABDAC underrun (So that the abdac will only receive data every other time).
 
-\subsection{Modularity and use with an OS}
+\subsection{Modularity}
+
 
 
 \clearpage
 \section{Conclusion}
-In the end we did not only have a system that satisfied the requirements, but a full-fledged midi player. This gives us a great deal of flexibility when we 
+In the end we did not only have a system that satisfied the requirements, but a full-fledged MIDI player. This gives us a great deal of flexibility when we 
 \clearpage
 
 \begin{thebibliography}{9}
@@ -244,6 +306,12 @@ Web 09.03.2013,
 \textgreater
 
 \end{thebibliography}
+
+Bilder:
+\url{http://projeneering.com/technical_articles/images_pid_primer/sampling.png}
+\url{http://www.sfu.ca/sonic-studio/handbook/Graphics/Sine_Wave.gif}
+
+
 
 \clearpage
 \appendix
