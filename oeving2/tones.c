@@ -4,7 +4,7 @@
 #include <math.h>
 
 // Generates tones
-void tones_init() {
+void tones_init(int16_t wave_type) {
     // Allocate memory
     tones = (sample_t**)malloc(sizeof(sample_t*) * 12);
     
@@ -12,7 +12,6 @@ void tones_init() {
     silence = sample_gen(100, WAVE_FLAT);
     
     // Generate tones (C5 - B5)
-	int16_t wave_type = WAVE_SQUARE;
     tones[ 0] = sample_gen(262, wave_type);
     tones[ 1] = sample_gen(277, wave_type);
     tones[ 2] = sample_gen(294, wave_type);

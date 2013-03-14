@@ -1,5 +1,1 @@
-We designed a set of tests to check our implementation against the specifications of the assignment, see appendix A. The final version passes all tests, but there have been some problems along the way. Test 3 failed in an earlier version, where LED 6 lit up instead of LED 7. This was because mov{cond} can only take an immediate value of up to 255 and LED 7 has the value 256. However, a workaround was devised by first moving 255 to the register and then using sub{cond} with -1 as there is no add{cond} that can take immediate values.
-
-At first we did not find an instruction called invert or similar. Since we needed to invert the button states that was read we had to hack a solution by instead nanding the number by itself. However, after a thorough read of the AVR32 instruction set \cite[Section~9]{avr32} we found the complement instruction.
-
-Eventually the group-members were satisfied with the resulting program’s response time, behaviour and the fact that it passed all the tests. At that point the program was deemed finished.
+Lorem ipsum

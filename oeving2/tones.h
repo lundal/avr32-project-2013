@@ -75,6 +75,6 @@ sample_t **tones;
 sample_t *silence;
 
 // Prototypes
-void tones_init();
+void tones_init(int16_t wave_type);
 
 #endif
