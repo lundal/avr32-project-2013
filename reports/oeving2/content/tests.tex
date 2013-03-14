@@ -1,52 +1,42 @@
 \begin{tabular}[h]{|lp{12cm}|} \hline
-\textbf{\emph{Test 1:}} 		& \textbf{Move right}\\
-\emph{Action:} 		& Press button 0\\
-\emph{Preconditions:}	& One, and only one, LED lit. The number of the lit LED should be between 1 and 7.\\
-\emph{Wanted outcome:}	& One, and only one, LED should be lit all the time. After the button press, the LED right of the currently lit should turn on, and the previously lit should turn off.\\ \hline
+\textbf{\emph{Test 1:}} 		& \textbf{Starting the machine}\\
+\emph{Action:} 		& Turn on the STK1000\\
+\emph{Preconditions:}	& Uploaded program on microcontroller and power cable is connected\\
+\emph{Wanted outcome:}	& LED0 should light up and 'Under pressure'  should play. \\ \hline
 \end{tabular}
 
 \vspace{1cm}
 
 \begin{tabular}[h]{|lp{12cm}|} \hline
-\textbf{\emph{Test 2:}} 		& \textbf{Move left}\\
-\emph{Action:} 		& Press button 2\\
-\emph{Preconditions:}	& One, and only one, LED lit. The number of the lit LED should be between 0 and 6.\\
-\emph{Wanted outcome:}	& One, and only one, LED should be lit all the time. After the button press, the LED left of the currently lit should turn on, and the previously lit should turn off. \\ \hline
+\textbf{\emph{Test 2:}} 		& \textbf{Switch song}\\
+\emph{Action:} 		& Press button SW X\\
+\emph{Preconditions:}	& LED Y lit and the music corresponding to SW Y should be playing.\\
+\emph{Wanted outcome:}	& LED Y turns off and LED X turns on. Music corresponding to SW Y stops and the music corresponding to SW X starts from the beginning.\\ \hline
 \end{tabular}
 
 \vspace{1cm}
 
 \begin{tabular}[h]{|lp{12cm}|} \hline
-\textbf{\emph{Test 3:}} 		& \textbf{Wrap right}\\
-\emph{Action:} 		& Press button 0\\
-\emph{Preconditions:}	& LED 0 lit and all others unlit.\\
-\emph{Wanted outcome:}	& After the button press, LED 0 should turn off and LED 7 should turn on.\\ \hline
+\textbf{\emph{Test 3:}} 		& \textbf{One click, one action}\\
+\emph{Action:} 		& Wait two seconds and release the button.\\
+\emph{Preconditions:}	& Press button SW X and hear the music start playing.\\
+\emph{Wanted outcome:}	& Upon releasing the button, the music should continue and not start over. \\ \hline
 \end{tabular}
 
 \vspace{1cm}
 
 \begin{tabular}[h]{|lp{12cm}|} \hline
-\textbf{\emph{Test 4:}} 		& \textbf{Wrap left}\\
-\emph{Action:} 		& Press button 2\\
-\emph{Preconditions:}	& LED 7 lit and all others unlit.\\
-\emph{Wanted outcome:}	& After the button press, LED 7 should turn off and LED 0 should turn on.\\ \hline
+\textbf{\emph{Test 3:}} 		& \textbf{Two interleaving button-clicks}\\
+\emph{Action:} 		& First press button SW X and hold it,  press press button SW Y (where $X \neq Y$), release button SW X and finally, release button SW Y. \\
+\emph{Preconditions:}	& The board is turned on and some LED Z is lit with its corresponding music playing.\\
+\emph{Wanted outcome:}	& Upon pressing button SW X, its corresponding music begins to play. Then, SW Y is pressed, the music changes to button SW Y's corresponding music. When button SW X is released, it changes nothing and the music continues to play, and lastly, when button SW Y is released, nothing changes and the music continues to play uninterrupted. \\ \hline
 \end{tabular}
 
 \vspace{1cm}
 
 \begin{tabular}[h]{|lp{12cm}|} \hline
-\textbf{\emph{Test 5:}} 		& \textbf{No action}\\
-\emph{Action:} 		& Do nothing\\
-\emph{Preconditions:}	& Precisely one LED lit\\
-\emph{Wanted outcome:}	& The same LED should remain lit for the entire period of inaction, and no other LEDs should light up.\\ \hline
-\end{tabular}
-
-\vspace{1cm}
-
-\begin{tabular}[h]{|lp{12cm}|} \hline
-\textbf{\emph{Test 6:}} 		& \textbf{Quick click}\\
-\emph{Action:} 		& Press button 2 fast 5 times\\
-\emph{Preconditions:}	& LED 0 lit and all others unlit.\\
-\emph{Wanted outcome:}	& LED 5 lit and all others unlit.\\
-\emph{Comments:}		& This test was made to make sure the debouncing code doesn’t interfere with normal speed-clicking \\ \hline
+\textbf{\emph{Test 4:}} 		& \textbf{Quick click}\\
+\emph{Action:} 		& Press button SW Y 5 times with 1-second intervals.\\
+\emph{Preconditions:}	& The board is turned on and some LED X is lit with its corresponding music playing.\\
+\emph{Wanted outcome:}	& LED Y lights up and stays lit upon the first pressing of the button, and the music corresponding to  button SW Y starts over each time the button is pressed.\\ \hline
 \end{tabular}

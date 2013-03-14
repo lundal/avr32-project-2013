@@ -31,7 +31,7 @@ int16_t abdac_output = 0;
 
 int main (int argc, char *argv[]) {
     // Init sound
-    tones_init();
+    tones_init(WAVE_SQUARE);
     midi_init();
     midi_play(&mario);
     
