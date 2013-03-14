@@ -12,10 +12,12 @@ int main (int argc, char *argv[]) {
 void print_wave_as_byte_array(wave_t *wav, char *name, int target_rate) {
     // Simplify access
     int *points = wav->sample_points;
-
-    printf("{");
+    
+    printf("{\n");
+    printf(".points = {");
     
     // Repeat until there are no more sample points (Might loose 1 sample point)
+    int num_points = 0;
     double progress = 0;
     while (progress < (double)wav->num_points - 1) {
         // Calculate whole and float parts
@@ -36,8 +38,13 @@ void print_wave_as_byte_array(wave_t *wav, char *name, int target_rate) {
         
         // Advance
         progress += (double)wav->sample_rate / (double)target_rate;
+        
+        // Count points
+        num_points++;
     }
     
+    printf("},\n");
+    printf(".n_points = %d\n", num_points);
     printf("};");
 }
 
