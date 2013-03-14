@@ -1,45 +1,46 @@
 \documentclass[a4paper,12pt]{article}
 
-
-% PACKAGES
-
-%For \url
+% For \url
 \usepackage{hyperref}
 
-%For line skip paragraphs
+% For line skip paragraphs
 \usepackage[parfill]{parskip}
 
-%For smaller margins
+% For smaller margins
 \usepackage[margin=1in]{geometry}
 
+% For images
 \usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+
+
+% For UTF-8
 \usepackage[utf8]{inputenc}
 
-
+% For verbatim environment
+\usepackage{verbatim}
 
 % Set section numbering to Roman
 \renewcommand \thesection{\Roman{section}}
 \renewcommand \thesubsection{\arabic{section}.\arabic{subsection}}
 
-\title{TDT4258\\ Energy Efficient Computer Design
-	\\Exercise 2}
+\title{TDT4258 \\ Energy Efficient Computer Design \\ Exercise 2}
 \author{
-    Lundal, Per Thomas\\
-    \texttt{perthol@stud.ntnu.no}
+    Lundal, Per Thomas \\ \texttt{perthol@stud.ntnu.no}
     \and
-    Normann, Kristian\\
-    \texttt{krinorm@stud.ntnu.no}
+    Normann, Kristian \\ \texttt{krinorm@stud.ntnu.no}
     \and
-    Selvik, Andreas Løve\\
-    \texttt{andrels@stud.ntnu.no}
+    Selvik, Andreas Løve \\ \texttt{andrels@stud.ntnu.no}
 }
 \date{\today}
+
 \begin{document}
 \maketitle
 
-\clearpage
 \begin{abstract}
-    \input{content/abstract.tex}
+
+Trololo
 
 \end{abstract}
 
@@ -47,56 +48,245 @@
 \tableofcontents
 
 \clearpage
-\section{ Introduction}
-    \input{content/introduction.tex}
+\section{Introduction}
+
+
+
+A little about notes and octaves. 
+
+A little about MIDI.
+
+Something about sound generation on STK1000?
+---------------------------------------------------WHAT-----------------------------------------------------------------
+The assignment was to write a C-program that would let us play at least 3 different sounds when different buttons were pushed on the STK1000 board. Furthermore, the code has to run directly on the board, that is, without an operating system.  
+
+
+---------------------------------------------------HOW-----------------------------------------------------------------
+Physically, sound is longitudinal waves that propagate through a medium, often the air. Which means that we have to produce waves, and that gives us the properties of waves to work with; frequency, amplitude, waveform and interference. Frequency is the property that decides the perceived pitch of the sound,  amplitude the loudness and the waveform, see figure \ref{figure}, has impact on multiple aspects of the sound, the most prominent being that the average amplitude is higher and thereby it is louder. When there is multiple sounds, that is, basic harmonic waves, at the same time they interfere, which gives the result of the amplitude in a given point being the sum of the amplitude in all the waves in that point. 
+
+To produce sound digitally, one has to be able to generate samples. A sample is the numerical value of the current wave amplitude in a point. In order to capture the frequency of the intended wave, the frequency of the samples have to be at least twice the maximum frequency of the sound produced. Humans are capable of perceiving sound with a frequency between 20Hz and 20kHz, so in order to produce the whole range we would need a sample rate above 40kHz. As we’ll see, we have a sample rate of 23.4kHz, which means that we can produce sound with a maximum frequency of 11.7kHz. 
+
+
+The STK1000 card has a ABDAC: write about it here \thiswillgivelatexerror
+
+By hooking an interrupt routine up with a clock, we were able to deliver samples to the ABDIAC at a consistent rate.
+Talk about midi and vaguely about structure of application.
+
+---------------------------------------------------PROBLEMS?-------------------------------------------------------
+During the development we got to face the limited computing power of the STK1000.
+Oh yes! Per-Thomas?
 
 \clearpage
-\section{ Description and methodology}
-    \input{content/descriptionAndMethodology.tex}
+\section{Description And Methodology}
+
+The first step was to read the exercise 2 chapter[ref] in the compendium[ref], where it was discovered that the purpose of the assignment was to learn how to use the features of the STK1000 while using the C programming language.
+
+The assignment was solved in the following steps:
+\begin{enumerate}
+\item Implement the first assignment in C
+\item Generate noise with the ABDAC
+\item Generate tones with different wavetypes and frequencies
+\item Play MIDI tunes
+\end{enumerate} 
+
+\subsection{Jumper and cable configuration}
+\begin{itemize}
+\item The LED’s were connected to PIOC by a flat-cable from GPIO pins 16-23(J3) to the LED-pins(J15) on the STK1000 board \cite[section~2.4.1]{compendium}.
+\item The buttons were connected to PIOB by flat-cable from GPIO pins 0-7(J1) to the SWITCH-pins(J25) on the STK1000 board \cite[section~2.4.1]{compendium}.
+\item On the AT32AP7000 we set the jumpers SW6 and SW4 to GPIO(so that PIOC and PIOB would be connected to GPIO)\cite[table~2.3]{compendium}.
+\end{itemize}
+
+\subsection{LEDs and Buttons}
+The LEDs and buttons were to be operated in a similar manner as in Assignment 1. However, as it now was to be written in C, the method of accessing the registers was a bit different. The AVR32 C libraries makes these available through a number of simple structs though, so the main difference was the syntax. The code for initialization can be seen below:
+
+\begin{verbatim}
+// Initialize the buttons
+register_interrupt(button_isr, AVR32_PIOB_IRQ / 32, AVR32_PIOB_IRQ % 32, BUTTONS_INT_LEVEL);
+piob->per = 0xFF;
+piob->puer = 0xFF;
+piob->ier = 0xFF;
+
+// Initialize the LEDs
+pioc->per = 0xFF;
+pioc->oer = 0xFF;
+pioc->codr = 0xFF;
+\end{verbatim}
+
+The interrupt routine was implemented by first debouncing, then determining what button was pressed by looking at the ISR (Interrupt Status Register) and PDSR (Pin Data Status Register), and finally updating the lights by writing to SODR (Set Output Data Register) and CODR (Clear Output Data Register).
+
+\subsection{ABDAC}
+Once the LEDs were shining and reacting to the buttons, the next objective was enabling the ABDAC. By following the procedure in the compendium [ref here], we started by releasing the
+ABDAC pins (20 and 21) from PIOB by writing 1 to its PDR (Pin Disable Registers) and followed by connecting them to Peripheral A (ABDAC) by writing to it’s A Select Register (ASR). The procedure for enabling the clock was not described in the compendium, so for this we searched for an example on the internet. There we found the code file for an AVR32 MP3 player \cite{clockex} which led us to the following code for using oscillator 1:
+
+\begin{verbatim}
+pm->GCCTRL[6].pllsel = 0;
+pm->GCCTRL[6].oscsel = 1;
+pm->GCCTRL[6].cen = 1;
+\end{verbatim}
+
+Finally we activated the ABDAC by writing 1 to its enable bit in CR (Control Register) and set the interrupt routine to write random data to SDR (Set Data Register). This made the board output white noise, which meant we could proceed to generating some sweet tunes.
+
+\subsection{Tones}
+At the the beginning of the main method we initialize a set of twelve notes (an octave) corresponding to the wavetype parameter given to the tones initialization function. The notes are built from this wavetype and and a given, hardcoded frequency. Depending on this wavetype, a value 
+
+\subsection{MIDI}
+
+
+\begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.57\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{progflow}
+                \caption{The main loop}
+                \label{mainloop}
+        \end{subfigure}%
+        ~ 
+        \begin{subfigure}[b]{0.52\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{interrupt}
+                \caption{The interrupt routine}
+                \label{interrupt}
+        \end{subfigure}
+      \caption{Overview of the system}
+   \label{progflow}
+\end{figure}
+
+
+Issues during development:
+
+At one point during development, we noticed that with eight tracks enabled, we could play two tracks simultaneously without loss of speed and clarity of sound(i.e no particularly greater amount of crackling, or noise in the background). Any more tracks played at the same time however, would result in slower and more faded sound.
+	After some inquiries we came upon this stackoverflow post (http://stackoverflow.com/questions/9742934/multiple-source-file-executable-slower-than-single-source-file-executable), which submitted that having multiple source files(which we did), decreased run-time performance. We then made an “all” c file that included all the c files and compiled this “all” file. We are inclined to believe that the post’s claim was correct as doing this let us play a whole eight tracks without loss of speed and seemingly, clarity of sound as well, though it should be noted at this point that we observe in Audacity that the sound isn’t quite as we expect[kanskje legge inn screenshot av Audacity bildet] and we wonder if this might be on account of hardware deterioration.
+
+
+Tools
+
+\begin{itemize}
+\item Audacity for observing and measuring sound output
+\item GitHub for handling version control
+\item Vim as main code-editor
+\item Google Docs for report collaboration
+\item \LaTeX for report markup
+\item JTAGICE mkII for connecting the computer to the board
+\item avr32gdbproxy for connecting to JTAGICE mkII
+\item avr32-gdb for connecting to the board, allowing us to debug the code
+\end{itemize}
 
 \clearpage
-\section{ Results and tests}
-    \input{content/resultsAndTests.tex}
+\section{Results And Tests}
+We designed some tests for the final implementation, see Appendix A. The final version passed all of these tests, save one instance during development. The  “Two interleaving button-clicks” test failed when including button SW0 in the test. As it turned out, this was because the ‘debounce-loop’ was removed in optimization by the compiler. This was fixed by making the debounce-variable volatile. After this all tests worked flawlessly.
 
 \clearpage
-\section{ Evaluation of assignment}
-    \input{content/evaluation.tex}
+\section{Evaluation Of Assignment}
 
 \clearpage
-\section{ Conclusion}
-    \input{content/conclusion.tex}
+\section{Discussion}
 
+During the start-up-fase, after turning on the STK1000, just before LED0 is lit and its corresponding music starts to play, some random light-arrangement occurs based on what is present in memory from previous. This does not interfere with any expected functionality.      
+
+
+Problems:
+
+A problem that has continued through the whole assignment is noise from the ABDAC. During pauses in the music, where the ABDAC is fed the value 0 repeatedly, a tone with seemingly random frequency can be heard. All attempts at correcting this in software have only masked the problem by another sound and thus failed. However, by intense searching of the internet we found that the audio output of the STK1000 might not be designed for load-heavy devices such as headphones, and that it might sound better when connected to an amplifier\cite{impedance}. By connecting the output to some speakers we noticed a slight reduction in the noise level, but it was still present. This leads us to think it is a hardware issue that we can not prevent.
+
+Another problem is that oscillator division does not seem to be working as no matter what values were set as division factor, some test samples were played at the same rate.
+
+MIDI files do not always follow the standard
+
+Challenge: MIDI files can theoretically play 16*128 = 2048 notes simultaneously, but our board can only play 12 at ~24kHz
+
+Oscillator division seems not to be working, therefore we just pretend it is running at targeted speed and make the ABDAC underrun (So that the abdac will only receive data every other time).
+
+\subsection{Modularity and use with an OS}
+
+
+\clearpage
+\section{Conclusion}
+In the end we did not only have a system that satisfied the requirements, but a full-fledged midi player. This gives us a great deal of flexibility when we 
 \clearpage
 
 \begin{thebibliography}{9}
 
 \bibitem{compendium}
-  Computer Architecture and Design Group,
-  \emph{Lab Assignments in TDT4258 Energy Efficient
-Computer Systems}.
-  Department of Computer and Information Science, NTNU,
-  2013,
-  \url{http://www.idi.ntnu.no/emner/tdt4258/\_media/kompendium.pdf}.
+Computer Architecture and Design Group,
+\emph{Lab Assignments in TDT4258 Energy Efficient Computer Systems}.
+Department of Computer and Information Science, NTNU,
+2013,
+\url{http://www.idi.ntnu.no/emner/tdt4258/\_media/kompendium.pdf}.
 
 \bibitem{avr32}
-  Atmel.
-  \emph{AVR32 Architecture Document},
-  2011,
-  \url{http://www.idi.ntnu.no/emner/tdt4258/\_media/doc32000.pdf}.
+Atmel.
+\emph{AVR32 Architecture Document},
+2011,
+\url{http://www.idi.ntnu.no/emner/tdt4258/\_media/doc32000.pdf}.
 
 \bibitem{ap7000}
-  Atmel.
-  \emph{AT32AP7000 Preliminary},
-  2009,
-  \url{http://www.idi.ntnu.no/emner/tdt4258/\_media/doc32003.pdf}.
+Atmel.
+\emph{AT32AP7000 Preliminary},
+2009,
+\url{http://www.idi.ntnu.no/emner/tdt4258/\_media/doc32003.pdf}.
+
 \bibitem{gdbforum}
-  \url{http://www.avrfreaks.net/index.php?name=PNphpBB2&file=viewtopic&p=750034}
+\url{http://www.avrfreaks.net/index.php?name=PNphpBB2&file=viewtopic&p=750034}
+
+\bibitem{clockex}
+Atmel. “abdac.c”
+\emph{asf.atmel.com},
+Web.09.03.2013.
+\textless \url{http://asf.atmel.com/docs/latest/avr32.applications.audio-player.mp3.evk1104/html/abdac_8c_source.html}
+\textgreater
+
+\bibitem{impedance}
+AVR32
+\emph{avrfreaks.net},
+Web 09.03.2013,
+\textless
+\url{http://www.avrfreaks.net/index.php?name=PNphpBB2&file=printview&t=53711&start=0}
+\textgreater
 
 \end{thebibliography}
-\clearpage
 
+\clearpage
 \appendix
 \addcontentsline{toc}{section}{Appendix}
 \section{Tests}
-\input{content/tests.tex}
+
+\begin{tabular}[h]{|lp{12cm}|} \hline
+\textbf{\emph{Test 1:}} 		& \textbf{Starting the machine}\\
+\emph{Action:} 		& Turn on the STK1000\\
+\emph{Preconditions:}	& Uploaded program on microcontroller and power cable is connected\\
+\emph{Wanted outcome:}	& LED0 should light up and 'Under pressure' should play. \\ \hline
+\end{tabular}
+\vspace{1cm}
+
+\begin{tabular}[h]{|lp{12cm}|} \hline
+\textbf{\emph{Test 2:}} 		& \textbf{Switch song}\\
+\emph{Action:} 		& Press button SW X\\
+\emph{Preconditions:}	& LED Y lit and the music corresponding to SW Y should be playing.\\
+\emph{Wanted outcome:}	& LED Y turns off and LED X turns on. Music corresponding to SW Y stops and the music corresponding to SW X starts from the beginning.\\ \hline
+\end{tabular}
+\vspace{1cm}
+
+\begin{tabular}[h]{|lp{12cm}|} \hline
+\textbf{\emph{Test 3:}} 		& \textbf{One click, one action}\\
+\emph{Action:} 		& Wait two seconds and release the button.\\
+\emph{Preconditions:}	& Press button SW X and hear the music start playing.\\
+\emph{Wanted outcome:}	& Upon releasing the button, the music should continue and not start over. \\ \hline
+\end{tabular}
+\vspace{1cm}
+
+\begin{tabular}[h]{|lp{12cm}|} \hline
+\textbf{\emph{Test 3:}} 		& \textbf{Two interleaving button-clicks}\\
+\emph{Action:} 		& First press button SW X and hold it, press press button SW Y (where $X \neq Y$), release button SW X and finally, release button SW Y. \\
+\emph{Preconditions:}	& The board is turned on and some LED Z is lit with its corresponding music playing.\\
+\emph{Wanted outcome:}	& Upon pressing button SW X, its corresponding music begins to play. Then, SW Y is pressed, the music changes to button SW Y's corresponding music. When button SW X is released, it changes nothing and the music continues to play, and lastly, when button SW Y is released, nothing changes and the music continues to play uninterrupted. \\ \hline
+\end{tabular}
+\vspace{1cm}
+
+\begin{tabular}[h]{|lp{12cm}|} \hline
+\textbf{\emph{Test 4:}} 		& \textbf{Quick click}\\
+\emph{Action:} 		& Press button SW Y 5 times with 1-second intervals.\\
+\emph{Preconditions:}	& The board is turned on and some LED X is lit with its corresponding music playing.\\
+\emph{Wanted outcome:}	& LED Y lights up and stays lit upon the first pressing of the button, and the music corresponding to button SW Y starts over each time the button is pressed.\\ \hline
+\end{tabular}
+
 \end{document}
