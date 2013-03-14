@@ -16,6 +16,7 @@
 #include "midi.h"
 
 int32_t current_led = ELEMENT_0;
+int16_t abdac_output = 0;
 
 // Midi sound files
 #include "midi/mario.c"
@@ -37,8 +38,14 @@ int main (int argc, char *argv[]) {
     // Init hardware
     initHardware();
     
-    // Busywaiting is FUN!
-    while(1);
+    // Main loop
+    while (1) {
+        // Get data from midi player
+        abdac_output = midi_tick();
+        
+        // Wait for next interrupt (Assume abdac)
+        asm("sleep 1");
+    }
     return 0;
 }
 
@@ -95,6 +102,11 @@ void initAudio(void) {
     pm->GCCTRL[6].oscsel = 1;
     pm->GCCTRL[6].cen = 1;
     
+    // Activate clock division [ CLK = 12MHz >> (DIV+1); SMPL_RATE = CLK >> 8; ]
+    // This should be done when the clock is disabled according to the docs, but then it does not work
+    pm->GCCTRL[6].div = 0;
+    pm->GCCTRL[6].diven = 1;
+    
     // Activate ABDAC
     dac->CR.en = 1;
 
@@ -104,8 +116,8 @@ void initAudio(void) {
 
 // Button interrupt routine
 void button_isr(void) {
-    // Debounce
-    int16_t i = 500;
+     // Debounce
+    volatile int16_t i = 500;
     while (i > 0) {
         i--;
     }
@@ -163,10 +175,7 @@ void button_isr(void) {
 
 // ABDAC interrupt routine
 void abdac_isr(void) {
-    // Get data from midi player
-    int16_t output = midi_tick();
-    
-    // Send data to ABDAC
-    dac->SDR.channel0 = output;
-    dac->SDR.channel1 = output;
+    // Retrieve next output
+    dac->SDR.channel0 = abdac_output;
+    dac->SDR.channel1 = abdac_output;
 }
