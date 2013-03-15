@@ -19,7 +19,7 @@ void midi_init() {
     // Create channels
     int i;
     for (i = 0; i < MIDI_CHANNELS; i++) {
-        midi_channels[i] = (midi_channel_t){silence, 0, 0, 0, 0};
+        midi_channels[i] = (midi_channel_t){silence, 0, 0, 0};
     }
 }
 
@@ -47,25 +47,15 @@ int16_t midi_tick() {
         midi_event_t event = midi_soundtrack->events[midi_current_event];
         
         // Update channel sample
-        midi_channels[event.channel].sample = tones[event.tone % 12];
         midi_channels[event.channel].sample_point = 0;
+        midi_channels[event.channel].sample = tones[event.tone % 12];
         
         // Update channel pitch (samples are pitch 5)
-        int32_t pitch = event.tone / 12 - 5;
-        midi_channels[event.channel].pitch_up = (pitch > 0) ? pitch : 0;
-        midi_channels[event.channel].pitch_down = (pitch < 0) ? -pitch : 0;
+        midi_channels[event.channel].pitch = event.tone / 12;
         
         // Update channel volume
         midi_channels[event.channel].volume = event.volume;
-        /*
-        // Experimental noise reduction
-        if (event.volume == 0) {
-            midi_channels[event.channel].sample = silence;
-            midi_channels[event.channel].pitch_up = 0;
-            midi_channels[event.channel].pitch_down = 3;
-            midi_channels[event.channel].volume = 100;
-        }
-        */
+
         // Next event (loop)
         midi_current_event = (midi_current_event + 1) % midi_soundtrack->num_events;
         midi_time_passed = 0;
@@ -100,8 +90,7 @@ int32_t midi_channel_advance(midi_channel_t *channel) {
     data = data * channel->volume;
     
     // Adjust advancement for pitch
-    int32_t advance = 1 << MIDI_PITCH_SHIFT;
-    advance = (advance << channel->pitch_up) >> channel->pitch_down;
+    int32_t advance = 1 << channel->pitch;
     
     // Advance to next sample point (loop)
     channel->sample_point = (channel->sample_point + advance) % (sample->n_points << MIDI_PITCH_SHIFT);

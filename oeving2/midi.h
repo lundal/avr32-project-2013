@@ -9,8 +9,7 @@
 typedef struct {
     sample_t *sample;
     int32_t sample_point;
-    int8_t pitch_up;
-    int8_t pitch_down;
+    int8_t pitch;
     int8_t volume;
 } midi_channel_t;
 
