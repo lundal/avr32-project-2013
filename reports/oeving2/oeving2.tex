@@ -14,6 +14,8 @@
 \usepackage{caption}
 \usepackage{subcaption}
 
+%For align environment
+\usepackage{amsmath}
 
 % For UTF-8
 \usepackage[utf8]{inputenc}
@@ -37,21 +39,20 @@
 
 \begin{document}
 \maketitle
-\clearpage
 \begin{abstract}
 
-This report presents a MIDI player implemented on an AVR32 microcontroller. This is the result of assignment 2 given in TDT4258, for which the requirements are to make a program that allows one to play different sound effects by pushing buttons on the STK1000. It is done by first parsing the MIDI files into a simpler intermediate event-based format which can be played efficiently by the STK1000.
+This report presents a MIDI player implemented on an AVR32 microcontroller\cite{avr32}. This is the result of assignment 2 given in TDT4258, for which the requirements are to make a program that allows one to play different sound effects by pushing buttons on the STK1000. It is done by first parsing the MIDI files into a simpler intermediate event-based format which can be played efficiently by the STK1000.
 
 \end{abstract}
 
-\clearpage
+\newpage
 \tableofcontents
 
 \clearpage
 \section{Introduction}
 Our focus for this assignment was to generate as smooth a sound as possible. As opposed to the previous assignment, this time around we did not give much thought to energy efficiency and tried instead to make sure the resulting music would be able to make use of as many tones as possible without loss of notable speed, while also minimizing background noise.
 
-Physically, sound is longitudinal waves that propagate through a medium, often the air. Which means that we have to produce waves, and that gives us the properties of waves to work with; frequency, amplitude, waveform and interference. Frequency is the property that decides the perceived pitch of the sound and amplitude, see figure \ref{sinwave}, decides the loudness. The waveform, see figure \ref{waveform}, has impact on multiple aspects of the sound, the most prominent being that the average amplitude is higher and thereby sound produced will be louder, it also changes sounds characteristics. When there is multiple sounds, that is, basic harmonic waves, at the same time they interfere, which gives the result of the amplitude in a given point being the sum of the amplitude in all the waves in that point. 
+Physically, sound is longitudinal waves that propagate through a medium, often the air. Which means that we have to produce waves, and that gives us the properties of waves to work with; frequency, amplitude, waveform and interference. Frequency is the property that decides the perceived pitch of the sound and amplitude, see figure \ref{sinwave}, decides the loudness. The waveform, see figure \ref{waveforms}, has impact on multiple aspects of the sound, the most prominent being that the average amplitude is higher and thereby sound produced will be louder, it also changes sounds characteristics. When there is multiple sounds, that is, basic harmonic waves, at the same time they interfere, which gives the result of the amplitude in a given point being the sum of the amplitude in all the waves in that point. 
 
 To produce sound digitally, one has to be able to generate samples. A sample is the numerical value of the current wave amplitude in a point, see figure \ref{digwave}. In order to capture the frequency of the intended wave, the frequency of the samples has to be at least twice the maximum frequency of the sound produced. Humans are capable of perceiving sound with a frequency between 20Hz and 20kHz, so in order to produce the whole range we would need a sample rate above 40kHz. As we’ll see, we have a sample rate of 23.4kHz, which means that we can produce sound with a maximum frequency of 11.7kHz. 
 
@@ -61,10 +62,10 @@ The STK1000 is equipped with an Audio Bitstream Digital Analog Converter
 By hooking an interrupt routine up with a clock, we were able to deliver samples to the ABDAC at a consistent rate.
 
 Our note system is a set of 12 notes evenly spaced. Mathematically this spacing is 
-\begin{equation}
-f_0=233\\
-f_n=\sqrt[12]{2} * f_{n-1}
-\end{equation} 
+\begin{align*}
+f_0&=233\\
+f_n&=\sqrt[12]{2} * f_{n-1}
+\end{align*} 
 where $f_n$ is the frequency of the n-th note. The set of 12 consecutive notes is called an octave. The next octave on a note is obtained by multiplying the frequency by 2. 
 
 MIDI is a sound format that generates sounds by turning off and on different notes from different channels. It uses events which specifies which note to turn on and off at what time. The final sound samples are produced by summing the samples of each channel. 
@@ -74,14 +75,14 @@ MIDI is a sound format that generates sounds by turning off and on different not
         \begin{subfigure}[b]{0.57\textwidth}
                 \centering
                 \includegraphics[width=\textwidth]{sinwave}
-                \caption{A wave}
+                \caption{A wave\cite{sinewave}.}
                 \label{sinwave}
         \end{subfigure}%
         ~ 
         \begin{subfigure}[b]{0.52\textwidth}
                 \centering
                 \includegraphics[width=\textwidth]{digwave}
-                \caption{Samples of a wave}
+                \caption{Samples of a wave\cite{samples}.}
                 \label{digwave}
         \end{subfigure}
     \caption{Sound waves}
@@ -99,8 +100,6 @@ MIDI is a sound format that generates sounds by turning off and on different not
 \clearpage
 \section{Description And Methodology}
 
-The first step was to read the exercise 2 chapter[ref] in the compendium[ref], where it was discovered that the purpose of the assignment was to learn how to use the features of the STK1000 while using the C programming language.
-
 The assignment was solved in the following steps:
 \begin{enumerate}
 \item Implement the first assignment in C
@@ -109,7 +108,7 @@ The assignment was solved in the following steps:
 \item Play MIDI tunes
 \end{enumerate} 
 
-\subsection{Jumper and cable configuration}
+\subsubsection*{Jumper and cable configuration}
 \begin{itemize}
 \item The LED’s were connected to PIOC by a flat-cable from GPIO pins 16-23(J3) to the LED-pins(J15) on the STK1000 board \cite[section~2.4.1]{compendium}.
 \item The buttons were connected to PIOB by flat-cable from GPIO pins 0-7(J1) to the SWITCH-pins(J25) on the STK1000 board \cite[section~2.4.1]{compendium}.
@@ -137,7 +136,7 @@ The interrupt routine was implemented by first debouncing, then determining what
 
 \subsection{ABDAC}
 
-Once the LEDs were shining and reacting to the buttons, the next objective was enabling the ABDAC. By following the procedure in the compendium [ref here], we started by releasing the
+Once the LEDs were shining and reacting to the buttons, the next objective was enabling the ABDAC. By following the procedure in the compendium \cite{compendium}, we started by releasing the
 ABDAC pins (20 and 21) from PIOB by writing 1 to its PDR (Pin Disable Registers) and followed by connecting them to Peripheral A (ABDAC) by writing to it’s A Select Register (ASR). The procedure for enabling the clock was not described in the compendium, so for this we searched for an example on the internet. There we found the code file for an AVR32 MP3 player \cite{clockex} which led us to the following code for using oscillator 1:
 
 \begin{verbatim}
@@ -222,14 +221,11 @@ With the midi playback system in order, all that remained to get sound output wa
 
 With the setup functioning correctly, verified by some simple test soundtracks, the time had come to make a program that converts the MIDI files to our simplified format. This was perhaps the most challenging part of the assignment. The first step was to find good documentation of the MIDI file format. The one we found to be most useful and descriptive was an online guide by The Sonic Spot \cite{sonicspot}. With this knowledge in hand, the work started.
 
-We started by reading in the whole MIDI file to a buffer.
+Since MIDI is structured like a buffer, we started by reading the whole MIDI file into one. This allowed us to create a few simple methods to get the next value from the file, parse\_varint() and parse\_int(). The first reads a variable-length number where the most significant bit of each byte determines whether it should continue or not. The second reads a specified number of bytes.
 
+We then started the parsing procedure by first 
 
-\subsection{Issues during development}
-
-At one point during development, we noticed that with eight tracks enabled, we could play two tracks simultaneously without loss of speed and clarity of sound(i.e no particularly greater amount of crackling, or noise in the background). Any more tracks played at the same time however, would result in slower and more faded sound.
-
-After some inquiries we came upon this stackoverflow post (http://stackoverflow.com/questions/9742934/multiple-source-file-executable-slower-than-single-source-file-executable), which submitted that having multiple source files(which we do), decreased run-time performance. We then made an “all” c file that included all the c files and compiled this “all” file. We are inclined to believe that the post’s claim was correct as doing this let us play a whole eight tracks without loss of speed and seemingly, clarity of sound as well, though it should be noted at this point that we observe in Audacity that the sound isn’t quite as we expect and we wonder if this might be on account of hardware deterioration.
+Then we can read the next value through methods
 
 
 \subsection{Tools}
@@ -243,6 +239,7 @@ After some inquiries we came upon this stackoverflow post (http://stackoverflow.
 \item JTAGICE mkII for connecting the computer to the board
 \item avr32gdbproxy for connecting to JTAGICE mkII
 \item avr32-gdb for connecting to the board, allowing us to debug the code
+\item \url{www.websequencediagrams.com} for drawing sequence diagrams
 \end{itemize}
 
 \clearpage
@@ -251,28 +248,33 @@ We designed some tests for the final implementation, see Appendix A. The final v
 
 \clearpage
 \section{Evaluation Of Assignment}
-Per Thomas has storkost seg.
+It was a fun challenge. 
 \clearpage
 \section{Discussion}
 
-During the start-up-fase, after turning on the STK1000, just before LED0 is lit and its corresponding music starts to play, some random light-arrangement occurs based on what is present in memo                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  ry from previous. This does not interfere with any expected functionality.      
+During the startup phase, after turning on the STK1000, just before LED0 is lit and its corresponding music starts to play, some random light-arrangement occurs based on what is present in memory from previous. This does not interfere with any expected functionality.      
 
-During development we noticed a strong audible difference between square waves and sine waves, see figure\ref{waveforms}. We heard the sounds generated with square waves much clearer than the sine waves and elected therefore to use them for our final code.
+During development we noticed a strong audible difference between square waves and sine waves, see figure \ref{waveforms}. We heard the sounds generated with square waves much clearer than the sine waves and elected therefore to use them for our final code, even though it sounded more electronic, so to speak.
+
+\subsection{Issues during development}
+
+At one point during development, we noticed that with eight tracks enabled, we could play two tracks simultaneously without loss of speed and clarity of sound(i.e no particularly greater amount of crackling, or noise in the background). Any more tracks played at the same time however, would result in slower and more faded sound.
+
+After some inquiries we came upon a stackoverflow post\cite{multifile}, which submitted that having multiple source files(which we do), decreased run-time performance. We then made an “all” c file that included all the c files and compiled this “all” file. We are inclined to believe that the post’s claim was correct as doing this let us play a whole eight tracks without loss of speed and seemingly, clarity of sound as well, though it should be noted at this point that we observe in Audacity that the sound isn’t quite as we expect and we wonder if this might be on account of hardware deterioration.
 
 Problems:
 
 A problem that has continued through the whole assignment is noise from the ABDAC. During pauses in the music, where the ABDAC is fed the value 0 repeatedly, a tone with seemingly random frequency can be heard. All attempts at correcting this in software have only masked the problem by another sound and thus failed. However, by intense searching of the internet we found that the audio output of the STK1000 might not be designed for load-heavy devices such as headphones, and that it might sound better when connected to an amplifier\cite{impedance}. By connecting the output to some speakers we noticed a slight reduction in the noise level, but it was still present. This leads us to think it is a hardware issue that we can not prevent.
 
-Another problem is that oscillator division does not seem to be working as no matter what values were set as division factor, some test samples were played at the same rate.
-
 MIDI files do not always follow the standard
 
 Challenge: MIDI files can theoretically play 16*128 = 2048 notes simultaneously, but our board can only play 12 at ~24kHz
 
-Oscillator division seems not to be working, therefore we just pretend it is running at targeted speed and make the ABDAC underrun (So that the abdac will only receive data every other time).
+Oscillator division seems not to be working according to specifications, therefore we just pretend it is running at targeted speed and make the ABDAC underrun (So that the abdac will only receive data every other time). *** It works if we enable the division after enabling the clock. This is the exact opposite of the recommended procedure in the AP7000 documentation\cite{AP7000}. ***
 
 \subsection{Modularity}
 
+The modularity of the code was central during the development, as it is important to be able to reuse the code for later assignment and whenever we need midi sound on some system. Therefore we tried to keep most of the code general, and the only hardware specific code should be in oeving2.c. This means that it shouldn’t pose a great challenge to use this code to produce sound with an operating system and drivers. There are some hardcoded values however, like the sample rate, that is defined specifically instead of taken as an argument, but this was a deliberate compromise for code speed over modularity. Furthermore, the midi initialization routine could have taken \emph{number of channels} as an argument, but we have elected not to allow for this. The reasons are that this would interfere with the compiler’s loop unrolling optimization, which in turn would lead to if-tests, branching, a chance of pipeline bubbles and in effect, slower execution.
 
 
 \clearpage
@@ -303,9 +305,6 @@ Atmel.
 2009,
 \url{http://www.idi.ntnu.no/emner/tdt4258/\_media/doc32003.pdf}.
 
-\bibitem{gdbforum}
-\url{http://www.avrfreaks.net/index.php?name=PNphpBB2&file=viewtopic&p=750034}
-
 \bibitem{clockex}
 Atmel. “abdac.c”
 \emph{asf.atmel.com},
@@ -321,13 +320,36 @@ Web 09.03.2013,
 \url{http://www.avrfreaks.net/index.php?name=PNphpBB2&file=printview&t=53711&start=0}
 \textgreater
 
-\end{thebibliography}
+\bibitem{sonicspot}
+Sonicspot, “MIDI File Format”
+\emph{sonicspot.com}
+Web 14.03.2013
+\textless
+\url{http://www.sonicspot.com/guide/midifiles.html}
+\textgreater
 
-Bilder:
+
+\bibitem{multifile}
+“Multiple source file executable slower than single source file executable“, 
+\emph{stackoverflow.com}
+17.03.2012 Web 14.03.2013
+\textless
+\url{http://stackoverflow.com/questions/9742934/multiple-source-file-executable-slower-than-single-source-file-executable}
+\textgreater
+
+\bibitem{samples}
+\emph{projeneering.com}
+\textless
 \url{http://projeneering.com/technical_articles/images_pid_primer/sampling.png}
+\textgreater
+
+\bibitem{sinewave}
+Simon Fraser University “Sine Wave.gif”
+\emph{sfu.ca}
+\textless
 \url{http://www.sfu.ca/sonic-studio/handbook/Graphics/Sine_Wave.gif}
-
-
+\textgreater
+\end{thebibliography}
 
 \clearpage
 \appendix
@@ -359,7 +381,7 @@ Bilder:
 \vspace{1cm}
 
 \begin{tabular}[h]{|lp{12cm}|} \hline
-\textbf{\emph{Test 3:}} 		& \textbf{Two interleaving button-clicks}\\
+\textbf{\emph{Test 4:}} 		& \textbf{Two interleaving button-clicks}\\
 \emph{Action:} 		& First press button SW X and hold it, press press button SW Y (where $X \neq Y$), release button SW X and finally, release button SW Y. \\
 \emph{Preconditions:}	& The board is turned on and some LED Z is lit with its corresponding music playing.\\
 \emph{Wanted outcome:}	& Upon pressing button SW X, its corresponding music begins to play. Then, SW Y is pressed, the music changes to button SW Y's corresponding music. When button SW X is released, it changes nothing and the music continues to play, and lastly, when button SW Y is released, nothing changes and the music continues to play uninterrupted. \\ \hline
@@ -367,7 +389,7 @@ Bilder:
 \vspace{1cm}
 
 \begin{tabular}[h]{|lp{12cm}|} \hline
-\textbf{\emph{Test 4:}} 		& \textbf{Quick click}\\
+\textbf{\emph{Test 5:}} 		& \textbf{Quick click}\\
 \emph{Action:} 		& Press button SW Y 5 times with 1-second intervals.\\
 \emph{Preconditions:}	& The board is turned on and some LED X is lit with its corresponding music playing.\\
 \emph{Wanted outcome:}	& LED Y lights up and stays lit upon the first pressing of the button, and the music corresponding to button SW Y starts over each time the button is pressed.\\ \hline
