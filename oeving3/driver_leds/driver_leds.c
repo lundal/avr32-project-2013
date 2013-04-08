@@ -37,14 +37,22 @@ static struct file_operations driver_fops = {
 
 // Constants
 
-static unsigned long MEM_ADDR_START = AVR32_PIOC_ADDRESS;
-static unsigned long MEM_ADDR_LEN = AVR32_PIOD_ADDRESS - AVR32_PIOC_ADDRESS;
+static dev_t dev;
+static unsigned long MEM_ADDR_START = AVR32_PIOB_ADDRESS;
+static unsigned long MEM_ADDR_LEN = AVR32_PIOC_ADDRESS - AVR32_PIOB_ADDRESS;
+
+static int elements[] = {1<<8, 1<<9, 1<<10, 1<<13, 1<<14, 1<<15, 1<<16, 1<<30};
+static int elements_all;
 
 /*****************************************************************************/
 
 static int __init driver_init(void) {
+	// Setup vars
+	elements_all = elements[0] + elements[1] + elements[2] + elements[3]
+		+ elements[4] + elements[5] + elements[6] + elements[7];
+	
 	// Allocate device number
-	dev_t dev = MKDEV(1337, 0);
+	dev = MKDEV(1337, 0);
 	int res_devnum = register_chrdev_region(dev, 1, "LEDS");
 	
 	// Check for errors
@@ -52,16 +60,12 @@ static int __init driver_init(void) {
 	
 	// Request I/O ports
 	request_region(MEM_ADDR_START, MEM_ADDR_LEN, "LEDS");
-	//struct resource res_io = request_region(MEM_ADDR_START, MEM_ADDR_LEN, "LEDS");
-	
-	// Check for errors
-	//if (res_io == NULL) return -1000;
 	
 	// Init hardware
-	AVR32_PIOC.per = 0xFF;
-	AVR32_PIOC.oer = 0xFF;
-	AVR32_PIOC.codr = 0xFF;
-	AVR32_PIOC.sodr = 0x55;
+	AVR32_PIOB.per = elements_all;
+	AVR32_PIOB.oer = elements_all;
+	AVR32_PIOB.codr = elements_all;
+	AVR32_PIOB.sodr = elements[1] + elements[3] + elements[5];
 	
 	// Register Device
 	struct cdev *cdev = cdev_alloc();
@@ -76,6 +80,13 @@ static int __init driver_init(void) {
 
 static void __exit driver_exit(void) {
 	// TODO?
+	
+	// Release device number
+	unregister_chrdev_region(dev, 1);
+	
+	// Release hardware
+	AVR32_PIOB.codr = elements_all;
+	AVR32_PIOB.pdr = elements_all;
 	
 	// Release I/O ports
 	release_region(MEM_ADDR_START, MEM_ADDR_LEN);
