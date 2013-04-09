@@ -147,7 +147,7 @@ static ssize_t driver_write(struct file *filp, const char __user *buff, size_t c
 			case 'G': AVR32_PIOB.SODR.p16 = 1; break;
 			case 'H': AVR32_PIOB.SODR.p30 = 1; break;
 			
-			case 'a': AVR32_PIOB.CODR.p0 = 1; break;
+			case 'a': AVR32_PIOB.CODR.p8 = 1; break;
 			case 'b': AVR32_PIOB.CODR.p9 = 1; break;
 			case 'c': AVR32_PIOB.CODR.p10 = 1; break;
 			case 'd': AVR32_PIOB.CODR.p13 = 1; break;
