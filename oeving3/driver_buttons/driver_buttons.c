@@ -94,5 +94,5 @@ module_exit (driver_exit);  /* angir hva som er exit-funksjon */
 MODULE_LICENSE ("GPL");     /* programlisens for modulen */
 MODULE_DESCRIPTION ("");    /* tekstlig beskrivelse */
 MODULE_VERSION ("");        /* versjonsnummer */
-MODULE_AUTHOR ("");         /* forfatter(e) */
+MODULE_AUTHOR ("Kristian F.N, Per Thomas L, Andreas L");         /* forfatter(e) */
 
