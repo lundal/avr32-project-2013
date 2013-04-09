@@ -107,7 +107,7 @@ static int driver_release(struct inode *inode, struct file *filp) {
 }
 
 static ssize_t driver_read(struct file *filp, char __user *buff, size_t count, loff_t *offp) {
-	/*int pindata = AVR32_PIOB.pdsr;
+	int pindata = AVR32_PIOB.pdsr;
 	char data[8];
 	
 	data[0] = (pindata & elements[0]) ? 'A' : 'a';
@@ -119,23 +119,22 @@ static ssize_t driver_read(struct file *filp, char __user *buff, size_t count, l
 	data[6] = (pindata & elements[6]) ? 'G' : 'g';
 	data[7] = (pindata & elements[7]) ? 'H' : 'h';
 	
-	/
+	/*
 	int i = count;
 	while (i--) {
 		
-	}
-	/
+	}*/
 	
+	if(count > 8) count = 8;  //Do not allow reads outside the array.
 	copy_to_user(buff, data, count);
 	
-	return count;*/
-	return 0;
+	return count;
 }
 
 static ssize_t driver_write(struct file *filp, const char __user *buff, size_t count, loff_t *offp) {
 	char data[count];
 	copy_from_user(data, buff, count);
-	
+	printk(KERN_INFO "LED driver recieving data!");
 	int i = 0;
 	while (i < count) {
 		switch (data[i]) {
@@ -148,7 +147,7 @@ static ssize_t driver_write(struct file *filp, const char __user *buff, size_t c
 			case 'G': AVR32_PIOB.SODR.p16 = 1; break;
 			case 'H': AVR32_PIOB.SODR.p30 = 1; break;
 			
-			case 'a': AVR32_PIOB.CODR.p8 = 1; break;
+			case 'a': AVR32_PIOB.CODR.p0 = 1; break;
 			case 'b': AVR32_PIOB.CODR.p9 = 1; break;
 			case 'c': AVR32_PIOB.CODR.p10 = 1; break;
 			case 'd': AVR32_PIOB.CODR.p13 = 1; break;
