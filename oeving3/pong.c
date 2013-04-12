@@ -40,7 +40,7 @@ void main_loop() {
     while (1) {
         // Clear shapes
         screen_draw_rect(0, player2_pos, player_width, player2_size, 0,0,0);
-        screen_draw_rect(SCREEN_WIDTH-player_width-1, player1_pos, player_width, player1_size, 0,0,0);
+        screen_draw_rect(SCREEN_WIDTH-player_width, player1_pos, player_width, player1_size, 0,0,0);
         screen_draw_rect(ball_x, ball_y, ball_size, ball_size, 0,0,0);
         
         handle_input();
@@ -49,13 +49,19 @@ void main_loop() {
         
         // Draw shapes
         screen_draw_rect(0, player2_pos, player_width, player2_size, 255,255,255);
-        screen_draw_rect(SCREEN_WIDTH-player_width-1, player1_pos, player_width, player1_size, 255,255,255);
+        screen_draw_rect(SCREEN_WIDTH-player_width, player1_pos, player_width, player1_size, 255,255,255);
         screen_draw_rect(ball_x, ball_y, ball_size, ball_size, 255,255,255);
         
         // Update screen
         screen_update_rect(0, 0, player_width, SCREEN_HEIGHT);
-        screen_update_rect(SCREEN_WIDTH-player_width-1, 0, player_width, SCREEN_HEIGHT);
+        screen_update_rect(SCREEN_WIDTH-player_width, 0, player_width, SCREEN_HEIGHT);
         screen_update_rect(ball_x-2, ball_y-2, ball_size+4, ball_size+4);
+        
+        //screen_update_all();
+        //screen_update_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        
+        // Wait?
+        //usleep(1*1000);
     }
 }
 
@@ -86,7 +92,7 @@ void force_bounds() {
     
     // Player 1
     min = 0;
-    max = SCREEN_HEIGHT - player1_size - 1;
+    max = SCREEN_HEIGHT - player1_size;
     if (player1_pos < 0) {
         player1_pos = 0;
     }
@@ -96,7 +102,7 @@ void force_bounds() {
     
     // Player 2
     min = 0;
-    max = SCREEN_HEIGHT - player2_size - 1;
+    max = SCREEN_HEIGHT - player2_size;
     if (player2_pos < 0) {
         player2_pos = 0;
     }
@@ -113,7 +119,7 @@ void move_ball() {
     
     // Left and right out
     min = 0;
-    max = SCREEN_WIDTH - ball_size -1;
+    max = SCREEN_WIDTH - ball_size;
     if (ball_x < min) {
         ball_x = ball_x_start;
         ball_y = ball_y_start;
@@ -129,7 +135,7 @@ void move_ball() {
     
     // Left and right collision
     min = player_width;
-    max = SCREEN_WIDTH - ball_size - player_width - 1;
+    max = SCREEN_WIDTH - ball_size - player_width;
     if (ball_x == min) {
         if (ball_y + ball_size > player2_pos && ball_y < player2_pos + player2_size) {
             ball_x = min;
@@ -145,7 +151,7 @@ void move_ball() {
     
     // Top and bottom collision
     min = 0;
-    max = SCREEN_HEIGHT - ball_size - 1;
+    max = SCREEN_HEIGHT - ball_size;
     if (ball_y < min) {
         ball_y = min;
         ball_dy *= -1;
