@@ -1,9 +1,9 @@
 #ifndef BMP_H
 #define BMP_H
 
-#define WORD int
-#define HALF short
-#define BYTE char
+#define WORD unsigned int
+#define HALF unsigned short
+#define BYTE unsigned char
 
 typedef struct __attribute__((__packed__)) {
     HALF file_type;
@@ -30,7 +30,7 @@ typedef struct __attribute__((__packed__)) {
 typedef struct {
     int width;
     int height;
-    unsigned char *data;
+    BYTE *data;
 } bmp_image;
 
 // Prototypes

@@ -1,5 +1,5 @@
 #include "graphics.h"
-
+#include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
 #include <sys/mman.h>
@@ -68,13 +68,16 @@ void screen_draw_image(int x, int y, bmp_image *image) {
     
     // For every row
     for (y = yi; y < ye; y++) {
+        int y_image = y - yi;
+
         // Determine start pixels
         int rowstart_screen = y * SCREEN_WIDTH * SCREEN_BPP;
-        int rowstart_image = y * image_width * SCREEN_BPP;
+        int rowstart_image = y_image * image->width * SCREEN_BPP;
         
         // Write row
         for (x = xi; x < xe; x++) {
-            screen_buffer[rowstart_screen + x] = image->data[rowstart_image + x];
+            int x_image = x - xi;
+            screen_buffer[rowstart_screen + x] = image->data[rowstart_image + x_image];
         }
     }
 }

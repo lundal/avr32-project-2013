@@ -1,7 +1,8 @@
 #include "pong.h"
 
+#include "graphics.h"
+
 #include <stdio.h>
-#include "graphics.c"
 
 FILE *buttons_file;
 
@@ -34,6 +35,8 @@ int main() {
     // Dispose
     fclose(buttons_file);
     screen_dispose();
+
+    return 0;
 }
 
 void main_loop() {
