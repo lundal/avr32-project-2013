@@ -1,4 +1,6 @@
 #include "graphics.h"
+
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -52,7 +54,6 @@ void screen_draw_rect(int x, int y, int width, int height, char r, char g, char 
             screen_buffer[rowstart + x + 0] = b;
             screen_buffer[rowstart + x + 1] = g;
             screen_buffer[rowstart + x + 2] = r;
-            
         }
     }
 }
@@ -68,7 +69,8 @@ void screen_draw_image(int x, int y, bmp_image *image) {
     
     // For every row
     for (y = yi; y < ye; y++) {
-        int y_image = y - yi;
+        // BMP images are stored from bottom to top
+        int y_image = ye - y - 1;
 
         // Determine start pixels
         int rowstart_screen = y * SCREEN_WIDTH * SCREEN_BPP;
@@ -104,8 +106,5 @@ void screen_update_rect(int x, int y, int width, int height) {
 }
 
 void screen_update_all() {
-    int i;
-    for (i = 0; i < SCREEN_SIZE; i++) {
-        screen_map[i] = screen_buffer[i];
-    }
+    memcpy(screen_map, screen_buffer, SCREEN_SIZE);
 }

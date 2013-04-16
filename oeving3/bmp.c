@@ -3,22 +3,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void flip_endian_word(WORD *value) {
-    BYTE *bytes = (BYTE *)value;
-    BYTE temp;
-    temp = bytes[0];
-    bytes[0] = bytes[3];
-    bytes[3] = temp;
-    temp = bytes[1];
-    bytes[1] = bytes[2];
-    bytes[2] = temp;
-}
-
-void flip_endian_half(HALF *value) {
-    BYTE *bytes = (BYTE *)value;
-    BYTE temp = bytes[0];
-    bytes[0] = bytes[1];
-    bytes[1] = temp;
+void reverse(void *array, int length) {
+    BYTE *data = (BYTE *)array;
+    int i;
+    int temp;
+    for (i = 0; i < length/2; i++) {
+        temp = data[i];
+        data[i] = data[length-i-1];
+        data[length-i-1] = temp;
+    }
 }
 
 bmp_image *bmp_load(char *filename) {
@@ -35,11 +28,11 @@ bmp_image *bmp_load(char *filename) {
     fread(&file_header, 1, sizeof(bmp_file_header), file);
         
     // Correct endianness
-    flip_endian_half(&file_header.file_type);
-    flip_endian_word(&file_header.file_size);
-    flip_endian_half(&file_header.reserved1);
-    flip_endian_half(&file_header.reserved2);
-    flip_endian_word(&file_header.data_offset);
+    reverse(&file_header.file_type, HALF_S);
+    reverse(&file_header.file_size, WORD_S);
+    reverse(&file_header.reserved1, HALF_S);
+    reverse(&file_header.reserved2, HALF_S);
+    reverse(&file_header.data_offset, WORD_S);
     
     // Verify that this is a BMP file
     if (file_header.file_type != 0x4D42) {
@@ -52,22 +45,24 @@ bmp_image *bmp_load(char *filename) {
     fread(&info_header, 1, sizeof(bmp_info_header), file);
     
     // Correct endianness
-    flip_endian_word(&info_header.header_size);
-    flip_endian_word(&info_header.image_width);
-    flip_endian_word(&info_header.image_height);
-    flip_endian_half(&info_header.color_planes);
-    flip_endian_half(&info_header.bpp);
-    flip_endian_word(&info_header.compression);
-    flip_endian_word(&info_header.image_size);
-    flip_endian_word(&info_header.resolution_horizontal);
-    flip_endian_word(&info_header.resolution_vertical);
-    flip_endian_word(&info_header.colors_total);
-    flip_endian_word(&info_header.colors_important);
+    reverse(&info_header.header_size, WORD_S);
+    reverse(&info_header.image_width, WORD_S);
+    reverse(&info_header.image_height, WORD_S);
+    reverse(&info_header.color_planes, HALF_S);
+    reverse(&info_header.bpp, HALF_S);
+    reverse(&info_header.compression, WORD_S);
+    reverse(&info_header.image_size, WORD_S);
+    reverse(&info_header.resolution_horizontal, WORD_S);
+    reverse(&info_header.resolution_vertical, WORD_S);
+    reverse(&info_header.colors_total, WORD_S);
+    reverse(&info_header.colors_important, WORD_S);
     
     // Move to bitmap data
     fseek(file, file_header.data_offset, SEEK_SET);
     
-    // NOTE: Assume 24 bpp and width multiple of 4
+    // ***********************************************
+    // * NOTE: Assume 24 bpp and width multiple of 4 *
+    // ***********************************************
     
     // Allocate memory
     BYTE *data = (BYTE *)malloc(info_header.image_size);

@@ -5,6 +5,10 @@
 #define HALF unsigned short
 #define BYTE unsigned char
 
+#define WORD_S sizeof(WORD)
+#define HALF_S sizeof(HALF)
+#define BYTE_S sizeof(BYTE)
+
 typedef struct __attribute__((__packed__)) {
     HALF file_type;
     WORD file_size;

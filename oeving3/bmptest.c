@@ -9,7 +9,7 @@ int main() {
     
     // Run
     printf("Loading...\n");
-    bmp_image *bmp = bmp_load("test.bmp");
+    bmp_image *bmp = bmp_load("test2.bmp");
     
     printf("BMP: %d, %d\n", bmp->width, bmp->height);
 
