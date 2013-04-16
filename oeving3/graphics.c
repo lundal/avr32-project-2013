@@ -34,33 +34,68 @@ void screen_fill(char r, char g, char b) {
 }
 
 void screen_draw_rect(int x, int y, int width, int height, char r, char g, char b) {
-    int xi;
-    int yi;
-    int xe = x + width;
-    int ye = y + height;
-    for (yi = y; yi < ye; yi++) {
-        for (xi = x; xi < xe; xi++) {
-            int pixel = yi * SCREEN_WIDTH * SCREEN_BPP + xi * SCREEN_BPP;
-            screen_buffer[pixel + 0] = b;
-            screen_buffer[pixel + 1] = g;
-            screen_buffer[pixel + 2] = r;
+    // Initial (sub)pixel
+    int xi = x * SCREEN_BPP;
+    int yi = y;
+    
+    // End (sub)pixel
+    int xe = xi + width * SCREEN_BPP;
+    int ye = yi + height;
+    
+    // For every row
+    for (y = yi; y < ye; y++) {
+        // Determine start pixel
+        int rowstart = y * SCREEN_WIDTH * SCREEN_BPP;
+        
+        // Write row
+        for (x = xi; x < xe; x += 3) {
+            screen_buffer[rowstart + x + 0] = b;
+            screen_buffer[rowstart + x + 1] = g;
+            screen_buffer[rowstart + x + 2] = r;
             
         }
     }
 }
 
+void screen_draw_image(int x, int y, bmp_image *image) {
+    // Initial (sub)pixel
+    int xi = x * SCREEN_BPP;
+    int yi = y;
+    
+    // End (sub)pixel
+    int xe = xi + image->width * SCREEN_BPP;
+    int ye = yi + image->height;
+    
+    // For every row
+    for (y = yi; y < ye; y++) {
+        // Determine start pixels
+        int rowstart_screen = y * SCREEN_WIDTH * SCREEN_BPP;
+        int rowstart_image = y * image_width * SCREEN_BPP;
+        
+        // Write row
+        for (x = xi; x < xe; x++) {
+            screen_buffer[rowstart_screen + x] = image->data[rowstart_image + x];
+        }
+    }
+}
+
 void screen_update_rect(int x, int y, int width, int height) {
-    int xi;
-    int yi;
-    int xe = x + width;
-    int ye = y + height;
-    for (yi = y; yi < ye; yi++) {
-        for (xi = x; xi < xe; xi++) {
-            int pixel = yi * SCREEN_WIDTH * SCREEN_BPP + xi * SCREEN_BPP;
-            screen_map[pixel + 0] = screen_buffer[pixel + 0];
-            screen_map[pixel + 1] = screen_buffer[pixel + 1];
-            screen_map[pixel + 2] = screen_buffer[pixel + 2];
-            
+    // Initial (sub)pixel
+    int xi = x * SCREEN_BPP;
+    int yi = y;
+    
+    // End (sub)pixel
+    int xe = xi + width * SCREEN_BPP;
+    int ye = yi + height;
+    
+    // For every row
+    for (y = yi; y < ye; y++) {
+        // Determine start pixel
+        int rowstart = y * SCREEN_WIDTH * SCREEN_BPP;
+        
+        // Write row
+        for (x = xi; x < xe; x++) {
+            screen_map[rowstart + x] = screen_buffer[rowstart + x];
         }
     }
 }

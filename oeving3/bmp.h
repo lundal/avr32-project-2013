@@ -1,3 +1,5 @@
+#ifndef BMP_H
+#define BMP_H
 
 #define WORD int
 #define HALF short
@@ -30,3 +32,8 @@ typedef struct {
     int height;
     unsigned char *data;
 } bmp_image;
+
+// Prototypes
+bmp_image *bmp_load(char *filename);
+
+#endif
