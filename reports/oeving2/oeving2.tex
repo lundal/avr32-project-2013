@@ -223,10 +223,24 @@ With the setup functioning correctly, verified by some simple test soundtracks, 
 
 Since MIDI is structured like a buffer, we started by reading the whole MIDI file into one. This allowed us to create a few simple methods to get the next value from the file, parse\_varint() and parse\_int(). The first reads a variable-length number where the most significant bit of each byte determines whether it should continue or not. The second reads a specified number of bytes.
 
-We then started the parsing procedure by first 
+We started the parsing by first reading the header data followed by storing the individual tracks into different buffers. Since the board can only play so many tones at a time, we also created a global variable to to keep track of how many of the channels were in use. We then continued to the main processing loop.
 
-Then we can read the next value through methods
+Since our simplified format only has one sequence of events, it is necessary to merge all the MIDI tracks into one. This was accomplished by checking the delta-time of the next event for each track to determine the which one had the soonest event. Once we have found the track, we process the next event on it by calling track\_process\_event(), before updating the delta-times of the other tracks to make sure everything stays in sync.
 
+We process the next event by first checking its type. Due to our simplified format we only cared about a few of them, namely “Note on”, “Note off” and “Set tempo”. The rest still had to be taken into account though, as we needed to skip the correct amount of bytes.
+
+For note on events it was necessary to find an available channel. This was done with the function channel\_find() which checks all channels for one that is available. However, if none is found and the parameter to enforce channel stealing is enabled, it will return the channel with lowest volume. This allows playback of MIDI files with more concurrent tones while reducing sound artifacts. For note off events we call the function channel\_recover() which simply sets the channel to unused. If it is not found, either due to an error in the MIDI file or channel stealing, it will produce a warning.
+
+Then, for both event types, we output data for one event of our simplified format. Delta-time is saved as the number of seconds multiplied by the sample rate (example: 0.31 * SAMPLE\_RATE) to increase portability, and allow us to change the playback sample rate without reconverting the MIDI files. Set tempo only triggers a recalculation of the global BPM (Beats Per Minute) variable.
+
+Only the note on and off events consumes time in our format. This meant that the delta-time of other events had to be added to the next event of that track. This was accomplished by returning 1 for those that consume time and 0 for those that do not, which the main loop uses to update the times. This concluded our converter, and the whole MIDI system was complete. The general program flow for the converter can be seen in figure \ref{midi2c}.
+
+\begin{figure}[b]
+        \centering
+            \includegraphics[width=\textwidth]{midi2c}
+            \caption{MIDI converter}
+            \label{midi2c}
+\end{figure}
 
 \subsection{Tools}
 
@@ -248,7 +262,10 @@ We designed some tests for the final implementation, see Appendix A. The final v
 
 \clearpage
 \section{Evaluation Of Assignment}
-It was a fun challenge. 
+It was a fun challenge!
+
+It was however a bit difficult to understand how to enable the clock for the ABDAC, as the only reference in the Compendium \cite{compendium} is the line “pm\rightarrow GCCTRL[6] = data”.
+
 \clearpage
 \section{Discussion}
 
@@ -256,21 +273,21 @@ During the startup phase, after turning on the STK1000, just before LED0 is lit 
 
 During development we noticed a strong audible difference between square waves and sine waves, see figure \ref{waveforms}. We heard the sounds generated with square waves much clearer than the sine waves and elected therefore to use them for our final code, even though it sounded more electronic, so to speak.
 
-\subsection{Issues during development}
+We did observe in Audacity however that the sound output isn’t quite what we expected. Sine waves look correct, but square waves does not look square, as can be seen in figure \ref{actualsquare}. We do not know if this is because of hardware deterioration, or simply the inner workings of the ABDAC.
+\subsection{Issues}
 
-At one point during development, we noticed that with eight tracks enabled, we could play two tracks simultaneously without loss of speed and clarity of sound(i.e no particularly greater amount of crackling, or noise in the background). Any more tracks played at the same time however, would result in slower and more faded sound.
+At one point during development, we noticed that with eight tracks enabled, we could play two tracks simultaneously without loss of speed and clarity of sound (i.e no particularly greater amount of crackling, or noise in the background). Any more tracks played at the same time however, would result in slower and more faded sound. This was discovered to be due to the ABDAC underrunning, causing it to use an extra interrupt cycle, and thus reducing the pitch.
 
-After some inquiries we came upon a stackoverflow post\cite{multifile}, which submitted that having multiple source files(which we do), decreased run-time performance. We then made an “all” c file that included all the c files and compiled this “all” file. We are inclined to believe that the post’s claim was correct as doing this let us play a whole eight tracks without loss of speed and seemingly, clarity of sound as well, though it should be noted at this point that we observe in Audacity that the sound isn’t quite as we expect and we wonder if this might be on account of hardware deterioration.
+After some inquiries we came upon a stackoverflow post\cite{multifile}, which stated that having multiple source files(which we do), decreased run-time performance. We then made an “all” c file that included all the c files and compiled this “all” file. We are inclined to believe that the post’s claim was correct as doing this let us play a whole eight tracks without loss of speed.
 
-Problems:
+A problem that has continued through the whole assignment is noise from the ABDAC. During pauses in the music, where the ABDAC is fed the value 0 repeatedly, a tone with seemingly random frequency can be heard. All attempts at correcting this in software have only masked the problem by another sound and thus failed. However, by intense searching of the internet we found that the audio output of the STK1000 might not be designed for load-heavy devices such as headphones, and that it might sound better when connected to an amplifier\cite{impedance}. By connecting the output to some speakers we noticed a slight reduction in the noise level, but it was still present. This leads us to think it is a hardware issue that we can not prevent. 
 
-A problem that has continued through the whole assignment is noise from the ABDAC. During pauses in the music, where the ABDAC is fed the value 0 repeatedly, a tone with seemingly random frequency can be heard. All attempts at correcting this in software have only masked the problem by another sound and thus failed. However, by intense searching of the internet we found that the audio output of the STK1000 might not be designed for load-heavy devices such as headphones, and that it might sound better when connected to an amplifier\cite{impedance}. By connecting the output to some speakers we noticed a slight reduction in the noise level, but it was still present. This leads us to think it is a hardware issue that we can not prevent.
+Oscillator division seems not to be working according to specifications. At first we just made the playback system think it was running at a lower sample rate and then made the ABDAC constantly underrun (So that the abdac only received data every other interrupt cycle). We did however, find out that it does work if we enable clock division after enabling the clock. This is the exact opposite from the recommended procedure in the AP7000 documentation \cite{ap7000}.
 
-MIDI files do not always follow the standard
+The MIDI format allows for theoretically up to 2048 notes to be played simultaneously. However, when running our code, the STK1000 could only play 12 simultaneous notes at approximately 24 kHz. If we try to increase the number of notes we’ll have to decrease the frequency and vica versa.
 
-Challenge: MIDI files can theoretically play 16*128 = 2048 notes simultaneously, but our board can only play 12 at ~24kHz
+It’s worth noting that MIDI files don’t always follow the standard. Sometimes they use note on events with volume 0 instead of note off, note on events instead of note aftertouches and so on. In addition, a relatively vital part of the specification was left out by what sources we could find \cite{sonicspot} \cite{mididoc}. This is that when the most significant bit of the type-and-channel byte (first byte after delta-time) is 0, this is actually the first parameter to the event, and the type-and-channel is that of the previous event. This is possible because all type-and-channel bytes have a most significant bit of 1 and parameters 0. This complicated the development of the MIDI converter.
 
-Oscillator division seems not to be working according to specifications, therefore we just pretend it is running at targeted speed and make the ABDAC underrun (So that the abdac will only receive data every other time). *** It works if we enable the division after enabling the clock. This is the exact opposite of the recommended procedure in the AP7000 documentation\cite{AP7000}. ***
 
 \subsection{Modularity}
 
@@ -327,6 +344,16 @@ Web 14.03.2013
 \textless
 \url{http://www.sonicspot.com/guide/midifiles.html}
 \textgreater
+
+\bibitem{mididoc}
+cse4501, “The MIDI File Format”
+\emph{cse4051/projects/midi}
+Web 14.03.2013
+\textless
+\url{http://cs.fit.edu/~ryan/cse4051/projects/midi/midi.html}
+\textgreater
+
+
 
 
 \bibitem{multifile}
