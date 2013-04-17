@@ -101,15 +101,28 @@ void screen_draw_image(int x, int y, bmp_image *image) {
         
         // Determine start pixels
         int rowstart_screen = y * SCREEN_WIDTH * SCREEN_BPP;
-        int rowstart_image = (ye_image - dy - 1) * image->width * SCREEN_BPP; // Read BMP from bottom up
+        int rowstart_image = (ye_image - dy - 1) * image->width * SCREEN_BPP; // Read BMP from bottom and up
         
         // Write row
-        for (x = xi_c; x < xe_c; x++) {
+        for (x = xi_c; x < xe_c; x += 3) {
             // Calculate delta
             int dx = x - xi_c;
             
+            // Read
+            char b = image->data[rowstart_image + xi_image + dx + 0];
+            char g = image->data[rowstart_image + xi_image + dx + 1];
+            char r = image->data[rowstart_image + xi_image + dx + 2];
+            
+            // If transparent (fuchsia)
+            if (r == 0xFF && g == 0x00 && b == 0xFF) {
+                // Skip
+                continue;
+            }
+            
             // Write
-            screen_buffer[rowstart_screen + x] = image->data[rowstart_image + xi_image + dx];
+            screen_buffer[rowstart_screen + x + 0] = b;
+            screen_buffer[rowstart_screen + x + 1] = g;
+            screen_buffer[rowstart_screen + x + 2] = r;
         }
     }
 }
