@@ -50,7 +50,7 @@ void screen_draw_rect(int x, int y, int width, int height, char r, char g, char 
     // Crop to screen
     int xi_c = MAX(0, xi);
     int yi_c = MAX(0, yi);
-    int xe_c = MIN(SCREEN_WIDTH, xe);
+    int xe_c = MIN(SCREEN_WIDTH * SCREEN_BPP, xe);
     int ye_c = MIN(SCREEN_HEIGHT, ye);
     
     // For every row
@@ -79,7 +79,7 @@ void screen_draw_image(int x, int y, bmp_image *image) {
     // Crop to screen
     int xi_c = MAX(0, xi);
     int yi_c = MAX(0, yi);
-    int xe_c = MIN(SCREEN_WIDTH, xe);
+    int xe_c = MIN(SCREEN_WIDTH * SCREEN_BPP, xe);
     int ye_c = MIN(SCREEN_HEIGHT, ye);
     
     // Draw dimensions
@@ -88,23 +88,20 @@ void screen_draw_image(int x, int y, bmp_image *image) {
     
     // Initial image (sub)pixel
     int xi_image = xi_c - xi;
-    int yi_image = yi_c - yi;
+    int yi_image = yi_c - yi; // Offset for image saved the correct way
     
     // End image (sub)pixel
     int xe_image = xi_image + width;
-    int ye_image = yi_image + height;
+    int ye_image = image->height - yi_image; // Where we actually start reading the BMP: Bottom minus what would normally be the top pixel
     
     // For every row
     for (y = yi_c; y < ye_c; y++) {
         // Calculate delta
         int dy = y - yi_c;
         
-        // BMP images are stored from bottom to top
-        //int y_image = ye - y - 1;
-
         // Determine start pixels
         int rowstart_screen = y * SCREEN_WIDTH * SCREEN_BPP;
-        int rowstart_image = (ye_image - dy - 1) * image->width * SCREEN_BPP;
+        int rowstart_image = (ye_image - dy - 1) * image->width * SCREEN_BPP; // Read BMP from bottom up
         
         // Write row
         for (x = xi_c; x < xe_c; x++) {
@@ -129,7 +126,7 @@ void screen_update_rect(int x, int y, int width, int height) {
     // Crop to screen
     int xi_c = MAX(0, xi);
     int yi_c = MAX(0, yi);
-    int xe_c = MIN(SCREEN_WIDTH, xe);
+    int xe_c = MIN(SCREEN_WIDTH * SCREEN_BPP, xe);
     int ye_c = MIN(SCREEN_HEIGHT, ye);
     
     // For every row
