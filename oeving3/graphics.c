@@ -135,8 +135,14 @@ void screen_draw_text(int x, int y, FONT font, char *text) {
         // Get character image
         bmp_image *image = font[(int)text[i]];
         
+        // Check if null
+        if (image == NULL) {
+            // Skip
+            continue;
+        }
+        
         // Draw image
-        screen_draw_image(x, y, image);
+        screen_draw_bmp(x, y, image);
         
         // Move right for next character
         x += image->width + 1;
