@@ -13,19 +13,14 @@ int main() {
     FONT font2 = font_copy(font);
     font_tint(font2, 0, 255, 0);
     
-    // Draw basic bmp
-    bmp_image *bmp = bmp_load("test2.bmp");
-    screen_draw_bmp(-50, -50, bmp);
-    screen_update_all();
-    
-    
     // Try to draw text
     int i;
-    for (i = 0; i < 240; i += 12) {
+    for (i = 0; i < 230; i += 1) {
+        screen_draw_text_background(0, i, font2, "EXTERMINATE!", 255, 2, 255);
         screen_draw_text(0, i, font2, "EXTERMINATE!");
-        screen_draw_text(100, i, font, "The rabbit army of pixie-land!");
+        screen_update_rect(0, i, 100, 11);
+        screen_update_all();
     }
-    screen_update_all();
     
     // Dispose
     screen_dispose();
