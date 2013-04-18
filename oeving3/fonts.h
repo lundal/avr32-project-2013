@@ -8,5 +8,7 @@
 
 // Prototypes
 FONT font_load(char *folder);
+FONT font_copy(FONT font);
+void font_tint(FONT font, char r, char g, char b);
 
 #endif
