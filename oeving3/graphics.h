@@ -2,6 +2,7 @@
 #define GRAPHICS_H
 
 #include "bmp.h"
+#include "fonts.h"
 
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 240
