@@ -133,6 +133,12 @@ void bmp_tint(bmp_image *image, char r, char g, char b) {
         char g_image = image->data[i + 1];
         char r_image = image->data[i + 2];
         
+        // If transparent (fuchsia)
+        if (r == 0xFF && g == 0x00 && b == 0xFF) {
+            // Skip
+            continue;
+        }
+        
         // Calculate color
         char b_out = (char)(((int)b * (int)b_image) / 255);
         char g_out = (char)(((int)g * (int)g_image) / 255);
