@@ -61,9 +61,9 @@ bmp_image *bmp_load(char *filename) {
     // Move to bitmap data
     fseek(file, file_header.data_offset, SEEK_SET);
     
-    // ***********************************************
-    // * NOTE: Assume 24 bpp and width multiple of 4 *
-    // ***********************************************
+    // ***********************
+    // * NOTE: Assume 24 bpp *
+    // ***********************
     
     // Allocate memory
     BYTE *data = (BYTE *)malloc(info_header.image_size);
@@ -74,8 +74,19 @@ bmp_image *bmp_load(char *filename) {
         return NULL;
     }
     
-    // Read bitmap data
-    fread(data, 1, info_header.image_size, file);
+    // For each line
+    int i;
+    for (i = 0; i < info_header.image_height; i++) {
+        // Get line start
+        BYTE *line = &data[i * info_header.image_width * BMP_BPP];
+        
+        // Read a line of bitmap data
+        fread(line, 1, info_header.image_width * BMP_BPP, file);
+        
+        // Seek to next line
+        int seek_dist = info_header.image_width % 4;
+        fseek(file, seek_dist, SEEK_CUR);
+    }
     
     // Verify that data was read
     if (data == NULL) {
