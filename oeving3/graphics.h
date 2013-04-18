@@ -14,6 +14,7 @@ void screen_dispose();
 void screen_fill(char r, char g, char b);
 void screen_draw_rect(int x, int y, int width, int height, char r, char g, char b);
 void screen_draw_bmp(int x, int y, bmp_image *image);
+void screen_draw_text(int x, int y, FONT font, char *text);
 void screen_update_rect(int x, int y, int width, int height);
 void screen_update_all();
 
