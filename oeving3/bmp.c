@@ -84,7 +84,7 @@ bmp_image *bmp_load(char *filename) {
         fread(line, 1, info_header.image_width * BMP_BPP, file);
         
         // Seek to next line
-        int seek_dist = info_header.image_width % 4;
+        int seek_dist = info_header.image_width % 4; // This is actually short for (4 - (info_header.image_width * BMP_BPP) % 4) % 4;
         fseek(file, seek_dist, SEEK_CUR);
     }
     
