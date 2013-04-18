@@ -17,10 +17,11 @@ void tick(int32_t tick_nr){
 //And then there needs to be a drawing method
 void draw(){
 	int i;
-    for(i = 0; i < n_game_objects; i++){
+    for(i = 0; i < draw_queue_length; i++){
         //put current gameobjects image in some screen buffer array at correct position.
+		screen_draw_bmp(draw_queue[i]->pos.x, draw_queue[i]->pos.y, draw_queue[i]->image);
     }
-
+	draw_queue_length = 0;
     //Maybe swap directly here to the screen
 }
 
