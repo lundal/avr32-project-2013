@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 void reverse(void *array, int length) {
     BYTE *data = (BYTE *)array;
@@ -95,3 +96,51 @@ bmp_image *bmp_load(char *filename) {
     return image;
 }
 
+bmp_image *bmp_copy(bmp_image *image) {
+    // Calculate size
+    int size = image->width * image->height * BMP_BPP;
+    
+    // Allocate memory
+    BYTE *data = (BYTE *)malloc(size);
+    
+    // Verify allocation
+    if (data == NULL) {
+        return NULL;
+    }
+    
+    // Copy data
+    memcpy(data, image->data, size);
+    
+    // Create struct
+    bmp_image *image_n = (bmp_image *)malloc(sizeof(bmp_image));
+    image_n->width = image->width;
+    image_n->height = image->height;
+    image_n->data = data;
+    
+    // Return image
+    return image_n;
+}
+
+void bmp_tint(bmp_image *image, char r, char g, char b) {
+    // Calculate size
+    int size = image->width * image->height * BMP_BPP;
+    
+    // For every pixel
+    int i;
+    for (i = 0; i < size; i += 3) {
+        // Read
+        char b_image = image->data[i + 0];
+        char g_image = image->data[i + 1];
+        char r_image = image->data[i + 2];
+        
+        // Calculate color
+        char b_out = (char)(((int)b * (int)b_image) / 255);
+        char g_out = (char)(((int)g * (int)g_image) / 255);
+        char r_out = (char)(((int)r * (int)r_image) / 255);
+        
+        // Write
+        image->data[i + 0] = b_out;
+        image->data[i + 1] = g_out;
+        image->data[i + 2] = r_out;
+    }
+}
