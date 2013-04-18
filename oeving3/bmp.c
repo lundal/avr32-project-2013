@@ -108,6 +108,11 @@ bmp_image *bmp_load(char *filename) {
 }
 
 bmp_image *bmp_copy(bmp_image *image) {
+    // Verify image
+    if (image == NULL) {
+        return NULL;
+    }
+    
     // Calculate size
     int size = image->width * image->height * BMP_BPP;
     
@@ -133,6 +138,11 @@ bmp_image *bmp_copy(bmp_image *image) {
 }
 
 void bmp_tint(bmp_image *image, char r, char g, char b) {
+    // Verify image
+    if (image == NULL) {
+        return;
+    }
+    
     // Calculate size
     int size = image->width * image->height * BMP_BPP;
     
