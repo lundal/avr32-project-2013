@@ -67,7 +67,7 @@ void screen_draw_rect(int x, int y, int width, int height, char r, char g, char 
     }
 }
 
-void screen_draw_image(int x, int y, bmp_image *image) {
+void screen_draw_bmp(int x, int y, bmp_image *image) {
     // Initial (sub)pixel
     int xi = x * SCREEN_BPP;
     int yi = y;
@@ -83,15 +83,15 @@ void screen_draw_image(int x, int y, bmp_image *image) {
     int ye_c = MIN(SCREEN_HEIGHT, ye);
     
     // Draw dimensions
-    int width = xe_c - xi_c;
-    int height = ye_c - yi_c;
+    //int width = xe_c - xi_c;
+    //int height = ye_c - yi_c;
     
     // Initial image (sub)pixel
     int xi_image = xi_c - xi;
     int yi_image = yi_c - yi; // Offset for image saved the correct way
     
     // End image (sub)pixel
-    int xe_image = xi_image + width;
+    //int xe_image = xi_image + width;
     int ye_image = image->height - yi_image; // Where we actually start reading the BMP: Bottom minus what would normally be the top pixel
     
     // For every row
