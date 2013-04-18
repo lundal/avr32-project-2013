@@ -3,7 +3,7 @@
 
 #include "bmp.h"
 
-#define FONT (bmp_image **)
+#define FONT bmp_image**
 #define FONT_SET_SIZE 0x80
 
 // Prototypes
