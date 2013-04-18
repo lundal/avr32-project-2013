@@ -117,6 +117,22 @@ void screen_draw_image(int x, int y, bmp_image *image) {
     }
 }
 
+void screen_draw_text(int x, int y, FONT font, char *text) {
+    int length = strlen(text);
+    
+    int i;
+    for (i = 0; i < length; i++) {
+        // Get character image
+        bmp_image *image = font[(int)text[i]];
+        
+        // Draw image
+        screen_draw_image(x, y, image);
+        
+        // Move right for next character
+        x += image->width + 1;
+    }
+}
+
 void screen_update_rect(int x, int y, int width, int height) {
     // Initial (sub)pixel
     int xi = x * SCREEN_BPP;
