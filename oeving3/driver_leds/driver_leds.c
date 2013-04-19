@@ -17,7 +17,6 @@
 #include "ap7000.h"
 
 // Prototypes
-
 static int __init driver_init(void);
 static void __exit driver_exit(void);
 static int driver_open(struct inode *inode, struct file *filp);
@@ -26,7 +25,6 @@ static ssize_t driver_read(struct file *filp, char __user *buff, size_t count, l
 static ssize_t driver_write(struct file *filp, const char __user *buff, size_t count, loff_t *offp);
 
 // File Operations Struct
-
 static struct file_operations driver_fops = {
   .owner = THIS_MODULE,
   .read = driver_read,
@@ -36,9 +34,11 @@ static struct file_operations driver_fops = {
 };
 
 // Constants
-
 static dev_t dev;
 static struct cdev *cdev;
+
+static char *driver_name = "leds";
+
 static unsigned long MEM_ADDR_START = AVR32_PIOB_ADDRESS;
 static unsigned long MEM_ADDR_LEN = AVR32_PIOC_ADDRESS - AVR32_PIOB_ADDRESS;
 
@@ -47,31 +47,64 @@ static int elements_all;
 
 /*****************************************************************************/
 
+static void init_hardware(void) {
+	AVR32_PIOB.per = elements_all;
+	AVR32_PIOB.oer = elements_all;
+	AVR32_PIOB.codr = elements_all;
+}
+
+static void release_hardware(void) {
+    AVR32_PIOB.codr = elements_all;
+    AVR32_PIOB.pdr = elements_all;
+}
+
+/*****************************************************************************/
+
 static int __init driver_init(void) {
+    int result;
+    
 	// Setup vars
 	elements_all = elements[0] + elements[1] + elements[2] + elements[3]
 		+ elements[4] + elements[5] + elements[6] + elements[7];
 	
 	// Allocate device number
-	//dev = MKDEV(1337, 0);
-	int res_devnum = alloc_chrdev_region(&dev, 0, 1, "LEDS");
+	result = alloc_chrdev_region(&dev, 0, 1, driver_name);
 	
 	// Check for errors
-	if (res_devnum < 0) return res_devnum;
+	if (result < 0) {
+        printk(KERN_INFO "Allocating device number for %s failed!\n", driver_name);
+        return result;
+    }
 	
 	// Request I/O ports
-	request_region(MEM_ADDR_START, MEM_ADDR_LEN, "LEDS");
+	request_region(MEM_ADDR_START, MEM_ADDR_LEN, driver_name);
 	
 	// Init hardware
-	AVR32_PIOB.per = elements_all;
-	AVR32_PIOB.oer = elements_all;
-	AVR32_PIOB.codr = elements_all;
+	init_hardware();
 	
-	// Register Device
+	// Set up character device
 	cdev = cdev_alloc();
 	cdev_init(cdev, &driver_fops);
-	cdev_add(cdev, dev, 1);
+    cdev->owner = THIS_MODULE;
+    
+    // Add device to system
+	result = cdev_add(cdev, dev, 1);
 	
+	// Check for errors
+	if (result < 0) {
+        // Release hardware
+        release_hardware();
+        
+        // Release I/O ports
+        release_region(MEM_ADDR_START, MEM_ADDR_LEN);
+        
+        // Unregister device
+        unregister_chrdev_region(dev, 1);
+        
+        printk(KERN_INFO "Adding device %s to system failed!\n", driver_name);
+        return result;
+    }
+    
 	printk(KERN_INFO "LED driver loaded! (%d, %d)", MAJOR(dev), MINOR(dev));
 	
 	return 0;
@@ -80,20 +113,17 @@ static int __init driver_init(void) {
 /*****************************************************************************/
 
 static void __exit driver_exit(void) {
-	// TODO?
-	
 	// Release device number
 	cdev_del(cdev);
 	unregister_chrdev_region(dev, 1);
 	
 	// Release hardware
-	AVR32_PIOB.codr = elements_all;
-	AVR32_PIOB.pdr = elements_all;
+    release_hardware();
 	
 	// Release I/O ports
 	release_region(MEM_ADDR_START, MEM_ADDR_LEN);
 	
-	printk(KERN_INFO "LED driver killed!");
+	printk(KERN_INFO "%s driver killed!\n", driver_name);
 }
 
 /*****************************************************************************/
@@ -107,9 +137,11 @@ static int driver_release(struct inode *inode, struct file *filp) {
 }
 
 static ssize_t driver_read(struct file *filp, char __user *buff, size_t count, loff_t *offp) {
+    // Read pins
 	int pindata = AVR32_PIOB.pdsr;
+    
+    // Store the state of each pin as a character (capital letter means on)
 	char data[8];
-	
 	data[0] = (pindata & elements[0]) ? 'A' : 'a';
 	data[1] = (pindata & elements[1]) ? 'B' : 'b';
 	data[2] = (pindata & elements[2]) ? 'C' : 'c';
@@ -119,25 +151,27 @@ static ssize_t driver_read(struct file *filp, char __user *buff, size_t count, l
 	data[6] = (pindata & elements[6]) ? 'G' : 'g';
 	data[7] = (pindata & elements[7]) ? 'H' : 'h';
 	
-	/*
-	int i = count;
-	while (i--) {
-		
-	}*/
-	
-	if(count > 8) count = 8;  //Do not allow reads outside the array.
+    // Limit read count to 8
+	if (count > 8) {
+        count = 8;
+    }
+    
+    // Send data to user
 	copy_to_user(buff, data, count);
 	
 	return count;
 }
 
 static ssize_t driver_write(struct file *filp, const char __user *buff, size_t count, loff_t *offp) {
+    // Read data from user
 	char data[count];
 	copy_from_user(data, buff, count);
-	printk(KERN_INFO "LED driver recieving data!");
-	int i = 0;
-	while (i < count) {
+    
+    // For every character
+	int i;
+	for (i = 0; i < count; i++) {
 		switch (data[i]) {
+            // Enable leds for capital letters
 			case 'A': AVR32_PIOB.SODR.p8 = 1; break;
 			case 'B': AVR32_PIOB.SODR.p9 = 1; break;
 			case 'C': AVR32_PIOB.SODR.p10 = 1; break;
@@ -147,6 +181,7 @@ static ssize_t driver_write(struct file *filp, const char __user *buff, size_t c
 			case 'G': AVR32_PIOB.SODR.p16 = 1; break;
 			case 'H': AVR32_PIOB.SODR.p30 = 1; break;
 			
+			// Disable leds for small letters
 			case 'a': AVR32_PIOB.CODR.p8 = 1; break;
 			case 'b': AVR32_PIOB.CODR.p9 = 1; break;
 			case 'c': AVR32_PIOB.CODR.p10 = 1; break;
@@ -156,7 +191,6 @@ static ssize_t driver_write(struct file *filp, const char __user *buff, size_t c
 			case 'g': AVR32_PIOB.CODR.p16 = 1; break;
 			case 'h': AVR32_PIOB.CODR.p30 = 1; break;
 		}
-		i++;
 	}
 	
 	return count;
