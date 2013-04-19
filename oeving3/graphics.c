@@ -191,6 +191,48 @@ void screen_draw_text(int x, int y, font *f, char *text) {
     }
 }
 
+void screen_update_text(int x, int y, font *f, char *text) {
+    int i;
+    
+    // Determine text length
+    int length = strlen(text);
+    
+    // Vars to keep track of size
+    int x_start = x;
+    int y_max = 0;
+    
+    // Loop through characters
+    for (i = 0; i < length; i++) {
+        // Get character image
+        bmp_image *image = f->bitmaps[(int)text[i]];
+        
+        // Check if null
+        if (image == NULL) {
+            // Skip
+            continue;
+        }
+        
+        // Update max y
+        y_max = MAX(y_max, image->height);
+        
+        // Move right for next character
+        x += image->width + f->spacing;
+    }
+    
+    // Calculate deltas
+    int dx = x - x_start - f->spacing;
+    int dy = y_max;
+    
+    // Calculate start position and size
+    int xi = x_start - f->padding_left;
+    int yi = y - f->padding_top;
+    int w = dx + f->padding_left + f->padding_right;
+    int h = dy + f->padding_top + f->padding_bottom;
+    
+    // Update
+    screen_update_rect(xi, yi, w, h);
+}
+
 void screen_update_rect(int x, int y, int width, int height) {
     // Initial (sub)pixel
     int xi = x * SCREEN_BPP;
