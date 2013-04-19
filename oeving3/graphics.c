@@ -127,7 +127,7 @@ void screen_draw_bmp(int x, int y, bmp_image *image) {
     }
 }
 
-void screen_draw_text(int x, int y, FONT font, char *text) {
+void screen_draw_text(int x, int y, FONT font, char *text, int spacing) {
     // Determine text length
     int length = strlen(text);
     
@@ -147,11 +147,11 @@ void screen_draw_text(int x, int y, FONT font, char *text) {
         screen_draw_bmp(x, y, image);
         
         // Move right for next character
-        x += image->width + 1;
+        x += image->width + spacing;
     }
 }
 
-void screen_draw_text_background(int x, int y, FONT font, char *text, int padding, char r, char g, char b) {
+void screen_draw_text_background(int x, int y, FONT font, char *text, int spacing, int padding, char r, char g, char b) {
     // Determine text length
     int length = strlen(text);
     
@@ -175,7 +175,7 @@ void screen_draw_text_background(int x, int y, FONT font, char *text, int paddin
         y_max = MAX(y_max, image->height);
         
         // Move right for next character
-        x += image->width + 1;
+        x += image->width + spacing;
     }
     
     // Calculate deltas
