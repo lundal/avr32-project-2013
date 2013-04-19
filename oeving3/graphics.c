@@ -160,8 +160,14 @@ void screen_draw_text(int x, int y, font *f, char *text) {
     int dx = x - x_start - f->spacing;
     int dy = y_max;
     
+    // Calculate start position and size
+    int xi = x_start - f->padding_left;
+    int yi = y - f->padding_top;
+    int w = dx + f->padding_left + f->padding_right;
+    int h = dy + f->padding_top + f->padding_bottom;
+    
     // Draw background
-    screen_draw_rect(x_start - f->padding, y - f->padding, dx + 2 * f->padding, dy + 2 * f->padding, f->background_r, f->background_g, f->background_b);
+    screen_draw_rect(xi, yi, w, h, f->background_r, f->background_g, f->background_b);
     
     // Reset x position
     x = x_start;

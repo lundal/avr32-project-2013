@@ -22,9 +22,11 @@ font *font_load(char *folder) {
         f->bitmaps[i] = bmp_load(path);
     }
     
-    // Set default parameters
+    // Set default spacing
     f->spacing = 1;
-    f->padding = 1;
+    
+    // Set default padding
+    font_padding_set(f, 2, 0, 2, 2);
     
     // Set transparent background
     font_background_set(f, 0xFF, 0x00, 0xFF);
@@ -57,14 +59,19 @@ font *font_copy(font *f) {
         f_n->bitmaps[i] = bmp_copy(f->bitmaps[i]);
     }
     
-    // Copy parameters
+    // Copy spacing
     f_n->spacing = f->spacing;
-    f_n->padding = f->padding;
     
     // Copy background
     f_n->background_r = f_n->background_r;
     f_n->background_g = f_n->background_g;
     f_n->background_b = f_n->background_b;
+    
+    // Copy padding
+    f_n->padding_top = f->padding_top;
+    f_n->padding_bottom = f->padding_bottom;
+    f_n->padding_left = f->padding_left;
+    f_n->padding_right = f->padding_right;
     
     return f_n;
 }
@@ -93,4 +100,11 @@ void font_background_set(font *f, char r, char g, char b) {
     f->background_r = r;
     f->background_g = g;
     f->background_b = b;
+}
+
+void font_padding_set(font *f, int top, int bottom, int left, int right) {
+    f->padding_top = top;
+    f->padding_bottom = bottom;
+    f->padding_left = left;
+    f->padding_right = right;
 }
