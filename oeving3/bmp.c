@@ -155,7 +155,7 @@ void bmp_tint(bmp_image *image, char r, char g, char b) {
         char r_image = image->data[i + 2];
         
         // If transparent (fuchsia)
-        if (r == 0xFF && g == 0x00 && b == 0xFF) {
+        if (r_image == 0xFF && g_image == 0x00 && b_image == 0xFF) {
             // Skip
             continue;
         }
