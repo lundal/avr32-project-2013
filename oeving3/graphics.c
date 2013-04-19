@@ -128,19 +128,62 @@ void screen_draw_bmp(int x, int y, bmp_image *image) {
 }
 
 void screen_draw_text(int x, int y, FONT font, char *text) {
+    // Determine text length
     int length = strlen(text);
     
+    // Loop through characters
     int i;
     for (i = 0; i < length; i++) {
         // Get character image
         bmp_image *image = font[(int)text[i]];
         
+        // Check if null
+        if (image == NULL) {
+            // Skip
+            continue;
+        }
+        
         // Draw image
-        screen_draw_image(x, y, image);
+        screen_draw_bmp(x, y, image);
         
         // Move right for next character
         x += image->width + 1;
     }
+}
+
+void screen_draw_text_background(int x, int y, FONT font, char *text, char r, char g, char b) {
+    // Determine text length
+    int length = strlen(text);
+    
+    // Vars to keep track of size
+    int x_start = x;
+    int y_max = 0;
+    
+    // Loop through characters
+    int i;
+    for (i = 0; i < length; i++) {
+        // Get character image
+        bmp_image *image = font[(int)text[i]];
+        
+        // Check if null
+        if (image == NULL) {
+            // Skip
+            continue;
+        }
+        
+        // Update max y
+        y_max = MAX(y_max, image->height);
+        
+        // Move right for next character
+        x += image->width + 1;
+    }
+    
+    // Calculate deltas
+    int dx = x - x_start;
+    int dy = y_max;
+    
+    // Draw rect
+    screen_draw_rect(x_start, y, dx, dy, r, g, b);
 }
 
 void screen_update_rect(int x, int y, int width, int height) {

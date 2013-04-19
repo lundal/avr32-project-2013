@@ -61,9 +61,9 @@ bmp_image *bmp_load(char *filename) {
     // Move to bitmap data
     fseek(file, file_header.data_offset, SEEK_SET);
     
-    // ***********************************************
-    // * NOTE: Assume 24 bpp and width multiple of 4 *
-    // ***********************************************
+    // ***********************
+    // * NOTE: Assume 24 bpp *
+    // ***********************
     
     // Allocate memory
     BYTE *data = (BYTE *)malloc(info_header.image_size);
@@ -74,8 +74,19 @@ bmp_image *bmp_load(char *filename) {
         return NULL;
     }
     
-    // Read bitmap data
-    fread(data, 1, info_header.image_size, file);
+    // For each line
+    int i;
+    for (i = 0; i < info_header.image_height; i++) {
+        // Get line start
+        BYTE *line = &data[i * info_header.image_width * BMP_BPP];
+        
+        // Read a line of bitmap data
+        fread(line, 1, info_header.image_width * BMP_BPP, file);
+        
+        // Seek to next line
+        int seek_dist = info_header.image_width % 4; // This is actually short for (4 - (info_header.image_width * BMP_BPP) % 4) % 4;
+        fseek(file, seek_dist, SEEK_CUR);
+    }
     
     // Verify that data was read
     if (data == NULL) {
@@ -97,6 +108,11 @@ bmp_image *bmp_load(char *filename) {
 }
 
 bmp_image *bmp_copy(bmp_image *image) {
+    // Verify image
+    if (image == NULL) {
+        return NULL;
+    }
+    
     // Calculate size
     int size = image->width * image->height * BMP_BPP;
     
@@ -122,6 +138,11 @@ bmp_image *bmp_copy(bmp_image *image) {
 }
 
 void bmp_tint(bmp_image *image, char r, char g, char b) {
+    // Verify image
+    if (image == NULL) {
+        return;
+    }
+    
     // Calculate size
     int size = image->width * image->height * BMP_BPP;
     
@@ -132,6 +153,12 @@ void bmp_tint(bmp_image *image, char r, char g, char b) {
         char b_image = image->data[i + 0];
         char g_image = image->data[i + 1];
         char r_image = image->data[i + 2];
+        
+        // If transparent (fuchsia)
+        if (r == 0xFF && g == 0x00 && b == 0xFF) {
+            // Skip
+            continue;
+        }
         
         // Calculate color
         char b_out = (char)(((int)b * (int)b_image) / 255);
