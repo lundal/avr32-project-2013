@@ -151,7 +151,7 @@ void screen_draw_text(int x, int y, FONT font, char *text) {
     }
 }
 
-void screen_draw_text_background(int x, int y, FONT font, char *text, char r, char g, char b) {
+void screen_draw_text_background(int x, int y, FONT font, char *text, int padding, char r, char g, char b) {
     // Determine text length
     int length = strlen(text);
     
@@ -183,7 +183,7 @@ void screen_draw_text_background(int x, int y, FONT font, char *text, char r, ch
     int dy = y_max;
     
     // Draw rect
-    screen_draw_rect(x_start, y, dx, dy, r, g, b);
+    screen_draw_rect(x_start - padding, y - padding, dx + 2*padding, dy + 2*padding, r, g, b);
 }
 
 void screen_update_rect(int x, int y, int width, int height) {
