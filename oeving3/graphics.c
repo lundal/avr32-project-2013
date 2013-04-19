@@ -127,31 +127,10 @@ void screen_draw_bmp(int x, int y, bmp_image *image) {
     }
 }
 
-void screen_draw_text(int x, int y, FONT font, char *text, int spacing) {
-    // Determine text length
-    int length = strlen(text);
-    
-    // Loop through characters
-    int i;
-    for (i = 0; i < length; i++) {
-        // Get character image
-        bmp_image *image = font[(int)text[i]];
-        
-        // Check if null
-        if (image == NULL) {
-            // Skip
-            continue;
-        }
-        
-        // Draw image
-        screen_draw_bmp(x, y, image);
-        
-        // Move right for next character
-        x += image->width + spacing;
-    }
-}
 
-void screen_draw_text_background(int x, int y, FONT font, char *text, int spacing, int padding, char r, char g, char b) {
+void screen_draw_text(int x, int y, font *f, char *text) {
+    int i;
+    
     // Determine text length
     int length = strlen(text);
     
@@ -160,10 +139,9 @@ void screen_draw_text_background(int x, int y, FONT font, char *text, int spacin
     int y_max = 0;
     
     // Loop through characters
-    int i;
     for (i = 0; i < length; i++) {
         // Get character image
-        bmp_image *image = font[(int)text[i]];
+        bmp_image *image = f->bitmaps[(int)text[i]];
         
         // Check if null
         if (image == NULL) {
@@ -175,15 +153,36 @@ void screen_draw_text_background(int x, int y, FONT font, char *text, int spacin
         y_max = MAX(y_max, image->height);
         
         // Move right for next character
-        x += image->width + spacing;
+        x += image->width + f->spacing;
     }
     
     // Calculate deltas
-    int dx = x - x_start - spacing;
+    int dx = x - x_start - f->spacing;
     int dy = y_max;
     
-    // Draw rect
-    screen_draw_rect(x_start - padding, y - padding, dx + 2*padding, dy + 2*padding, r, g, b);
+    // Draw background
+    screen_draw_rect(x_start - f->padding, y - f->padding, dx + 2 * f->padding, dy + 2 * f->padding, f->background_r, f->background_g, f->background_b);
+    
+    // Reset x position
+    x = x_start;
+    
+    // Loop through characters
+    for (i = 0; i < length; i++) {
+        // Get character image
+        bmp_image *image = f->bitmaps[(int)text[i]];
+        
+        // Check if null
+        if (image == NULL) {
+            // Skip
+            continue;
+        }
+        
+        // Draw image
+        screen_draw_bmp(x, y, image);
+        
+        // Move right for next character
+        x += image->width + f->spacing;
+    }
 }
 
 void screen_update_rect(int x, int y, int width, int height) {

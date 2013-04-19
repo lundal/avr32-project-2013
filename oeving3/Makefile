@@ -10,7 +10,7 @@ CCFLAGS = -Wall -g -O3 -c
 LDFLAGS = -Wall -g -pedantic -lm
 
 # File names 
-SRC = fonts.c bmp.c graphics.c fonttest.c
+SRC = font.c bmp.c graphics.c fonttest.c
 OBJ = $(SRC:.c=.o)
 EXE = game.out
 
