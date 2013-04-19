@@ -179,7 +179,7 @@ void screen_draw_text_background(int x, int y, FONT font, char *text, int spacin
     }
     
     // Calculate deltas
-    int dx = x - x_start;
+    int dx = x - x_start - spacing;
     int dy = y_max;
     
     // Draw rect
