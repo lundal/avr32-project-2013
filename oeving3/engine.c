@@ -23,6 +23,7 @@ void draw(){
         //put current gameobjects image in some screen buffer array at correct position.
 		screen_draw_image(draw_queue[i]->pos.x, draw_queue[i]->pos.y, draw_queue[i]->image);
     }
+    screen_update_all();
 	draw_queue_length = 0;
     //Maybe swap directly here to the screen
 }
@@ -34,7 +35,10 @@ void setup_engine(){
 
     game_objects_capacity = 10; //TODO: Magic number
     game_objects = malloc(sizeof(game_object*)*game_objects_capacity);
-    //Load up game objects and components
+
+
+    //set up screen
+    screen_init();
 }
 
 void free_engine(){
@@ -46,6 +50,7 @@ void add_initial_game_objects(){
     game_object* rabbit = create_game_object();
     component_nr = add_component(rabbit, &sprite_component_update);
     sprite_component_init(component_nr,rabbit,create_drawable(bmp_load("rabbit.bmp")));
+    add_game_object(rabbit);
 }
 
 

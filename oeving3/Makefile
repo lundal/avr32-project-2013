@@ -12,7 +12,7 @@ LDFLAGS = -Wall -g -pedantic -lm
 # File names 
 SRC = bmp.c graphics.c engine.c components.c 
 OBJ = $(SRC:.c=.o)
-EXE = game.out
+EXE = engine.out
 
 ###############################################################################
 
