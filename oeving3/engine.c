@@ -10,7 +10,8 @@
 //Call run_engine()
 //Any other order will segfault.
 
-
+FILE *button_file;
+FILE *led_file;
 
 //A very simple run method without concurrency or anything fancy
 void run_engine(){
@@ -60,13 +61,33 @@ void setup_engine(){
 
     //set up screen
     screen_init();
+
+    //Set up buttons
+    button_file = fopen("/dev/buttons","rb");
+    //Set up leds
+    led_file = fopen("/dev/leds","rb");
 }
 
 void free_engine(){
     //TODO: Free everything!
+
+    fclose(led_file);
+    fclose(button_file);
+
 }
 
 
+int is_button_down(int button_nr){
+    if(button_nr > 7 || button_nr < 0){
+        return -1;
+    }
+    char buffer[9];//TODO Replace with 1 after driver has been rewritten
+    fread(buffer, 1, 9, button_file);
+    char mask = 1;
+    mask = mask << button_nr;
+    //Masks out the relevant bit
+    return buffer[8] & mask;
+}
 
 int add_component(game_object* g_o, component_update component_func){
     if(g_o->n_components >= g_o->component_capacity){

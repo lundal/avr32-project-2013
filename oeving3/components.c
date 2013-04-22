@@ -17,5 +17,9 @@ void sprite_component(int tick_nr, game_object *object, int component_nr){
 
 
 void move_component(int tick_nr, game_object *object, int component_nr){   
-	object->pos.x = tick_nr % SCREEN_WIDTH;
+	//object->pos.x = tick_nr % SCREEN_WIDTH;
+	if (is_button_down(0)) { object->pos.x = (object->pos.x + 1) % SCREEN_WIDTH;}	
+	if (is_button_down(2)) { object->pos.y = (object->pos.y - 1) % SCREEN_HEIGHT;}	
+	if (is_button_down(4)) { object->pos.y = (object->pos.y + 1) % SCREEN_HEIGHT;}	
+	if (is_button_down(7)) { object->pos.x = (object->pos.x - 1) % SCREEN_WIDTH;}	
 }
