@@ -51,7 +51,6 @@ void add_initial_game_objects(){
     game_object* rabbit = create_game_object();
     component_nr = add_component(rabbit, &sprite_component);
     sprite_component_init(component_nr,rabbit,create_drawable(bmp_load("rabbit.bmp")));
-
     add_component(rabbit, &move_component);
     add_game_object(rabbit);
 }
