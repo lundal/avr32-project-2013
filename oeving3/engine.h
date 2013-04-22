@@ -41,15 +41,14 @@ int game_objects_capacity;
 drawable** draw_queue;
 int draw_queue_length;
 int draw_queue_capacity;
- 
+char engine_running;
+
 void tick(int tick_nr);
 void draw();
 
 void setup_engine();
 void free_engine();
-void start_engine();
-
-void add_initial_game_objects();
+void run_engine();
 
 game_object* create_game_object();
 drawable* create_drawable(bmp_image* image);

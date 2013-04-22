@@ -1,9 +1,29 @@
 #include "engine.h"
-#include "components.h"
 #include "graphics.h"
 #include "bmp.h"
 #include <stdio.h>
 #include <stdlib.h>
+
+//How to use:
+//Call setup_engine()
+//Add any starting game objects you want with add_game_object
+//Call run_engine()
+//Any other order will segfault.
+
+
+
+//A very simple run method without concurrency or anything fancy
+void run_engine(){
+    int32_t tick_nr;
+    tick_nr = 1;
+    engine_running = 1;
+    while(engine_running){
+        tick(tick_nr);
+        draw();
+        tick_nr++;
+    }
+    free_engine();
+}
 
 //Ok, this is how I think the main game logic loop should look like
 void tick(int32_t tick_nr){
@@ -46,14 +66,6 @@ void free_engine(){
     //TODO: Free everything!
 }
 
-void add_initial_game_objects(){
-    int component_nr;
-    game_object* rabbit = create_game_object();
-    component_nr = add_component(rabbit, &sprite_component);
-    sprite_component_init(component_nr,rabbit,create_drawable(bmp_load("rabbit.bmp")));
-    add_component(rabbit, &move_component);
-    add_game_object(rabbit);
-}
 
 
 int add_component(game_object* g_o, component_update component_func){
@@ -101,28 +113,4 @@ void draw_queue_append(drawable* drawing){
     }
     draw_queue[draw_queue_length] = drawing;
     draw_queue_length+=1;
-}
-
-//A very simple run method without concurrency or anything fancy
-void start_engine(){
-    printf("begin setup_engine\n");
-    setup_engine();
-    printf("add_game_objects\n");
-    add_initial_game_objects();
-    int32_t tick_nr;
-    tick_nr = 1;
-    while(1){
-    //  printf("before tick\n");
-        tick(tick_nr);
-    //  printf("begin draw\n");
-        draw();
-        tick_nr++;
-    }
-    free_engine();
-}
-
-
-int main(){
-	start_engine();
-	return 0;
 }
