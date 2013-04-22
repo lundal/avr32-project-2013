@@ -17,5 +17,12 @@ void sprite_component_update(int tick_nr, game_object *object, int component_nr)
 
 
 void move_component(int tick_nr, game_object *object, int component_nr){   
-       object->pos.x = tick_nr % SCREEN_WIDTH;
+	//object->pos.x = tick_nr % SCREEN_WIDTH;
+	char buffer[8];
+	fread(buffer, 1, 8, buttons_file);
+
+	if (buffer[1] == 'A') { object->pos.x = (object->pos.x + 1) % SCREEN_WIDTH;}	
+	if (buffer[3] == 'C') { object->pos.y = (object->pos.y - 1) % SCREEN_HEIGHT;}	
+	if (buffer[5] == 'E') { object->pos.y = (object->pos.y + 1) % SCREEN_HEIGHT;}	
+	if (buffer[7] == 'G') { object->pos.x = (object->pos.x - 1) % SCREEN_WIDTH;}	
 }
