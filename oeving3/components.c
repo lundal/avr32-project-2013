@@ -1,15 +1,15 @@
-//Just a list of example components so you get the idea.
+#include "engine.h"
+#include "components.h"
 
-//int32_t player_controlled(int32_t component_nr, int32_t tick_nr, game_object object){
-    //Read button state
-    //Switch 
-//}
-/*
-
-int32_t poisoned(int32_t component_nr, int32_t tick_nr, game_object object){
-    //Damages player every 10th tick
-    if(tick_nr % 10 == 0){
-        object.hp--;
-    }
+void sprite_component_init(int component_nr, game_object *g_o, drawable* sprite){   
+   g_o->component_data[component_nr] = sprite;
 }
-*/
+
+//Adds the drawable stored in the matching componentdata slot to the draw_queue
+void sprite_component_update(int tick_nr, game_object *object, int component_nr){   
+    drawable* sprite;
+    sprite = (drawable*) object->component_data[component_nr];
+    sprite->pos.x = object->pos.x;
+    sprite->pos.y = object->pos.y;
+    draw_queue_append(sprite);
+}
