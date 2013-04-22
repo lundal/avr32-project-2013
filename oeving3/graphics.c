@@ -67,7 +67,7 @@ void screen_draw_rect(int x, int y, int width, int height, char r, char g, char 
     }
 }
 
-void screen_draw_image(int x, int y, bmp_image *image) {
+void screen_draw_bmp(int x, int y, bmp_image *image) {
     // Initial (sub)pixel
     int xi = x * SCREEN_BPP;
     int yi = y;
@@ -83,15 +83,15 @@ void screen_draw_image(int x, int y, bmp_image *image) {
     int ye_c = MIN(SCREEN_HEIGHT, ye);
     
     // Draw dimensions
-    int width = xe_c - xi_c;
-    int height = ye_c - yi_c;
+    //int width = xe_c - xi_c;
+    //int height = ye_c - yi_c;
     
     // Initial image (sub)pixel
     int xi_image = xi_c - xi;
     int yi_image = yi_c - yi; // Offset for image saved the correct way
     
     // End image (sub)pixel
-    int xe_image = xi_image + width;
+    //int xe_image = xi_image + width;
     int ye_image = image->height - yi_image; // Where we actually start reading the BMP: Bottom minus what would normally be the top pixel
     
     // For every row
@@ -125,6 +125,112 @@ void screen_draw_image(int x, int y, bmp_image *image) {
             screen_buffer[rowstart_screen + x + 2] = r;
         }
     }
+}
+
+
+void screen_draw_text(int x, int y, font *f, char *text) {
+    int i;
+    
+    // Determine text length
+    int length = strlen(text);
+    
+    // Vars to keep track of size
+    int x_start = x;
+    int y_max = 0;
+    
+    // Loop through characters
+    for (i = 0; i < length; i++) {
+        // Get character image
+        bmp_image *image = f->bitmaps[(int)text[i]];
+        
+        // Check if null
+        if (image == NULL) {
+            // Skip
+            continue;
+        }
+        
+        // Update max y
+        y_max = MAX(y_max, image->height);
+        
+        // Move right for next character
+        x += image->width + f->spacing;
+    }
+    
+    // Calculate deltas
+    int dx = x - x_start - f->spacing;
+    int dy = y_max;
+    
+    // Calculate start position and size
+    int xi = x_start - f->padding_left;
+    int yi = y - f->padding_top;
+    int w = dx + f->padding_left + f->padding_right;
+    int h = dy + f->padding_top + f->padding_bottom;
+    
+    // Draw background
+    screen_draw_rect(xi, yi, w, h, f->background_r, f->background_g, f->background_b);
+    
+    // Reset x position
+    x = x_start;
+    
+    // Loop through characters
+    for (i = 0; i < length; i++) {
+        // Get character image
+        bmp_image *image = f->bitmaps[(int)text[i]];
+        
+        // Check if null
+        if (image == NULL) {
+            // Skip
+            continue;
+        }
+        
+        // Draw image
+        screen_draw_bmp(x, y, image);
+        
+        // Move right for next character
+        x += image->width + f->spacing;
+    }
+}
+
+void screen_update_text(int x, int y, font *f, char *text) {
+    int i;
+    
+    // Determine text length
+    int length = strlen(text);
+    
+    // Vars to keep track of size
+    int x_start = x;
+    int y_max = 0;
+    
+    // Loop through characters
+    for (i = 0; i < length; i++) {
+        // Get character image
+        bmp_image *image = f->bitmaps[(int)text[i]];
+        
+        // Check if null
+        if (image == NULL) {
+            // Skip
+            continue;
+        }
+        
+        // Update max y
+        y_max = MAX(y_max, image->height);
+        
+        // Move right for next character
+        x += image->width + f->spacing;
+    }
+    
+    // Calculate deltas
+    int dx = x - x_start - f->spacing;
+    int dy = y_max;
+    
+    // Calculate start position and size
+    int xi = x_start - f->padding_left;
+    int yi = y - f->padding_top;
+    int w = dx + f->padding_left + f->padding_right;
+    int h = dy + f->padding_top + f->padding_bottom;
+    
+    // Update
+    screen_update_rect(xi, yi, w, h);
 }
 
 void screen_update_rect(int x, int y, int width, int height) {

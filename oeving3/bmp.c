@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 void reverse(void *array, int length) {
     BYTE *data = (BYTE *)array;
@@ -60,9 +61,9 @@ bmp_image *bmp_load(char *filename) {
     // Move to bitmap data
     fseek(file, file_header.data_offset, SEEK_SET);
     
-    // ***********************************************
-    // * NOTE: Assume 24 bpp and width multiple of 4 *
-    // ***********************************************
+    // ***********************
+    // * NOTE: Assume 24 bpp *
+    // ***********************
     
     // Allocate memory
     BYTE *data = (BYTE *)malloc(info_header.image_size);
@@ -73,8 +74,19 @@ bmp_image *bmp_load(char *filename) {
         return NULL;
     }
     
-    // Read bitmap data
-    fread(data, 1, info_header.image_size, file);
+    // For each line
+    int i;
+    for (i = 0; i < info_header.image_height; i++) {
+        // Get line start
+        BYTE *line = &data[i * info_header.image_width * BMP_BPP];
+        
+        // Read a line of bitmap data
+        fread(line, 1, info_header.image_width * BMP_BPP, file);
+        
+        // Seek to next line
+        int seek_dist = info_header.image_width % 4; // This is actually short for (4 - (info_header.image_width * BMP_BPP) % 4) % 4;
+        fseek(file, seek_dist, SEEK_CUR);
+    }
     
     // Verify that data was read
     if (data == NULL) {
@@ -95,3 +107,67 @@ bmp_image *bmp_load(char *filename) {
     return image;
 }
 
+bmp_image *bmp_copy(bmp_image *image) {
+    // Verify image
+    if (image == NULL) {
+        return NULL;
+    }
+    
+    // Calculate size
+    int size = image->width * image->height * BMP_BPP;
+    
+    // Allocate memory
+    BYTE *data = (BYTE *)malloc(size);
+    
+    // Verify allocation
+    if (data == NULL) {
+        return NULL;
+    }
+    
+    // Copy data
+    memcpy(data, image->data, size);
+    
+    // Create struct
+    bmp_image *image_n = (bmp_image *)malloc(sizeof(bmp_image));
+    image_n->width = image->width;
+    image_n->height = image->height;
+    image_n->data = data;
+    
+    // Return image
+    return image_n;
+}
+
+void bmp_tint(bmp_image *image, char r, char g, char b) {
+    // Verify image
+    if (image == NULL) {
+        return;
+    }
+    
+    // Calculate size
+    int size = image->width * image->height * BMP_BPP;
+    
+    // For every pixel
+    int i;
+    for (i = 0; i < size; i += 3) {
+        // Read
+        char b_image = image->data[i + 0];
+        char g_image = image->data[i + 1];
+        char r_image = image->data[i + 2];
+        
+        // If transparent (fuchsia)
+        if (r_image == 0xFF && g_image == 0x00 && b_image == 0xFF) {
+            // Skip
+            continue;
+        }
+        
+        // Calculate color
+        char b_out = (char)(((int)b * (int)b_image) / 255);
+        char g_out = (char)(((int)g * (int)g_image) / 255);
+        char r_out = (char)(((int)r * (int)r_image) / 255);
+        
+        // Write
+        image->data[i + 0] = b_out;
+        image->data[i + 1] = g_out;
+        image->data[i + 2] = r_out;
+    }
+}

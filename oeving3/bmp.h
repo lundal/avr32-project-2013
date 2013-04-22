@@ -9,6 +9,8 @@
 #define HALF_S sizeof(HALF)
 #define BYTE_S sizeof(BYTE)
 
+#define BMP_BPP 3
+
 typedef struct __attribute__((__packed__)) {
     HALF file_type;
     WORD file_size;
@@ -39,5 +41,7 @@ typedef struct {
 
 // Prototypes
 bmp_image *bmp_load(char *filename);
+bmp_image *bmp_copy(bmp_image *image);
+void bmp_tint(bmp_image *image, char r, char g, char b);
 
 #endif
