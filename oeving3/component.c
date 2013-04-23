@@ -45,7 +45,21 @@ int component_add(gameobject *object, component *c, void *param) {
 // Finds the component number of component in gameobject
 // Return -1 if the component was not found
 int component_find(gameobject *object, component *c) {
-    return 0; //TODO: Implement
+    // For each component in object
+    int i;
+    for (i = 0; i < object->components_size; i++) {
+        // Get component
+        component *c2 = object->components[i];
+        
+        // If match
+        if (c == c2) {
+            // Return index
+            return i;
+        }
+    }
+    
+    // None was found
+    return -1;
 }
 
 // Removes a component from a gameobject
@@ -60,7 +74,7 @@ gameobject* gameobject_create() {
     
     // Set initial capacity
     object->components_size = 0;
-    object->components_capacity = 4; // TODO: Remove magic number?
+    object->components_capacity = COMPONENT_INITIAL_SIZE;
     
     // Allocate arrays
     object->components = malloc(sizeof(component_function) * object->components_capacity);
