@@ -115,11 +115,11 @@ static ssize_t driver_read (struct file *filp, char __user *buff,
 	/* This is just a first version which makes it easy to test using cat. 
 	In the future it might suffice to simply write the first 8 bits of the pdsr data directly?*/
        
-	char data[9]; //TODO remove magic number
+	char data[1]; //TODO remove magic number
 	
 
 	// Remember that pindata is 0 when button is pushed.
-	data[0] = (pindata & elements[0]) ? 'a' : 'A';
+	/*data[0] = (pindata & elements[0]) ? 'a' : 'A';
 	data[1] = (pindata & elements[1]) ? 'b' : 'B';
 	data[2] = (pindata & elements[2]) ? 'c' : 'C';
 	data[3] = (pindata & elements[3]) ? 'd' : 'D';
@@ -127,12 +127,13 @@ static ssize_t driver_read (struct file *filp, char __user *buff,
 	data[5] = (pindata & elements[5]) ? 'f' : 'F';
 	data[6] = (pindata & elements[6]) ? 'g' : 'G';
 	data[7] = (pindata & elements[7]) ? 'h' : 'H';
+*/
 
 	//An alternative way of printing the data which we might use later. 
 	//Added to the end of the array for testing.
-	data[8] = pindata & elements_all;
+	data[0] = (~pindata) & elements_all;
 	
-	if(count > 9) count = 9;  //Do not allow reads outside the array.
+	if(count > 1) count = 1;  //Do not allow reads outside the array.
 	copy_to_user(buff, data, count);
 	
 	return count;

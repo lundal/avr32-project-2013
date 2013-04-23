@@ -77,17 +77,6 @@ void free_engine(){
 }
 
 
-int is_button_down(int button_nr){
-    if(button_nr > 7 || button_nr < 0){
-        return -1;
-    }
-    char buffer[9];//TODO Replace with 1 after driver has been rewritten
-    fread(buffer, 1, 9, button_file);
-    char mask = 1;
-    mask = mask << button_nr;
-    //Masks out the relevant bit
-    return buffer[8] & mask;
-}
 
 int add_component(game_object* g_o, component_update component_func){
     if(g_o->n_components >= g_o->component_capacity){
@@ -134,4 +123,16 @@ void draw_queue_append(drawable* drawing){
     }
     draw_queue[draw_queue_length] = drawing;
     draw_queue_length+=1;
+}
+
+int is_button_down(int button_nr){
+    if(button_nr > 7 || button_nr < 0){
+        return -1;
+    }
+    char buffer[1];//TODO Replace with 1 after driver has been rewritten
+    fread(buffer, 1, 1, button_file);
+    char mask = 1;
+    mask = mask << button_nr;
+    //Masks out the relevant bit
+    return buffer[0] & mask;
 }
