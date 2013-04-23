@@ -18,7 +18,7 @@ void component_controllable_add(int component_nr, gameobject *object, void *para
 void component_controllable_tick(int component_nr, gameobject *object, void *param);
 void component_controllable_remove(int component_nr, gameobject *object, void *param);
 
-// Controllable component
+// Sprite component
 extern component *component_sprite;
 void component_sprite_add(int component_nr, gameobject *object, void *param);
 void component_sprite_tick(int component_nr, gameobject *object, void *param);
