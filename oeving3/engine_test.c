@@ -31,7 +31,8 @@ int main() {
     component_add(player1, component_player_control, (void*)0);
     component_add(player1, component_sprite, rabby);
     component_add(player1, component_shoot, rabby_red);
-    component_add(player1, component_sprite, lol);
+    component_add(player1, component_hpbar, NULL) ;
+    player1->hp = 33;
     engine_gameobject_add(player1);
     
     // Add object

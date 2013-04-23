@@ -123,6 +123,50 @@ void component_shoot_remove(int component_nr, gameobject *object, void *param) {
 }
 
 
+// *****************************************************************************
+// *** HP bar component 
+// *****************************************************************************
+component *component_hpbar;
+
+typedef struct {
+    drawable *empty_bar;
+    drawable *full_bar;
+}hpbar_data;
+
+// param - NULL
+// Function that is called when the component is added
+void component_hpbar_add(int component_nr, gameobject *object, void *param) {
+    drawable *empty_bar = drawable_create_rect(100,25,255,0,0);
+    drawable *full_bar = drawable_create_rect(100,25,0,255,0);
+    
+    //store in struct
+    object->components_data[component_nr] = malloc(sizeof(hpbar_data));
+    *((hpbar_data*) object->components_data[component_nr]) = (hpbar_data){
+            .empty_bar = empty_bar,
+            .full_bar = full_bar
+    };
+
+}
+
+// Function that is called each tick
+void component_hpbar_tick(int component_nr, gameobject *object, void *param) {
+    hpbar_data *bardata = (hpbar_data*)object->components_data[component_nr];
+
+    //update size of full bar
+    drawable_rect *rect =(drawable_rect*) bardata->full_bar->data;
+    rect->width = object->hp;
+
+    engine_drawable_add(bardata->empty_bar, object->pos_x, object->pos_y);
+    engine_drawable_add(bardata->full_bar, object->pos_x, object->pos_y);
+}
+
+// Function that is called when the component is removed
+void component_hpbar_remove(int component_nr, gameobject *object, void *param) {
+    free(object->components_data[component_nr]);
+    return; // TODO: Dispose sprite?
+}
+
+
 
 // *****************************************************************************
 // *** Init function
@@ -151,4 +195,10 @@ void components_init() {
         &component_shoot_tick,
         &component_shoot_remove
     );
+    component_hpbar = component_create(
+        &component_hpbar_add,
+        &component_hpbar_tick,
+        &component_hpbar_remove
+        );  
 }
+
