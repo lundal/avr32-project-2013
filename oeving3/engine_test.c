@@ -35,13 +35,14 @@ int main() {
     engine_gameobject_add(player1);
     
     // Add object
-    gameobject *player2 = gameobject_create();
-    player2->pos_y = 200;
-    component_add(player2, component_player_control, (void*)1);
-    component_add(player2, component_sprite, rabby);
-    component_add(player2, component_shoot, rabby_red);
-    component_add(player2, component_sprite, lol);
-    engine_gameobject_add(player2);
+    gameobject *enemy = gameobject_create();
+    enemy->type = TYPE_ENEMY;
+    enemy->pos_x = 200;
+    enemy->pos_y = 20;
+    enemy->size_x = 32;
+    enemy->size_y = 32;
+    component_add(enemy, component_sprite, rabby);
+    engine_gameobject_add(enemy);
     
     engine_run();
     

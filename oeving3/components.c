@@ -29,7 +29,6 @@ void component_upup_tick(int component_nr, gameobject *object, void *param) {
     if (object->pos_y < 0 - object->size_y) {
         engine_gameobject_remove(object);
     }
-    
 }
 
 // Function that is called when the component is removed
@@ -111,14 +110,70 @@ void component_shoot_tick(int component_nr, gameobject *object, void *param) {
         drawable *sprite = (drawable*)object->components_data[component_nr];
         component_add(bullet, component_sprite, sprite);
         component_add(bullet, component_upup, sprite);
+        component_add(bullet, component_affect_enemy, NULL);
+        bullet->type = TYPE_BULLET;
         bullet->pos_x = object->pos_x;
         bullet->pos_y = object->pos_y;
+        bullet->size_x = 32;
+        bullet->size_y = 32;
         engine_gameobject_add(bullet);
     }
 }
 
 // Function that is called when the component is removed
 void component_shoot_remove(int component_nr, gameobject *object, void *param) {
+    return;
+}
+
+
+
+// *****************************************************************************
+// *** Affect enemy with component
+// *****************************************************************************
+component *component_affect_enemy;
+
+// Function that is called when the component is added
+void component_affect_enemy_add(int component_nr, gameobject *object, void *param) {
+    // Store component
+    object->components_data[component_nr] = param;
+    
+    return;
+}
+
+// Function that is called each tick
+void component_affect_enemy_tick(int component_nr, gameobject *object, void *param) {
+    int i;
+    for (i = 0; i < gameobjects_size; i++) {
+        // Get object
+        gameobject *target = gameobjects[i];
+        
+        // If object is an enemy
+        if (target->type == TYPE_ENEMY) {
+            // Check for collision
+            if ( (object->pos_x < target->pos_x + target->size_x) &&
+                 (object->pos_x + object->size_x > target->pos_x) &&
+                 (object->pos_y < target->pos_y + target->size_y) &&
+                 (object->pos_y + object->size_y > target->pos_y) ) {
+                // Get stored component
+                component *c = (component*)object->components_data[component_nr];
+                
+                // Add it to enemy
+                //component_add(target, (component*)c, NULL);
+                
+                // Remove target
+                engine_gameobject_remove(target);
+                
+                // Remove self?
+                engine_gameobject_remove(object);
+                
+                break;
+            }
+        }
+    }
+}
+
+// Function that is called when the component is removed
+void component_affect_enemy_remove(int component_nr, gameobject *object, void *param) {
     return;
 }
 
@@ -150,5 +205,11 @@ void components_init() {
         &component_shoot_add,
         &component_shoot_tick,
         &component_shoot_remove
+    );
+
+    component_affect_enemy = component_create(
+        &component_affect_enemy_add,
+        &component_affect_enemy_tick,
+        &component_affect_enemy_remove
     );
 }
