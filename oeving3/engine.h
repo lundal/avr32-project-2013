@@ -2,6 +2,7 @@
 #define ENGINE_HEADER
 
 #include "bmp.h"
+#include "font.h"
 #include "component.h"
 
 // External variables
@@ -27,6 +28,7 @@ void engine_draw();
 void engine_gameobject_add(gameobject *object);
 void engine_drawable_add(drawable *drawing, int x, int y);
 drawable* drawable_create_bmp(bmp_image *image);
+drawable* drawable_create_text(font *f, char *text);
 
 
 // IO

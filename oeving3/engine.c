@@ -2,6 +2,7 @@
 
 #include "graphics.h"
 #include "bmp.h"
+#include "font.h"
 #include "component.h"
 
 #include <stdio.h>
@@ -157,6 +158,15 @@ drawable* drawable_create_bmp(bmp_image *image) {
     drawing->type = DRAWABLE_BMP;
     drawing->data = (void*)image;
     drawing->param = NULL;
+    return drawing;
+}
+
+drawable* drawable_create_text(font *f, char *text) {
+    drawable* drawing;
+    drawing = malloc(sizeof(drawable));
+    drawing->type = DRAWABLE_TEXT;
+    drawing->data = (void*)text;
+    drawing->param = (void*)f;
     return drawing;
 }
 
