@@ -136,8 +136,8 @@ typedef struct {
 // param - NULL
 // Function that is called when the component is added
 void component_hpbar_add(int component_nr, gameobject *object, void *param) {
-    drawable *empty_bar = drawable_create_rect(100,25,255,0,0);
-    drawable *full_bar = drawable_create_rect(100,25,0,255,0);
+    drawable *empty_bar = drawable_create_rect(30,5,255,0,0);
+    drawable *full_bar = drawable_create_rect(30,5,0,255,0);
     
     //store in struct
     object->components_data[component_nr] = malloc(sizeof(hpbar_data));
