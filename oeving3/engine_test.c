@@ -1,20 +1,21 @@
 #include "engine.h"
 #include "components.h"
-#include "engine_test.h"
 
 
-int main(){
-    setup_engine();
-    add_game_objects();
-    run_engine();
-}
-
-
-void add_game_objects(){
-    int component_nr;
-    game_object* rabbit = create_game_object();
-    component_nr = add_component(rabbit, &sprite_component);
-    sprite_component_init(component_nr,rabbit,create_drawable(bmp_load("rabbit.bmp")));
-    add_component(rabbit, &move_component);
-    add_game_object(rabbit);
+int main() {
+    engine_init();
+    
+    // Init components
+    component_example = component_create(&component_example_add, &component_example_tick, component_example_remove);
+    component_controllable = component_create(&component_controllable_add, &component_controllable_tick, component_controllable_remove);
+    component_sprite = component_create(&component_sprite_add, &component_sprite_tick, component_sprite_remove);
+    
+    // Add object
+    gameobject *rabbit = gameobject_create();
+    component_add(rabbit, component_sprite, "rabbit.bmp");
+    engine_gameobject_add(rabbit);
+    
+    engine_run();
+    
+    return 0;
 }
