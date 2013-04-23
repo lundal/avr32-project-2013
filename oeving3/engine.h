@@ -8,11 +8,13 @@
 extern int TICK;
 extern int ENGINE_RUNNING;
 
+#define DRAWABLE_BMP 0
+#define DRAWABLE_TEXT 1
 
-typedef struct{
-	int pos_x;
-	int pos_y;
-	bmp_image* image;
+typedef struct {
+	int type;
+	void* data;
+    void* param;
 } drawable;
 
 
@@ -23,8 +25,8 @@ void engine_run();
 void engine_tick();
 void engine_draw();
 void engine_gameobject_add(gameobject *object);
-void engine_drawable_add(drawable *drawing);
-drawable* drawable_create(bmp_image *image);
+void engine_drawable_add(drawable *drawing, int x, int y);
+drawable* drawable_create_bmp(bmp_image *image);
 
 
 // IO
