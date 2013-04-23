@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
 // Extern variables
 int TICK;
 int ENGINE_RUNNING;
@@ -20,6 +21,16 @@ FILE *leds_file;
 int gameobjects_size;
 int gameobjects_capacity;
 gameobject **gameobjects;
+
+// Add queue
+int add_queue_size;
+int add_queue_capacity;
+gameobject **add_queue;
+
+// Remove queue
+int remove_queue_size;
+int remove_queue_capacity;
+gameobject **remove_queue;
 
 // Draw queue
 int *draw_queue_x;
@@ -40,12 +51,22 @@ void engine_init() {
     
     // Init gameobjects
     gameobjects_size = 0;
-    gameobjects_capacity = 8; //TODO: Magic number
+    gameobjects_capacity = ENGINE_INITIAL_SIZE;
     gameobjects = malloc(sizeof(gameobject*) * gameobjects_capacity);
+    
+    // Init add queue
+    add_queue_size = 0;
+    add_queue_capacity = ENGINE_INITIAL_SIZE;
+    add_queue = malloc(sizeof(gameobject*) * add_queue_capacity);
+    
+    // Init remove queue
+    remove_queue_size = 0;
+    remove_queue_capacity = ENGINE_INITIAL_SIZE;
+    remove_queue = malloc(sizeof(gameobject*) * remove_queue_capacity);
 
     // Init draw queue
     draw_queue_size = 0;
-    draw_queue_capacity = 8; //TODO: Magic number
+    draw_queue_capacity = ENGINE_INITIAL_SIZE;
     draw_queue = malloc(sizeof(drawable*) * draw_queue_capacity);
     draw_queue_x = malloc(sizeof(int) * draw_queue_capacity);
     draw_queue_y = malloc(sizeof(int) * draw_queue_capacity);
@@ -70,6 +91,7 @@ void engine_run() {
     ENGINE_RUNNING = 1;
     while (ENGINE_RUNNING) {
         engine_tick();
+        engine_process_queues();
         engine_draw();
         TICK++;
     }
@@ -90,6 +112,49 @@ void engine_tick() {
             object->components[j]->tick_function(j, object, NULL);
         }
     }
+}
+
+void engine_process_queues() {
+    int i;
+    
+    // For each object in remove queue
+    for (i = 0; i < remove_queue_size; i++) {
+        // Get object
+        gameobject *target = remove_queue[i];
+        
+        // For each gameobject
+        int j;
+        for (j = 0; j < gameobjects_size; j++) {
+            // Get object
+            gameobject *obj = gameobjects[j];
+            
+            // If match
+            if (target == obj) {
+                // Copy last gameobject to target's position and reduce size
+                gameobjects[j] = gameobjects[gameobjects_size-- - 1];
+                break;
+            }
+        }
+    }
+            
+    // For each object in add queue
+    for (i = 0; i < add_queue_size; i++) {
+        // Get object
+        gameobject *object = add_queue[i];
+        
+        // Expand array if needed
+        if (gameobjects_size == gameobjects_capacity) {
+            gameobjects_capacity *= 2;
+            gameobjects = realloc(gameobjects, sizeof(gameobject*) * gameobjects_capacity);
+        }
+        
+        // Add to gameobjects
+        gameobjects[gameobjects_size++] = object;
+    }
+    
+    // Reset queues
+    add_queue_size = 0;
+    remove_queue_size = 0;
 }
 
 // 
@@ -143,13 +208,24 @@ void engine_drawable_add(drawable *drawing, int x, int y) {
 
 void engine_gameobject_add(gameobject *object) {
     // Expand array if needed
-    if (gameobjects_size == gameobjects_capacity) {
-        gameobjects_capacity *= 2;
-        gameobjects = realloc(gameobjects, sizeof(drawable*) * gameobjects_capacity);
+    if (add_queue_size == add_queue_capacity) {
+        add_queue_capacity *= 2;
+        add_queue = realloc(add_queue, sizeof(gameobject*) * add_queue_capacity);
     }
     
     // Add to queue
-    gameobjects[gameobjects_size++] = object;
+    add_queue[add_queue_size++] = object;
+}
+
+void engine_gameobject_remove(gameobject *object) {
+    // Expand array if needed
+    if (remove_queue_size == remove_queue_capacity) {
+        remove_queue_capacity *= 2;
+        remove_queue = realloc(add_queue, sizeof(gameobject*) * remove_queue_capacity);
+    }
+    
+    // Add to queue
+    remove_queue[remove_queue_size++] = object;
 }
 
 drawable* drawable_create_bmp(bmp_image *image) {
