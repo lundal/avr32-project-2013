@@ -24,4 +24,11 @@ void component_sprite_add(int component_nr, gameobject *object, void *param);
 void component_sprite_tick(int component_nr, gameobject *object, void *param);
 void component_sprite_remove(int component_nr, gameobject *object, void *param);
 
+// Player control component
+extern component *component_player_control;
+void component_player_control_add(int component_nr, gameobject *object, void *param);
+void component_player_control_tick(int component_nr, gameobject *object, void *param);
+void component_player_control_remove(int component_nr, gameobject *object, void *param);
+
+
 #endif

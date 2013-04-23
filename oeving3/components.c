@@ -73,3 +73,35 @@ void component_sprite_tick(int component_nr, gameobject *object, void *param) {
 void component_sprite_remove(int component_nr, gameobject *object, void *param) {
     return; // TODO: Dispose sprite?
 }
+
+// *****************************************************************************
+// *** Player move component
+// *****************************************************************************
+
+component *component_player_control;
+
+//data - NULL
+void component_player_control_tick(int component_nr, gameobject *object, void* data){
+    #define PLAYER_MOVE_RIGHT 2
+    #define PLAYER_MOVE_LEFT 3
+    #define PLAYER_MOVE_GAP 2
+    int player_nr;
+    player_nr = (int)object->components_data[component_nr];
+
+    if(player_nr > 1 || player_nr < 0) return;
+    if(button_down(PLAYER_MOVE_RIGHT+player_nr*PLAYER_MOVE_GAP)) { 
+        object->pos_x = (object->pos_x + 1) % SCREEN_WIDTH;
+    }
+    if(button_down(PLAYER_MOVE_LEFT+player_nr*PLAYER_MOVE_GAP)) { 
+        object->pos_x = (object->pos_x - 1) % SCREEN_WIDTH;
+    }
+}
+
+//data - player number (0 or 1)
+void component_player_control_add(int component_nr, gameobject *object, void* data){ 
+    object->components_data[component_nr] = data;
+}
+
+void component_player_control_remove(int component_nr, gameobject *object, void* data){
+    return;
+}
