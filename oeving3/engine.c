@@ -1,155 +1,173 @@
 #include "engine.h"
+
 #include "graphics.h"
 #include "bmp.h"
+#include "component.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 
-//How to use:
-//Call setup_engine()
-//Add any starting game objects you want with add_game_object
-//Call run_engine()
-//Any other order will segfault.
+// Extern variables
+int TICK;
+int ENGINE_RUNNING;
 
-FILE *button_file;
-FILE *led_file;
+// Files used for io
+FILE *buttons_file;
+FILE *leds_file;
 
-//A very simple run method without concurrency or anything fancy
-void run_engine(){
-    int32_t tick_nr;
-    tick_nr = 1;
-    engine_running = 1;
-    while(engine_running){
-        tick(tick_nr);
-        draw();
-        tick_nr++;
-    }
-    free_engine();
+// Gameobjects
+int gameobjects_size;
+int gameobjects_capacity;
+gameobject **gameobjects;
+
+// Draw queue
+int draw_queue_size;
+int draw_queue_capacity;
+drawable **draw_queue;
+
+void engine_init() {
+    // Init screen
+    screen_init();
+    
+    // Open buttons
+    buttons_file = fopen("/dev/buttons","rb");
+    
+    // Open leds
+    leds_file = fopen("/dev/leds","wb");
+    
+    // Init gameobjects
+    gameobjects_size = 0;
+    gameobjects_capacity = 8; //TODO: Magic number
+    gameobjects = malloc(sizeof(gameobject*) * gameobjects_capacity);
+
+    // Init draw queue
+    draw_queue_size = 0;
+    draw_queue_capacity = 8; //TODO: Magic number
+    draw_queue = malloc(sizeof(drawable*) * draw_queue_capacity);
 }
 
-//Ok, this is how I think the main game logic loop should look like
-void tick(int32_t tick_nr){
+void engine_dispose() {
+    // Close leds
+    fclose(leds_file);
+    
+    // Close buttons
+    fclose(buttons_file);
+    
+    // Dispose screen
+    screen_dispose();
+    
+    // TODO: Free more stuff
+}
+
+// Run the main loop
+void engine_run() {
+    TICK = 0;
+    ENGINE_RUNNING = 1;
+    while (ENGINE_RUNNING) {
+        engine_tick();
+        engine_draw();
+        TICK++;
+    }
+}
+
+// 
+void engine_tick() {
+    // Loop though all gameobjects
 	int i;
-    for(i = 0; i < n_game_objects; i++){
+    for (i = 0; i < gameobjects_size; i++) {
+        // Get object
+        gameobject *object = gameobjects[i];
+        
+        // Loop through all components
 		int j;
-        for(j = 0; j < game_objects[i]->n_components; j++){
-            game_objects[i]->component_array[j](tick_nr, game_objects[i],j);
+        for (j = 0; j < object->components_size; j++) {
+            // Call tick function
+            object->components[j]->tick_function(j, object, NULL);
         }
     }
 }
 
-//And then there needs to be a drawing method
-void draw(){
-	int i;
+// 
+void engine_draw() {
+    // Fill screen with black
     screen_fill(0,0,0);
-    for(i = 0; i < draw_queue_length; i++){
+    
+    // Loop through the draw queue
+	int i;
+    for (i = 0; i < draw_queue_size; i++){
         //put current gameobjects image in some screen buffer array at correct position.
-		screen_draw_bmp(draw_queue[i]->pos.x, draw_queue[i]->pos.y, draw_queue[i]->image);
+		screen_draw_bmp(draw_queue[i]->pos_x, draw_queue[i]->pos_y, draw_queue[i]->image);
     }
+    
+    // Update screen
     screen_update_all();
-	draw_queue_length = 0;
-    //Maybe swap directly here to the screen
+    
+    // Reset draw queue
+	draw_queue_size = 0;
 }
 
+/* ************************************************************************************* */
 
-void setup_engine(){
-    draw_queue_capacity = 10; //TODO: Magic number
-    draw_queue = malloc(sizeof(drawable*)*draw_queue_capacity);
-
-    game_objects_capacity = 10; //TODO: Magic number
-    game_objects = malloc(sizeof(game_object*)*game_objects_capacity);
-
-    //set up screen
-    screen_init();
-
-    //Set up buttons
-    button_file = fopen("/dev/buttons","rb");
-    //Set up leds
-    led_file = fopen("/dev/leds","wb");
-}
-
-void free_engine(){
-    //TODO: Free everything!
-
-    fclose(led_file);
-    fclose(button_file);
-
-}
-
-
-
-int add_component(game_object* g_o, component_update component_func){
-    if(g_o->n_components >= g_o->component_capacity){
-        g_o->component_capacity *= 2;
-        g_o-> component_array = realloc(g_o->component_array, sizeof(component_update) * g_o->component_capacity);
+void engine_drawable_add(drawable *drawing) {
+    // Expand array if needed
+    if (draw_queue_size == draw_queue_capacity) {
+        draw_queue_capacity *= 2;
+        draw_queue = realloc(draw_queue, sizeof(drawable*) * draw_queue_capacity);
     }
-    g_o->component_array[g_o->n_components] = component_func;
-    g_o->n_components += 1;
-    return g_o->n_components - 1;
+    
+    // Add to queue
+    draw_queue[draw_queue_size++] = drawing;
 }
 
-
-void add_game_object(game_object* g_o){
-    if(game_objects_capacity >= n_game_objects){
-        game_objects_capacity *= 2;
-        game_objects = realloc(game_objects, sizeof(game_object*)*game_objects_capacity);
+void engine_gameobject_add(gameobject *object) {
+    // Expand array if needed
+    if (gameobjects_size == gameobjects_capacity) {
+        gameobjects_capacity *= 2;
+        gameobjects = realloc(gameobjects, sizeof(drawable*) * gameobjects_capacity);
     }
-    game_objects[n_game_objects] = g_o;
-    n_game_objects+=1;
+    
+    // Add to queue
+    gameobjects[gameobjects_size++] = object;
 }
 
-
-game_object* create_game_object(){
-    game_object* go;
-    go = malloc(sizeof(game_object));
-    go->component_capacity = 5; //TODO: Remove magic number?
-    go->component_array = malloc(sizeof(component_update)*go->component_capacity);
-    go->component_data = malloc(sizeof(void*)*go->component_capacity);
-
-    return go;
-}
-
-drawable* create_drawable(bmp_image* image){
+drawable* drawable_create(bmp_image *image) {
     drawable* drawing;
     drawing = malloc(sizeof(drawable));
     drawing->image = image;
+    drawing->pos_x = 0;
+    drawing->pos_y = 0;
     return drawing;
 }
 
-void draw_queue_append(drawable* drawing){
-    if(draw_queue_length >= draw_queue_capacity ){
-        draw_queue_capacity *= 2;
-        draw_queue = realloc(draw_queue, sizeof(drawable*)*draw_queue_capacity);
-    }
-    draw_queue[draw_queue_length] = drawing;
-    draw_queue_length+=1;
-}
+/* ************************************************************************************* */
 
-int is_button_down(int button_nr){
+
+int button_down(int button_nr){
     if(button_nr > 7 || button_nr < 0){
         return -1;
     }
     char buffer[1];//TODO Replace with 1 after driver has been rewritten
-    fread(buffer, 1, 1, button_file);
+    fread(buffer, 1, 1, buttons_file);
     char mask = 1;
     mask = mask << button_nr;
     //Masks out the relevant bit
     return buffer[0] & mask;
 }
 
-void turn_led_on(int led_nr){
+void led_on(int led_nr){
     if(led_nr > 7 || led_nr < 0){
         return;
     }
     char buffer[1];
     buffer[0] = 'A'+led_nr;
-    fwrite(buffer, 1, 1, led_file);
+    fwrite(buffer, 1, 1, leds_file);
 }
 
-void turn_led_off(int led_nr){
+void led_off(int led_nr){
     if(led_nr > 7 || led_nr < 0){
         return;
     }
     char buffer[1];
     buffer[0] = 'a'+led_nr;
-    fwrite(buffer, 1, 1, led_file);
+    fwrite(buffer, 1, 1, leds_file);
 }

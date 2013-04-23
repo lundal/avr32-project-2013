@@ -1,25 +1,75 @@
-#include "engine.h"
 #include "components.h"
+
+#include "engine.h"
 #include "graphics.h"
 
-void sprite_component_init(int component_nr, game_object *g_o, drawable* sprite){   
-   g_o->component_data[component_nr] = sprite;
+#include <stdio.h>
+#include <stdlib.h>
+
+// *****************************************************************************
+// *** Example component
+// *****************************************************************************
+component *component_example;
+
+// Function that is called when the component is added
+void component_example_add(int component_nr, gameobject *object, void *param) {
+    return;
 }
 
-//Adds the drawable stored in the matching componentdata slot to the draw_queue
-void sprite_component(int tick_nr, game_object *object, int component_nr){   
-    drawable* sprite;
-    sprite = (drawable*) object->component_data[component_nr];
-    sprite->pos.x = object->pos.x;
-    sprite->pos.y = object->pos.y;
-    draw_queue_append(sprite);
+// Function that is called each tick
+void component_example_tick(int component_nr, gameobject *object, void *param) {
+    return;
+}
+
+// Function that is called when the component is removed
+void component_example_remove(int component_nr, gameobject *object, void *param) {
+    return;
 }
 
 
-void move_component(int tick_nr, game_object *object, int component_nr){   
-	//object->pos.x = tick_nr % SCREEN_WIDTH;
-	if (is_button_down(0)) { object->pos.x = (object->pos.x + 1) % SCREEN_WIDTH;}	
-	if (is_button_down(2)) { object->pos.y = (object->pos.y - 1) % SCREEN_HEIGHT;}	
-	if (is_button_down(4)) { object->pos.y = (object->pos.y + 1) % SCREEN_HEIGHT;}	
-	if (is_button_down(7)) { object->pos.x = (object->pos.x - 1) % SCREEN_WIDTH;}	
+
+// *****************************************************************************
+// *** Controllable component
+// *****************************************************************************
+component *component_controllable;
+
+// Function that is called when the component is added
+void component_controllable_add(int component_nr, gameobject *object, void *param) {
+    return;
+}
+
+// Function that is called each tick
+void component_controllable_tick(int component_nr, gameobject *object, void *param) {
+    object->pos_x = TICK % SCREEN_WIDTH;
+}
+
+// Function that is called when the component is removed
+void component_controllable_remove(int component_nr, gameobject *object, void *param) {
+    return;
+}
+
+
+
+// *****************************************************************************
+// *** Sprite component
+// *****************************************************************************
+component *component_sprite;
+
+// Function that is called when the component is added
+void component_sprite_add(int component_nr, gameobject *object, void *param) {
+    char *image = (char*)param;
+    object->components_data[component_nr] = (void*)drawable_create(bmp_load(image));
+}
+
+// Function that is called each tick
+void component_sprite_tick(int component_nr, gameobject *object, void *param) {
+    drawable *sprite = (drawable*)object->components_data[component_nr];
+    sprite->pos_x = object->pos_x;
+    sprite->pos_y = object->pos_y;
+    engine_drawable_add(sprite);
+}
+
+// Function that is called when the component is removed
+void component_sprite_remove(int component_nr, gameobject *object, void *param) {
+    return; // TODO: Dispose sprite?
 }
