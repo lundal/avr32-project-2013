@@ -7,7 +7,7 @@
 
 int main() {
     
-    #define objects 100
+    #define objects 200
 
     engine_init();
     
