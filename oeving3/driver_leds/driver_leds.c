@@ -141,8 +141,8 @@ static ssize_t driver_read(struct file *filp, char __user *buff, size_t count, l
 	int pindata = AVR32_PIOB.pdsr;
     
     // Store the state of each pin as a character (capital letter means on)
-	char data[8];
-	data[0] = (pindata & elements[0]) ? 'A' : 'a';
+	char data[1];
+	/*data[0] = (pindata & elements[0]) ? 'A' : 'a';
 	data[1] = (pindata & elements[1]) ? 'B' : 'b';
 	data[2] = (pindata & elements[2]) ? 'C' : 'c';
 	data[3] = (pindata & elements[3]) ? 'D' : 'd';
@@ -150,10 +150,13 @@ static ssize_t driver_read(struct file *filp, char __user *buff, size_t count, l
 	data[5] = (pindata & elements[5]) ? 'F' : 'f';
 	data[6] = (pindata & elements[6]) ? 'G' : 'g';
 	data[7] = (pindata & elements[7]) ? 'H' : 'h';
-	
+	*/
+
+    data[0] = (~pindata) & elements_all;
+
     // Limit read count to 8
-	if (count > 8) {
-        count = 8;
+	if (count > 1) {
+        count = 1;
     }
     
     // Send data to user
