@@ -27,6 +27,7 @@ struct gameobjectstruct {
     int size_x;
     int size_y;
     int hp;
+    int type;
 };
 
 // Component prototypes
