@@ -1,16 +1,18 @@
 #include "component.h"
 
+#include <stdlib.h>
+
 // Creates a new component
 component *component_create(component_function add, component_function tick, component_function remove) {
     // Allocate memory
-    component_example = malloc(sizeof(component));
+    component *c = malloc(sizeof(component));
     
     // Set functions
-    *component_example = {
-        &component_example_add,
-        &component_example_tick,
-        &component_example_remove,
-    };
+    c->add_function = add;
+    c->tick_function = tick;
+    c->remove_function = remove;
+    
+    return c;
 }
 
 // Frees the memory used by a component
@@ -19,9 +21,9 @@ void component_dispose(component *c) {
 }
 
 // Adds a component to a gameobject
-int component_add(component *c, gameobject *object, void *param) {
+int component_add(gameobject *object, component *c, void *param) {
     // Expand arrays if needed
-    if (object->components_size == components_capacity) {
+    if (object->components_size == object->components_capacity) {
         object->components_capacity *= 2;
         object->components = realloc(object->components, sizeof(component_function) * object->components_capacity);
         object->components_data = realloc(object->components_data, sizeof(void*) * object->components_capacity);
@@ -42,12 +44,12 @@ int component_add(component *c, gameobject *object, void *param) {
 
 // Finds the component number of component in gameobject
 // Return -1 if the component was not found
-int component_find(component *c, gameobject *object) {
+int component_find(gameobject *object, component *c) {
     return 0; //TODO: Implement
 }
 
 // Removes a component from a gameobject
-int component_remove(component *c, gameobject *object, void *param) {
+int component_remove(gameobject *object, component *c, void *param) {
     return 0; //TODO: Implement
 }
 

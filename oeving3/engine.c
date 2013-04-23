@@ -1,9 +1,15 @@
 #include "engine.h"
+
 #include "graphics.h"
 #include "bmp.h"
+#include "component.h"
 
 #include <stdio.h>
 #include <stdlib.h>
+
+// Extern variables
+int TICK;
+int ENGINE_RUNNING;
 
 // Files used for io
 FILE *buttons_file;
@@ -57,7 +63,7 @@ void engine_dispose() {
 void engine_run() {
     TICK = 0;
     ENGINE_RUNNING = 1;
-    while (ENGINE_RUNNIG) {
+    while (ENGINE_RUNNING) {
         engine_tick();
         engine_draw();
         TICK++;
@@ -68,7 +74,7 @@ void engine_run() {
 void engine_tick() {
     // Loop though all gameobjects
 	int i;
-    for (i = 0; i < gameobjects_size; i++){
+    for (i = 0; i < gameobjects_size; i++) {
         // Get object
         gameobject *object = gameobjects[i];
         
@@ -90,7 +96,7 @@ void engine_draw() {
 	int i;
     for (i = 0; i < draw_queue_size; i++){
         //put current gameobjects image in some screen buffer array at correct position.
-		screen_draw_bmp(draw_queue[i]->pos.x, draw_queue[i]->pos.y, draw_queue[i]->image);
+		screen_draw_bmp(draw_queue[i]->pos_x, draw_queue[i]->pos_y, draw_queue[i]->image);
     }
     
     // Update screen
@@ -102,7 +108,7 @@ void engine_draw() {
 
 /* ************************************************************************************* */
 
-void engine_drawing_add(drawable *drawing) {
+void engine_drawable_add(drawable *drawing) {
     // Expand array if needed
     if (draw_queue_size == draw_queue_capacity) {
         draw_queue_capacity *= 2;
@@ -141,7 +147,7 @@ int button_down(int button_nr){
         return -1;
     }
     char buffer[1];//TODO Replace with 1 after driver has been rewritten
-    fread(buffer, 1, 1, button_file);
+    fread(buffer, 1, 1, buttons_file);
     char mask = 1;
     mask = mask << button_nr;
     //Masks out the relevant bit
@@ -154,7 +160,7 @@ void led_on(int led_nr){
     }
     char buffer[1];
     buffer[0] = 'A'+led_nr;
-    fwrite(buffer, 1, 1, led_file);
+    fwrite(buffer, 1, 1, leds_file);
 }
 
 void led_off(int led_nr){
@@ -163,5 +169,5 @@ void led_off(int led_nr){
     }
     char buffer[1];
     buffer[0] = 'a'+led_nr;
-    fwrite(buffer, 1, 1, led_file);
+    fwrite(buffer, 1, 1, leds_file);
 }

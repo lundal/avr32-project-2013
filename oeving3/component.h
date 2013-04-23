@@ -2,7 +2,7 @@
 #define COMPONENT_HEADER
 
 // Hack to circumvent circular dependancy
-typedef struct gameobjectstructt gameobject;
+typedef struct gameobjectstruct gameobject;
 
 // Define function pointer
 typedef void (*component_function)(int component_nr, gameobject *object, void *param);

@@ -2,6 +2,7 @@
 #define ENGINE_HEADER
 
 #include "bmp.h"
+#include "component.h"
 
 // External variables
 extern int TICK;
@@ -22,7 +23,7 @@ void engine_run();
 void engine_tick();
 void engine_draw();
 void engine_gameobject_add(gameobject *object);
-void engine_drawing_add(drawable *drawing);
+void engine_drawable_add(drawable *drawing);
 drawable* drawable_create(bmp_image *image);
 
 

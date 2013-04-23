@@ -1,6 +1,8 @@
 #include "engine.h"
 #include "components.h"
 
+#include <stdio.h>
+#include <stdlib.h>
 
 int main() {
     engine_init();
@@ -12,6 +14,7 @@ int main() {
     
     // Add object
     gameobject *rabbit = gameobject_create();
+    component_add(rabbit, component_controllable, NULL);
     component_add(rabbit, component_sprite, "rabbit.bmp");
     engine_gameobject_add(rabbit);
     

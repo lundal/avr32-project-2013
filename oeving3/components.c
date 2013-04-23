@@ -3,9 +3,13 @@
 #include "engine.h"
 #include "graphics.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+
 // *****************************************************************************
 // *** Example component
 // *****************************************************************************
+component *component_example;
 
 // Function that is called when the component is added
 void component_example_add(int component_nr, gameobject *object, void *param) {
@@ -27,6 +31,7 @@ void component_example_remove(int component_nr, gameobject *object, void *param)
 // *****************************************************************************
 // *** Controllable component
 // *****************************************************************************
+component *component_controllable;
 
 // Function that is called when the component is added
 void component_controllable_add(int component_nr, gameobject *object, void *param) {
@@ -48,11 +53,12 @@ void component_controllable_remove(int component_nr, gameobject *object, void *p
 // *****************************************************************************
 // *** Sprite component
 // *****************************************************************************
+component *component_sprite;
 
 // Function that is called when the component is added
 void component_sprite_add(int component_nr, gameobject *object, void *param) {
     char *image = (char*)param;
-    object->components_data[component_nr] = (void*)create_drawable(bmp_load(image));
+    object->components_data[component_nr] = (void*)drawable_create(bmp_load(image));
 }
 
 // Function that is called each tick
@@ -60,7 +66,7 @@ void component_sprite_tick(int component_nr, gameobject *object, void *param) {
     drawable *sprite = (drawable*)object->components_data[component_nr];
     sprite->pos_x = object->pos_x;
     sprite->pos_y = object->pos_y;
-    engine_drawable_add(sprite)
+    engine_drawable_add(sprite);
 }
 
 // Function that is called when the component is removed
