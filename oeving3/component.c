@@ -21,6 +21,7 @@ void component_dispose(component *c) {
 }
 
 // Adds a component to a gameobject
+// Return number of added component
 int component_add(gameobject *object, component *c, void *param) {
     // Expand arrays if needed
     if (object->components_size == object->components_capacity) {
@@ -40,6 +41,8 @@ int component_add(gameobject *object, component *c, void *param) {
     
     // Return nr
     return nr;
+    
+    // TODO: How to prevent tick-glitching?
 }
 
 // Finds the component number of component in gameobject
@@ -63,8 +66,21 @@ int component_find(gameobject *object, component *c) {
 }
 
 // Removes a component from a gameobject
+// Return number of removed component
 int component_remove(gameobject *object, component *c, void *param) {
-    return 0; //TODO: Implement
+    // Find number
+    int num = component_find(object, c);
+    
+    // Check for error
+    if (num < 0) {
+        return num;
+    }
+    
+    object->components[num] = object->components[object->components_size-- - 1];
+    
+    return num;
+    
+    // TODO: How to prevent tick-glitching?
 }
 
 // Creates a new gameobject
