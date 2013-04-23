@@ -14,6 +14,11 @@
 extern int TICK;
 extern int ENGINE_RUNNING;
 
+// Gameobjects
+extern int gameobjects_size;
+extern gameobject **gameobjects;
+
+// Drawable struct
 typedef struct {
 	int type;
 	void* data;
