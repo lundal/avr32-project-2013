@@ -14,6 +14,7 @@ extern component *component_affect_enemy;
 #define TYPE_PLAYER 1
 #define TYPE_ENEMY 2
 #define TYPE_BULLET 3
+extern component *component_hpbar;
 
 // Init function
 void components_init();
