@@ -39,6 +39,11 @@ void screen_fill(char r, char g, char b) {
 }
 
 void screen_draw_rect(int x, int y, int width, int height, char r, char g, char b) {
+    // Check for magic pink (transparancy)
+    if (r == 0xFF && g == 0x00 && b == 0xFF) {
+        return;
+    }
+
     // Initial (sub)pixel
     int xi = x * SCREEN_BPP;
     int yi = y;
