@@ -9,6 +9,7 @@
 
 #define DRAWABLE_BMP 0
 #define DRAWABLE_TEXT 1
+#define DRAWABLE_RECT 2
 
 // External variables
 extern int TICK;
@@ -25,6 +26,14 @@ typedef struct {
     void* param;
 } drawable;
 
+typedef struct {
+    int width;
+    int height;
+    int r;
+    int g;
+    int b;
+} drawable_rect;
+
 
 // Engine prototypes
 void engine_init();
@@ -38,6 +47,7 @@ void engine_gameobject_remove(gameobject *object);
 void engine_drawable_add(drawable *drawing, int x, int y);
 drawable* drawable_create_bmp(bmp_image *image);
 drawable* drawable_create_text(font *f, char *text);
+drawable* drawable_create_rect(int width, int height, int r, int g, int b);
 
 
 // IO

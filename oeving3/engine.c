@@ -178,6 +178,12 @@ void engine_draw() {
         if (d->type == DRAWABLE_TEXT) {
             screen_draw_text(x, y, (font*)d->param, (char*)d->data);
         }
+
+        // Draw text
+        if (d->type == DRAWABLE_RECT) {
+            drawable_rect *rect = (drawable_rect*) d->data;
+            screen_draw_rect(x, y, rect->width,rect->height, rect->r, rect->g, rect->b);
+        }
     }
     
     // Update screen
@@ -243,6 +249,23 @@ drawable* drawable_create_text(font *f, char *text) {
     drawing->type = DRAWABLE_TEXT;
     drawing->data = (void*)text;
     drawing->param = (void*)f;
+    return drawing;
+}
+
+drawable* drawable_create_rect(int width, int height, int r, int g, int b){
+    drawable* drawing;
+    drawing = malloc(sizeof(drawable));
+    
+    drawable_rect* rect = malloc(sizeof(drawable_rect));
+    rect->width = width;
+    rect->height = height;
+    rect->r = r;
+    rect->g = g;
+    rect->b = b;
+    
+    drawing->data = rect;
+    drawing->type = DRAWABLE_RECT;
+
     return drawing;
 }
 
