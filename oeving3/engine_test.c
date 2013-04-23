@@ -8,23 +8,27 @@ int main() {
     engine_init();
     
     // Init components
-    component_example = component_create(&component_example_add, &component_example_tick, &component_example_remove);
-    component_player_control = component_create(&component_player_control_add, &component_player_control_tick, &component_player_control_remove);
-    component_sprite = component_create(&component_sprite_add, &component_sprite_tick, &component_sprite_remove);
+    components_init();
+    
+    // Load images
+    drawable *rabby = drawable_create_bmp(bmp_load("rabbit.bmp"));
+    drawable *target = drawable_create_bmp(bmp_load("test.bmp"));
     
     // Add object
     gameobject *player1 = gameobject_create();
-    player1->pos_y = 150;
-    component_add(player1, component_player_control,(void*) 0);
-    component_add(player1, component_sprite, "rabbit.bmp");
+    player1->pos_y = 200;
+    component_add(player1, component_player_control, (void*)0);
+    component_add(player1, component_sprite, rabby);
+    component_add(player1, component_shoot, rabby);
     engine_gameobject_add(player1);
-
+    
+    // Add object
     gameobject *player2 = gameobject_create();
-    player2->pos_y = 150;
-    component_add(player2, component_player_control,(void*) 1);
-    component_add(player2, component_sprite, "rabbit.bmp");
+    player2->pos_y = 200;
+    component_add(player2, component_player_control, (void*)1);
+    component_add(player2, component_sprite, rabby);
     engine_gameobject_add(player2);
-
+    
     engine_run();
     
     return 0;

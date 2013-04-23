@@ -3,22 +3,13 @@
 
 #include "component.h"
 
-// Initialize the component by:
-// component_example = component_create(&component_example_add, &component_example_tick, component_example_remove);
-
-// Example component
-extern component *component_example;
-void component_example_add(int component_nr, gameobject *object, void *param);
-void component_example_tick(int component_nr, gameobject *object, void *param);
-void component_example_remove(int component_nr, gameobject *object, void *param);
-
 // Controllable component
 extern component *component_controllable;
 void component_controllable_add(int component_nr, gameobject *object, void *param);
 void component_controllable_tick(int component_nr, gameobject *object, void *param);
 void component_controllable_remove(int component_nr, gameobject *object, void *param);
 
-// Controllable component
+// Sprite component
 extern component *component_sprite;
 void component_sprite_add(int component_nr, gameobject *object, void *param);
 void component_sprite_tick(int component_nr, gameobject *object, void *param);
@@ -30,5 +21,13 @@ void component_player_control_add(int component_nr, gameobject *object, void *pa
 void component_player_control_tick(int component_nr, gameobject *object, void *param);
 void component_player_control_remove(int component_nr, gameobject *object, void *param);
 
+// Shooting component
+extern component *component_shoot;
+void component_shoot_add(int component_nr, gameobject *object, void *param);
+void component_shoot_tick(int component_nr, gameobject *object, void *param);
+void component_shoot_remove(int component_nr, gameobject *object, void *param);
+
+// Init function
+void components_init();
 
 #endif

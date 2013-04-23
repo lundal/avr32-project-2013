@@ -21,6 +21,8 @@ int gameobjects_capacity;
 gameobject **gameobjects;
 
 // Draw queue
+int *draw_queue_x;
+int *draw_queue_y;
 int draw_queue_size;
 int draw_queue_capacity;
 drawable **draw_queue;
@@ -44,6 +46,8 @@ void engine_init() {
     draw_queue_size = 0;
     draw_queue_capacity = 8; //TODO: Magic number
     draw_queue = malloc(sizeof(drawable*) * draw_queue_capacity);
+    draw_queue_x = malloc(sizeof(int) * draw_queue_capacity);
+    draw_queue_y = malloc(sizeof(int) * draw_queue_capacity);
 }
 
 void engine_dispose() {
@@ -95,8 +99,19 @@ void engine_draw() {
     // Loop through the draw queue
 	int i;
     for (i = 0; i < draw_queue_size; i++){
-        //put current gameobjects image in some screen buffer array at correct position.
-		screen_draw_bmp(draw_queue[i]->pos_x, draw_queue[i]->pos_y, draw_queue[i]->image);
+        drawable *d = draw_queue[i];
+        int x = draw_queue_x[i];
+        int y = draw_queue_y[i];
+        
+        // Draw BMP
+        if (d->type == DRAWABLE_BMP) {
+            screen_draw_bmp(x, y, (bmp_image*)d->data);
+        }
+        
+        // Draw text
+        if (d->type == DRAWABLE_TEXT) {
+            screen_draw_text(x, y, (font*)d->param, (char*)d->data);
+        }
     }
     
     // Update screen
@@ -108,15 +123,21 @@ void engine_draw() {
 
 /* ************************************************************************************* */
 
-void engine_drawable_add(drawable *drawing) {
+void engine_drawable_add(drawable *drawing, int x, int y) {
     // Expand array if needed
     if (draw_queue_size == draw_queue_capacity) {
         draw_queue_capacity *= 2;
         draw_queue = realloc(draw_queue, sizeof(drawable*) * draw_queue_capacity);
+        draw_queue_x = realloc(draw_queue_x, sizeof(int) * draw_queue_capacity);
+        draw_queue_y = realloc(draw_queue_y, sizeof(int) * draw_queue_capacity);
     }
     
     // Add to queue
-    draw_queue[draw_queue_size++] = drawing;
+    draw_queue[draw_queue_size] = drawing;
+    draw_queue_x[draw_queue_size] = x;
+    draw_queue_y[draw_queue_size] = y;
+    
+    draw_queue_size++;
 }
 
 void engine_gameobject_add(gameobject *object) {
@@ -130,12 +151,12 @@ void engine_gameobject_add(gameobject *object) {
     gameobjects[gameobjects_size++] = object;
 }
 
-drawable* drawable_create(bmp_image *image) {
+drawable* drawable_create_bmp(bmp_image *image) {
     drawable* drawing;
     drawing = malloc(sizeof(drawable));
-    drawing->image = image;
-    drawing->pos_x = 0;
-    drawing->pos_y = 0;
+    drawing->type = DRAWABLE_BMP;
+    drawing->data = (void*)image;
+    drawing->param = NULL;
     return drawing;
 }
 
