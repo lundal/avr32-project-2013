@@ -31,7 +31,7 @@ int main() {
     component_add(player1, component_player_control, (void*)0);
     component_add(player1, component_sprite, rabby);
     component_add(player1, component_shoot, rabby_red);
-    component_add(player1, component_hpbar, NULL) ;
+    component_add(player1, component_hpbar,(int[]) {30,5}) ;
     player1->hp = 20;
     engine_gameobject_add(player1);
     
@@ -41,7 +41,7 @@ int main() {
     component_add(player2, component_player_control, (void*)1);
     component_add(player2, component_sprite, rabby);
     component_add(player2, component_shoot, rabby_red);
-    component_add(player2, component_hpbar, NULL) ;
+    component_add(player2, component_hpbar, (int[]) {30,5}) ;
     player2->hp = 20;
     engine_gameobject_add(player2);
     
