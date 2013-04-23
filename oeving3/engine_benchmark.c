@@ -1,5 +1,6 @@
 #include "engine.h"
 #include "components.h"
+#include "graphics.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,7 +17,8 @@ int main() {
     // Load images
     drawable *rabby = drawable_create_bmp(bmp_load("rabbit.bmp"));
     
-    for(int i = 0; i < objects; i++){
+    int i;
+    for(i = 0; i < objects; i++){
         // Add object
         gameobject *player1 = gameobject_create();
         player1->pos_y = rand() % SCREEN_HEIGHT;
