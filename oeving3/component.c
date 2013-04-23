@@ -76,7 +76,13 @@ int component_remove(gameobject *object, component *c, void *param) {
         return num;
     }
     
-    object->components[num] = object->components[object->components_size-- - 1];
+    // Call the component's remove function
+    c->remove_function(num, object, param);
+    
+    // Remove component
+    object->components[num] = object->components[object->components_size - 1];
+    object->components_data[num] = object->components_data[object->components_size - 1];
+    object->components_size--;
     
     return num;
     
