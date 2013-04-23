@@ -11,23 +11,29 @@
 
 
 // *****************************************************************************
-// *** Controllable component
+// *** Go up and dissapear
 // *****************************************************************************
-component *component_controllable;
+component *component_upup;
 
 // Function that is called when the component is added
-void component_controllable_add(int component_nr, gameobject *object, void *param) {
+void component_upup_add(int component_nr, gameobject *object, void *param) {
     return;
 }
 
 // Function that is called each tick
-void component_controllable_tick(int component_nr, gameobject *object, void *param) {
-    //object->pos_y = (object->pos_y - 5 + SCREEN_HEIGHT) % SCREEN_HEIGHT;
+void component_upup_tick(int component_nr, gameobject *object, void *param) {
+    // Go up
     object->pos_y -= 5;
+    
+    // Edge check
+    if (object->pos_y < 0 - object->size_y) {
+        engine_gameobject_remove(object);
+    }
+    
 }
 
 // Function that is called when the component is removed
-void component_controllable_remove(int component_nr, gameobject *object, void *param) {
+void component_upup_remove(int component_nr, gameobject *object, void *param) {
     return;
 }
 
@@ -104,7 +110,7 @@ void component_shoot_tick(int component_nr, gameobject *object, void *param) {
         gameobject *bullet = gameobject_create();
         drawable *sprite = (drawable*)object->components_data[component_nr];
         component_add(bullet, component_sprite, sprite);
-        component_add(bullet, component_controllable, sprite);
+        component_add(bullet, component_upup, sprite);
         bullet->pos_x = object->pos_x;
         bullet->pos_y = object->pos_y;
         engine_gameobject_add(bullet);
@@ -122,10 +128,10 @@ void component_shoot_remove(int component_nr, gameobject *object, void *param) {
 // *** Init function
 // *****************************************************************************
 void components_init() {
-    component_controllable = component_create(
-        &component_controllable_add,
-        &component_controllable_tick,
-        &component_controllable_remove
+    component_upup = component_create(
+        &component_upup_add,
+        &component_upup_tick,
+        &component_upup_remove
     );
     
     component_sprite = component_create(

@@ -4,10 +4,10 @@
 #include "component.h"
 
 // Controllable component
-extern component *component_controllable;
-void component_controllable_add(int component_nr, gameobject *object, void *param);
-void component_controllable_tick(int component_nr, gameobject *object, void *param);
-void component_controllable_remove(int component_nr, gameobject *object, void *param);
+extern component *component_upup;
+void component_upup_add(int component_nr, gameobject *object, void *param);
+void component_upup_tick(int component_nr, gameobject *object, void *param);
+void component_upup_remove(int component_nr, gameobject *object, void *param);
 
 // Sprite component
 extern component *component_sprite;
