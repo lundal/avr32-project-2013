@@ -54,7 +54,11 @@ game_object* create_game_object();
 drawable* create_drawable(bmp_image* image);
 void add_game_object(game_object* g_o);
 int add_component(game_object* g_o, component_update component_func); 
+
+//I/O
 int is_button_down(int button_nr);
+void turn_led_on(int led_nr);
+void turn_led_off(int led_nr);
 
 int main();
 void draw_queue_append(drawable* drawing);

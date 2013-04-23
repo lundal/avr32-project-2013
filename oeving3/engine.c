@@ -58,14 +58,13 @@ void setup_engine(){
     game_objects_capacity = 10; //TODO: Magic number
     game_objects = malloc(sizeof(game_object*)*game_objects_capacity);
 
-
     //set up screen
     screen_init();
 
     //Set up buttons
     button_file = fopen("/dev/buttons","rb");
     //Set up leds
-    led_file = fopen("/dev/leds","rb");
+    led_file = fopen("/dev/leds","wb");
 }
 
 void free_engine(){
@@ -135,4 +134,22 @@ int is_button_down(int button_nr){
     mask = mask << button_nr;
     //Masks out the relevant bit
     return buffer[0] & mask;
+}
+
+void turn_led_on(int led_nr){
+    if(led_nr > 7 || led_nr < 0){
+        return;
+    }
+    char buffer[1];
+    buffer[0] = 'A'+led_nr;
+    fwrite(buffer, 1, 1, led_file);
+}
+
+void turn_led_off(int led_nr){
+    if(led_nr > 7 || led_nr < 0){
+        return;
+    }
+    char buffer[1];
+    buffer[0] = 'a'+led_nr;
+    fwrite(buffer, 1, 1, led_file);
 }
