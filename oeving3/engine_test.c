@@ -43,6 +43,8 @@ int main() {
     enemy->size_x = 32;
     enemy->size_y = 32;
     component_add(enemy, component_sprite, rabby);
+    component_add(enemy, component_hpbar, (int[]) {30,5}) ;
+    enemy->hp = 20;
     engine_gameobject_add(enemy);
 
     gameobject *player2 = gameobject_create();

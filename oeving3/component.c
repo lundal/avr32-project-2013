@@ -75,18 +75,23 @@ int component_remove(gameobject *object, component *c, void *param) {
     if (num < 0) {
         return num;
     }
+    component_remove_by_nr(object, num, param);
+
+    return num;
     
+    // TODO: How to prevent tick-glitching?
+}
+
+void component_remove_by_nr(gameobject *object, int num, void *param){
     // Call the component's remove function
-    c->remove_function(num, object, param);
+    object->components[num]->remove_function(num, object, param);
     
-    // Remove component
+    // Remove component by swapping with last and reduce size
     object->components[num] = object->components[object->components_size - 1];
     object->components_data[num] = object->components_data[object->components_size - 1];
     object->components_size--;
     
     return num;
-    
-    // TODO: How to prevent tick-glitching?
 }
 
 // Creates a new gameobject

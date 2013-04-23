@@ -91,7 +91,6 @@ void component_player_control_remove(int component_nr, gameobject *object, void*
 }
 
 
-
 // *****************************************************************************
 // *** Shooting component
 // *****************************************************************************
@@ -110,7 +109,10 @@ void component_shoot_tick(int component_nr, gameobject *object, void *param) {
         drawable *sprite = (drawable*)object->components_data[component_nr];
         component_add(bullet, component_sprite, sprite);
         component_add(bullet, component_upup, sprite);
-        component_add(bullet, component_affect_enemy, NULL);
+        void** arr = malloc(sizeof(void*)*2);
+        arr[0] = component_damage;
+        arr[1] = 3;
+        component_add(bullet, component_affect_enemy, arr);
         bullet->type = TYPE_BULLET;
         bullet->pos_x = object->pos_x;
         bullet->pos_y = object->pos_y;
@@ -122,6 +124,82 @@ void component_shoot_tick(int component_nr, gameobject *object, void *param) {
 
 // Function that is called when the component is removed
 void component_shoot_remove(int component_nr, gameobject *object, void *param) {
+    return;
+}
+
+// *****************************************************************************
+// *** Damage component
+// *** Causes set amount of damage and removes itself
+// *****************************************************************************
+component *component_damage;
+
+// Function that is called when the component is added
+// param = (int) damage
+void component_damage_add(int component_nr, gameobject *object, void *param) {
+    object->components_data[component_nr] = param;
+}
+
+// Function that is called each tick
+void component_damage_tick(int component_nr, gameobject *object, void *param) {
+    int damage = (int) object->components_data[component_nr];
+    object->hp -= damage;
+    component_remove_by_nr(object, component_nr, NULL);
+}
+
+// Function that is called when the component is removed
+void component_damage_remove(int component_nr, gameobject *object, void *param) {
+    return;
+}
+
+
+
+// *****************************************************************************
+// *** Affect enemy with component
+// *****************************************************************************
+component *component_affect_enemy;
+
+// Function that is called when the component is added
+// param = (void*[]){pointer to component, param to component}
+void component_affect_enemy_add(int component_nr, gameobject *object, void *param) {
+    // Store component
+    object->components_data[component_nr] = param;
+    return;
+}
+
+// Function that is called each tick
+void component_affect_enemy_tick(int component_nr, gameobject *object, void *param) {
+    int i;
+    for (i = 0; i < gameobjects_size; i++) {
+        // Get object
+        gameobject *target = gameobjects[i];
+        
+        // If object is an enemy
+        if (target->type == TYPE_ENEMY) {
+            // Check for collision
+            if ( (object->pos_x < target->pos_x + target->size_x) &&
+                 (object->pos_x + object->size_x > target->pos_x) &&
+                 (object->pos_y < target->pos_y + target->size_y) &&
+                 (object->pos_y + object->size_y > target->pos_y) ) {
+                // Get stored component
+                component *c = (component*)((void**)object->components_data[component_nr])[0];
+                void* cparam = ((void**)object->components_data[component_nr])[1];
+                // Add it to enemy
+                component_add(target, (component*)c, cparam);
+                
+                // Remove target
+                //engine_gameobject_remove(target);
+                
+                // Remove self?
+                engine_gameobject_remove(object);
+                
+                break;
+            }
+        }
+    }
+}
+
+// Function that is called when the component is removed
+void component_affect_enemy_remove(int component_nr, gameobject *object, void *param) {
     return;
 }
 
@@ -172,57 +250,6 @@ void component_hpbar_remove(int component_nr, gameobject *object, void *param) {
 
 
 
-// *****************************************************************************
-// *** Affect enemy with component
-// *****************************************************************************
-component *component_affect_enemy;
-
-// Function that is called when the component is added
-void component_affect_enemy_add(int component_nr, gameobject *object, void *param) {
-    // Store component
-    object->components_data[component_nr] = param;
-    
-    return;
-}
-
-// Function that is called each tick
-void component_affect_enemy_tick(int component_nr, gameobject *object, void *param) {
-    int i;
-    for (i = 0; i < gameobjects_size; i++) {
-        // Get object
-        gameobject *target = gameobjects[i];
-        
-        // If object is an enemy
-        if (target->type == TYPE_ENEMY) {
-            // Check for collision
-            if ( (object->pos_x < target->pos_x + target->size_x) &&
-                 (object->pos_x + object->size_x > target->pos_x) &&
-                 (object->pos_y < target->pos_y + target->size_y) &&
-                 (object->pos_y + object->size_y > target->pos_y) ) {
-                // Get stored component
-                component *c = (component*)object->components_data[component_nr];
-                
-                // Add it to enemy
-                //component_add(target, (component*)c, NULL);
-                
-                // Remove target
-                engine_gameobject_remove(target);
-                
-                // Remove self?
-                engine_gameobject_remove(object);
-                
-                break;
-            }
-        }
-    }
-}
-
-// Function that is called when the component is removed
-void component_affect_enemy_remove(int component_nr, gameobject *object, void *param) {
-    return;
-}
-
-
 
 // *****************************************************************************
 // *** Init function
@@ -261,6 +288,11 @@ void components_init() {
         &component_hpbar_add,
         &component_hpbar_tick,
         &component_hpbar_remove
+        );  
+    component_damage = component_create(
+        &component_damage_add,
+        &component_damage_tick,
+        &component_damage_remove
         );  
 }
 

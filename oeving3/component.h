@@ -36,6 +36,7 @@ void component_dispose(component *c);
 int component_add(gameobject *object, component *c, void *param);
 int component_find(gameobject *object, component *c);
 int component_remove(gameobject *object, component *c, void *param);
+void component_remove_by_nr(gameobject *object, int component_nr, void *param);
 
 // Gameobject prototypes
 gameobject* gameobject_create();
