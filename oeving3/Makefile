@@ -10,7 +10,7 @@ CCFLAGS = -Wall -g -O3 -c
 LDFLAGS = -Wall -g -pedantic -lm
 
 # File names 
-SRC = bmp.c graphics.c ip.c
+SRC = bmp.c graphics.c font.c ip.c
 OBJ = $(SRC:.c=.o)
 EXE = ip.out
 

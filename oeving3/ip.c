@@ -1,5 +1,5 @@
 #include "graphics.h"
-#include "fonts.h"
+#include "font.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,7 +9,7 @@ int main() {
     FILE *ip_file;
     ip_file = popen("ifconfig | grep 'Bcast' | awk '{print $2}'", "r");
     char ip[100];
-    fgets(data, 100, ip_file);
+    fgets(ip, 100, ip_file);
     pclose(ip_file);
     
     // Init screen
