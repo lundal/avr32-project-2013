@@ -22,7 +22,8 @@ void component_controllable_add(int component_nr, gameobject *object, void *para
 
 // Function that is called each tick
 void component_controllable_tick(int component_nr, gameobject *object, void *param) {
-    object->pos_y = (object->pos_y - 1 + SCREEN_HEIGHT) % SCREEN_HEIGHT;
+    //object->pos_y = (object->pos_y - 5 + SCREEN_HEIGHT) % SCREEN_HEIGHT;
+    object->pos_y -= 5;
 }
 
 // Function that is called when the component is removed
@@ -99,11 +100,13 @@ void component_shoot_add(int component_nr, gameobject *object, void *param) {
 
 // Function that is called each tick
 void component_shoot_tick(int component_nr, gameobject *object, void *param) {
-    if (TICK % 50 == 0) {
+    if (TICK % 20 == 0) {
         gameobject *bullet = gameobject_create();
         drawable *sprite = (drawable*)object->components_data[component_nr];
         component_add(bullet, component_sprite, sprite);
         component_add(bullet, component_controllable, sprite);
+        bullet->pos_x = object->pos_x;
+        bullet->pos_y = object->pos_y;
         engine_gameobject_add(bullet);
     }
 }
