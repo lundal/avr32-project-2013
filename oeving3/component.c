@@ -22,7 +22,11 @@ void component_dispose(component *c) {
 
 // Adds a component to a gameobject
 // Return number of added component
+// Return -1 if the component was not found
 int component_add(gameobject *object, component *c, void *param) {
+    // Check for null
+    if (object == NULL || c == NULL) return -1;
+    
     // Expand arrays if needed
     if (object->components_size == object->components_capacity) {
         object->components_capacity *= 2;
@@ -46,8 +50,12 @@ int component_add(gameobject *object, component *c, void *param) {
 }
 
 // Finds the component number of component in gameobject
+// Return number of found component
 // Return -1 if the component was not found
 int component_find(gameobject *object, component *c) {
+    // Check for null
+    if (object == NULL || c == NULL) return -1;
+    
     // For each component in object
     int i;
     for (i = 0; i < object->components_size; i++) {
@@ -67,7 +75,11 @@ int component_find(gameobject *object, component *c) {
 
 // Removes a component from a gameobject
 // Return number of removed component
+// Return -1 if the component was not found
 int component_remove(gameobject *object, component *c, void *param) {
+    // Check for null
+    if (object == NULL || c == NULL) return -1;
+    
     // Find number
     int num = component_find(object, c);
     
