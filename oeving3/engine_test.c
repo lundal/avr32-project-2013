@@ -137,14 +137,53 @@ void powerup_spawner(){
         drawable *sprite;
         sprite = power_sprite;
 
+        int r = rand() % 4;
+        int led_nr = r;
+        component *self_effect = component_damage;
+        void* self_param = 0;
+        component *enemy_effect = component_damage;
+        void* enemy_param = 0;
+        int cr;
+        int cg;
+        int cb;
+        switch(r){
+            case 0:
+                self_param = (void*) 10;
+                enemy_param = (void*) 0;
+                cr = 0;
+                cg = 255;
+                cb = 0;
+                break;
+            case 1:
+                self_param = (void*) 7;
+                enemy_param = (void*) 3;
+                cr = 0;
+                cg = 180;
+                cb = 255;
+                break;
+            case 2:
+                self_param = (void*) 5;
+                enemy_param = (void*) 5;
+                cr = 255;
+                cg = 255;
+                cb = 0;
+                break;
+            case 3:
+                self_param = (void*) 0;
+                enemy_param = (void*) 10;
+                cr = 100;
+                cg = 0;
+                cb = 0;
+                break;
+        };
         component_powerup_data *data1 = malloc(sizeof(component_powerup_data));
 
         *data1 = (component_powerup_data){
             .led_nr = 2,
-            .self_effect = component_damage,
-            .self_param = (void*)(-10),
-            .enemy_effect = component_damage,
-            .enemy_param = (void*)(10),
+                .self_effect = component_damage,
+                .self_param = (void*)(-10),
+                .enemy_effect = component_damage,
+                .enemy_param = (void*)(10),
         };
         //TODO: Free where?
 
