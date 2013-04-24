@@ -235,10 +235,10 @@ void component_shoot_tick(int component_nr, gameobject *object, void *param) {
         
         // Set basic properties
         bullet->type = TYPE_BULLET;
-        bullet->pos_x = object->pos_x;
+        bullet->size_x = 4;
+        bullet->size_y = 4;
+        bullet->pos_x = object->pos_x + object->size_x/2 - bullet->size_x/2;
         bullet->pos_y = object->pos_y;
-        bullet->size_x = 32;
-        bullet->size_y = 32;
         engine_gameobject_add(bullet);
     }
 }

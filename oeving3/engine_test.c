@@ -8,23 +8,27 @@
 #include <stdlib.h>
 
 //defines
+void init();
+void dispose();
 void death_print(gameobject *object);
 void ufo_offscreen(gameobject *object);
 void player_death(gameobject *object);
 void enemy_spawner();
 void powerup_spawner();
 
-drawable *rabby_red, *power_sprite;
+drawable *rabby, *rabby_red, *power_sprite, *bullet;
 drawable *ufo1, *ufo2, *ufo3, *ufo4, *ufo5;
 gameobject *player1, *player2;
 
 font *f_small, *f_large;
 
 int main() {
-    engine_init();
-    
     // Init components
     components_init();
+    
+    // Load fonts
+    f_small = font_load("font_small");
+    f_large = font_load("font_large");
     
     // Load images
     bmp_image *img_ufo1 = bmp_load("images/ufo1.bmp");
@@ -38,56 +42,70 @@ int main() {
     bmp_tint(img_rabby_red, 255, 128, 128);
     bmp_tint(img_powerup, 0, 214, 29);
     
-    // Load fonts
-    f_small = font_load("font_small");
-    f_large = font_load("font_large");
-    
     // Create drawables
     ufo1 = drawable_create_bmp(img_ufo1);
     ufo2 = drawable_create_bmp(img_ufo2);
     ufo3 = drawable_create_bmp(img_ufo3);
     ufo4 = drawable_create_bmp(img_ufo4);
     ufo5 = drawable_create_bmp(img_ufo5);
-    drawable *rabby = drawable_create_bmp(img_rabby);
-    drawable *bullet = drawable_create_rect(5, 5, 255,255,255);
+    rabby = drawable_create_bmp(img_rabby);
+    bullet = drawable_create_rect(4, 4, 255, 255, 255);
     rabby_red = drawable_create_bmp(img_rabby_red);
     power_sprite = drawable_create_bmp(img_powerup);
     
+    // Loop game
+    while (1) {
+        engine_init();
+        init();
+        engine_run();
+        dispose();
+        engine_dispose();
+    }
+}
+
+void init() {
     // Add object
     player1 = gameobject_create();
+    player1->size_x = 32;
+    player1->size_y = 32;
+    player1->pos_x = SCREEN_WIDTH/2 + 10;
     player1->pos_y = 200;
     player1->size_x = 32;
     player1->size_y = 32;
     player1->type = TYPE_PLAYER1;
+    player1->hp = player1->size_x;
     component_add(player1, component_player_control, (void*)0);
     component_add(player1, component_sprite, rabby);
     component_add(player1, component_shoot, bullet);
-    component_add(player1, component_hpbar,(int[]) {30,5}) ;
+    component_add(player1, component_hpbar,(int[]) {player1->hp, 4}) ;
     component_add(player1, component_death, &player_death);
-    player1->hp = 20;
     engine_gameobject_add(player1);
     
     // Add object
     player2 = gameobject_create();
+    player2->size_x = 32;
+    player2->size_y = 32;
+    player2->pos_x = SCREEN_WIDTH/2 - player2->size_x - 10;
     player2->pos_y = 200;
     player2->type = TYPE_PLAYER2;
     player2->size_x = 32;
     player2->size_y = 32;
+    player2->hp = player2->size_x;
     component_add(player2, component_player_control, (void*)1);
     component_add(player2, component_sprite, rabby);
     component_add(player2, component_shoot, bullet);
-    component_add(player2, component_hpbar, (int[]) {30,5}) ;
+    component_add(player2, component_hpbar, (int[]) {player2->hp, 4}) ;
     component_add(player2, component_death, &player_death);
-    player2->hp = 20;
     engine_gameobject_add(player2);
     
     //Add enemy spawner
     engine_ticker_add(&enemy_spawner);
     engine_ticker_add(&powerup_spawner);
+}
 
-    engine_run();
-    
-    return 0;
+
+void dispose() {
+    return;
 }
 
 
@@ -96,28 +114,58 @@ void enemy_spawner(){
     if(TICK % 100 == 0){
      // Add object
         gameobject *enemy = gameobject_create();
-        enemy->type = TYPE_ENEMY;
-        enemy->size_x = 30;
-        enemy->size_y = 20;
-        enemy->pos_x = rand() % (SCREEN_WIDTH - 60) + 30;
-        enemy->pos_y = -10;
+        drawable *sprite = NULL;
         
-        // Use random image
+        // Randomize
         int r = rand() % 5 + 1;
-        drawable *sprite;
-        if (r == 1) sprite = ufo1;
-        if (r == 2) sprite = ufo2;
-        if (r == 3) sprite = ufo3;
-        if (r == 4) sprite = ufo4;
-        if (r == 5) sprite = ufo5;
-        component_add(enemy, component_sprite, sprite);
+        if (r == 1) {
+            sprite = ufo1;
+            enemy->size_x = 60;
+            enemy->size_y = 30;
+        }
+        else if (r == 2) {
+            sprite = ufo2;
+            enemy->size_x = 30;
+            enemy->size_y = 15;
+        }
+        else if (r == 3) {
+            sprite = ufo3;
+            enemy->size_x = 30;
+            enemy->size_y = 15;
+        }
+        else if (r == 4) {
+            sprite = ufo4;
+            enemy->size_x = 30;
+            enemy->size_y = 15;
+        }
+        else if (r == 5) {
+            sprite = ufo5;
+            enemy->size_x = 30;
+            enemy->size_y = 15;
+        }
         
-        enemy->hp = 30;
-        component_add(enemy, component_hpbar, (int[]) {enemy->hp,5}) ;
+        
+        enemy->type = TYPE_ENEMY;
+        enemy->pos_x = rand() % (SCREEN_WIDTH - enemy->size_x - 40) + 20;
+        enemy->pos_y = - (enemy->size_y - 1);
+        enemy->hp = enemy->size_x;
+        
+        // Add collision effect
+        component_collision_data data = {
+            .target_type = TYPE_PLAYER,
+            .self_effect = component_gameobject_remove,
+            .self_param = NULL,
+            .other_effect = component_damage,
+            .other_param = (void*)10,
+        };
+        component_add(enemy, component_collision, &data);
+        component_add(enemy, component_sprite, sprite);
+        component_add(enemy, component_hpbar, (int[]) {enemy->hp, 4}) ;
         component_add(enemy, component_zigzag, &(component_zigzag_data){2, 50});
         component_add(enemy, component_move, &(component_move_data){0, 1});
         component_add(enemy, component_offscreen, &ufo_offscreen);
         component_add(enemy, component_death, &death_print);
+        
         engine_gameobject_add(enemy);
     }
 }
@@ -213,13 +261,28 @@ void ufo_offscreen(gameobject *object) {
 }
 
 void player_death(gameobject *object) {
+    // Check for repeat
+    if (player1->hp == player2->hp && object == player2) {
+        return;
+    }
+    
     screen_fill(255,0,0);
-    if (object == player1) {
-        screen_draw_text(20, 20, f_large, "RABBIT 1 LOSES");
+    if (player1->hp == player2->hp) {
+        screen_draw_text(40, 100, f_large, "ALL RABBITS DIE!");
+        screen_draw_text(40, 130, f_small, "Aliens have scorched the land...");
+        screen_draw_text(40, 150, f_small, "Pixie-land is no more...");
+    }
+    else if (object == player1) {
+        screen_draw_text(40, 100, f_large, "RABBIT 1 DIES!");
+        screen_draw_text(40, 130, f_small, "While rabbit 2 lives on...");
+        screen_draw_text(40, 150, f_small, "For now...");
     } else {
-        screen_draw_text(20, 20, f_large, "RABBIT 2 LOSES");
+        screen_draw_text(40, 100, f_large, "RABBIT 2 DIES!");
+        screen_draw_text(40, 130, f_small, "While rabbit 1 lives on...");
+        screen_draw_text(40, 150, f_small, "For now...");
     }
     screen_update_all();
-    //ENGINE_RUNNING = 0;
+    
+    ENGINE_RUNNING = 0;
     sleep(3);
 }
