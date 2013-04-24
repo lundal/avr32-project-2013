@@ -280,6 +280,7 @@ component *component_powerup;
 // Function that is called when the component is added
 // param = component_powerup_data 
 void component_powerup_add(int component_nr, gameobject *object, void *param) {
+    printf("Adding powerup\n");
 
     // Get data
     component_powerup_data data = *(component_powerup_data*)param;
@@ -291,9 +292,12 @@ void component_powerup_add(int component_nr, gameobject *object, void *param) {
 
     //Turn on led
     int led_nr = data.led_nr;
+    printf("led_nr = %d\n",led_nr);
+    printf("self_effect = %d\n", data.self_effect);
     if(object->type == TYPE_PLAYER2){
         led_nr = 7 - led_nr; //Mirror for player 2
     }   
+    printf("led_nr = %d\n",led_nr);
     led_on(led_nr);
 }
 
@@ -362,7 +366,7 @@ void component_collision_tick(int component_nr, gameobject *object, void *param)
         gameobject *target = gameobjects[i];
         
         // If object is an specified type
-        if (target->type == data->target_type) {
+        if (target->type & data->target_type) { //Mask check
             // Check for collision
             if ( (object->pos_x < target->pos_x + target->size_x) &&
                  (object->pos_x + object->size_x > target->pos_x) &&

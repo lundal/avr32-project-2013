@@ -318,20 +318,18 @@ int button_down(int button_nr){
     return buffer[0] & mask;
 }
 
-void led_on(int led_nr){
-    if(led_nr > 7 || led_nr < 0){
+void led_on(unsigned char led_nr){
+    if(led_nr > 7){
         return;
     }
-    char buffer[1];
-    buffer[0] = 'A'+led_nr;
-    fwrite(buffer, 1, 1, leds_file);
+    fprintf(leds_file,"%c",'A'+led_nr);
+    fflush(leds_file);
 }
 
-void led_off(int led_nr){
+void led_off(unsigned char led_nr){
     if(led_nr > 7 || led_nr < 0){
         return;
     }
-    char buffer[1];
-    buffer[0] = 'a'+led_nr;
-    fwrite(buffer, 1, 1, leds_file);
+    fprintf(leds_file,"%c",'a'+led_nr);
+    fflush(leds_file);
 }
