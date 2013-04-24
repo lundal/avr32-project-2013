@@ -8,7 +8,9 @@
 
 //defines
 void death_print(gameobject *object);
+void enemy_spawner();
 drawable *rabby_red;
+
 int main() {
     engine_init();
     
@@ -41,18 +43,6 @@ int main() {
     engine_gameobject_add(player1);
     
     // Add object
-    gameobject *enemy = gameobject_create();
-    enemy->type = TYPE_ENEMY;
-    enemy->pos_x = 200;
-    enemy->pos_y = 20;
-    enemy->size_x = 32;
-    enemy->size_y = 32;
-    component_add(enemy, component_sprite, rabby_red);
-    component_add(enemy, component_hpbar, (int[]) {30,5}) ;
-    component_add(enemy, component_zigzag, &(component_zigzag_data){2, 50});
-    component_add(enemy, component_death, &death_print);
-    enemy->hp = 20;
-    engine_gameobject_add(enemy);
 
     gameobject *player2 = gameobject_create();
     player2->pos_y = 200;
@@ -63,10 +53,34 @@ int main() {
     player2->hp = 20;
     engine_gameobject_add(player2);
     
+    //Add enemy spawner
+    engine_ticker_add(&enemy_spawner);
+
     engine_run();
     
     return 0;
 }
+
+
+void enemy_spawner(){
+    //Spawn enemy every 100th tick 
+    if(TICK % 200 == 0){
+     // Add object
+        gameobject *enemy = gameobject_create();
+        enemy->type = TYPE_ENEMY;
+        enemy->pos_x = rand() % SCREEN_WIDTH;
+        enemy->pos_y = rand() % SCREEN_HEIGHT;
+        enemy->size_x = 32;
+        enemy->size_y = 32;
+        component_add(enemy, component_sprite, rabby_red);
+        enemy->hp = 30;
+        component_add(enemy, component_hpbar, (int[]) {enemy->hp,5}) ;
+        component_add(enemy, component_zigzag, &(component_zigzag_data){2, 50});
+        component_add(enemy, component_death, &death_print);
+        engine_gameobject_add(enemy);
+    }
+}
+
 
 void death_print(gameobject *object){
     printf("YO I'M a DEATH FUNCTION\n");
@@ -83,3 +97,6 @@ void death_print(gameobject *object){
     enemy->hp = 20;
     engine_gameobject_add(enemy);
 }
+
+
+
