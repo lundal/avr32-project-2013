@@ -56,7 +56,7 @@ void component_sprite_tick(int component_nr, gameobject *object, void *param) {
 
 // Function that is called when the component is removed
 void component_sprite_remove(int component_nr, gameobject *object, void *param) {
-    return; // TODO: Dispose sprite?
+    return;
 }
 
 // *****************************************************************************
