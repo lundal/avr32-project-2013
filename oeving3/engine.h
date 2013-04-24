@@ -15,6 +15,11 @@
 extern int TICK;
 extern int ENGINE_RUNNING;
 
+// Tickers
+typedef void (*ticker_function)();
+extern ticker_function* tickers;
+extern int tickers_size;
+
 // Gameobjects
 extern int gameobjects_size;
 extern gameobject **gameobjects;
@@ -42,6 +47,7 @@ void engine_run();
 void engine_tick();
 void engine_process_queues();
 void engine_draw();
+void engine_ticker_add(ticker_function tickfunc);
 void engine_gameobject_add(gameobject *object);
 void engine_gameobject_remove(gameobject *object);
 void engine_drawable_add(drawable *drawing, int x, int y);

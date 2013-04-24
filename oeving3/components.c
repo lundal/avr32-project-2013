@@ -323,7 +323,7 @@ void component_death_remove(int component_nr, gameobject *object, void *param) {
 // *** Ticker component
 // *** Spawns enemies at a given rate
 // *****************************************************************************
-component *component_ticker;
+/*component *component_ticker;
 
 // Function that is called when the component is added
 // param = death_function function pointer or NULL to simply die
@@ -344,7 +344,7 @@ void component_ticker_remove(int component_nr, gameobject *object, void *param) 
 }
 
 
-
+*/
 
 // *****************************************************************************
 // *** HP bar component 

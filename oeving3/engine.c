@@ -17,10 +17,17 @@ int ENGINE_RUNNING;
 FILE *buttons_file;
 FILE *leds_file;
 
+
+// Tickers
+ticker_function *tickers;
+int tickers_capacity;
+int tickers_size;
+
 // Gameobjects
 int gameobjects_size;
 int gameobjects_capacity;
 gameobject **gameobjects;
+void engine_gameobject_ticker();
 
 // Add queue
 int add_queue_size;
@@ -48,6 +55,11 @@ void engine_init() {
     
     // Open leds
     leds_file = fopen("/dev/leds","wb");
+
+    // Init tickers
+    tickers_size = 0;
+    tickers_capacity = ENGINE_INITIAL_SIZE;
+    tickers = malloc(sizeof(ticker_function) * tickers_capacity);
     
     // Init gameobjects
     gameobjects_size = 0;
@@ -70,6 +82,9 @@ void engine_init() {
     draw_queue = malloc(sizeof(drawable*) * draw_queue_capacity);
     draw_queue_x = malloc(sizeof(int) * draw_queue_capacity);
     draw_queue_y = malloc(sizeof(int) * draw_queue_capacity);
+
+    //Add initial tickers
+    engine_ticker_add(&engine_gameobject_ticker);
 }
 
 void engine_dispose() {
@@ -99,6 +114,14 @@ void engine_run() {
 
 // 
 void engine_tick() {
+   int i;
+   for(i = 0; i < tickers_size; i++){
+        //tick every ticker
+        tickers[i]();
+   }
+}
+
+void engine_gameobject_ticker(){
     // Loop though all gameobjects
 	int i;
     for (i = 0; i < gameobjects_size; i++) {
@@ -210,6 +233,17 @@ void engine_drawable_add(drawable *drawing, int x, int y) {
     draw_queue_y[draw_queue_size] = y;
     
     draw_queue_size++;
+}
+
+void engine_ticker_add(ticker_function tickfunc) {
+    // Expand array if needed
+    if (tickers_size >= tickers_capacity) {
+        tickers_capacity *= 2;
+        tickers = realloc(tickers, sizeof(ticker_function) * tickers_capacity);
+    }
+    
+    // Add
+    tickers[tickers_size++] = tickfunc;
 }
 
 void engine_gameobject_add(gameobject *object) {
