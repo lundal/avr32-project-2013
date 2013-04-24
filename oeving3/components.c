@@ -37,27 +37,31 @@ void component_gameobject_remove_remove(int component_nr, gameobject *object, vo
 
 
 // *****************************************************************************
-// *** Remove object when offscreen
+// *** Trigger function when offscreen
 // *****************************************************************************
-component *component_offscreen_remove;
+component *component_offscreen;
 
 // Function that is called when the component is added
-void component_offscreen_remove_add(int component_nr, gameobject *object, void *param) {
-    return;
+// Param: gameobject_function pointer
+void component_offscreen_add(int component_nr, gameobject *object, void *param) {
+    object->components_data[component_nr] = param;
 }
 
 // Function that is called each tick
-void component_offscreen_remove_tick(int component_nr, gameobject *object, void *param) {
+void component_offscreen_tick(int component_nr, gameobject *object, void *param) {
     // Edge check
     if ( (object->pos_x + object->size_x < 0) || (object->pos_x >= SCREEN_WIDTH) ||
          (object->pos_y + object->size_y < 0) || (object->pos_y >= SCREEN_HEIGHT) ) {
         // Remove gameobject
-        engine_gameobject_remove(object);
+        gameobject_function func = (gameobject_function) object->components_data[component_nr];
+        if(func != NULL) {
+            func(object);
+        }
     }
 }
 
 // Function that is called when the component is removed
-void component_offscreen_remove_remove(int component_nr, gameobject *object, void *param) {
+void component_offscreen_remove(int component_nr, gameobject *object, void *param) {
     return;
 }
 
@@ -216,7 +220,7 @@ void component_shoot_tick(int component_nr, gameobject *object, void *param) {
         component_add(bullet, component_move, &data1);
         
         // Remove when offscreen
-        component_add(bullet, component_offscreen_remove, NULL);
+        component_add(bullet, component_offscreen, &engine_gameobject_remove);
         
         // Add collision effect
         component_collision_data data2 = {
@@ -392,7 +396,7 @@ void component_collision_remove(int component_nr, gameobject *object, void *para
 component *component_death;
 
 // Function that is called when the component is added
-// param = death_function function pointer or NULL to simply die
+// param = gameobject_function function pointer or NULL to simply die
 void component_death_add(int component_nr, gameobject *object, void *param) {
     object->components_data[component_nr] = param;
 }
@@ -401,7 +405,7 @@ void component_death_add(int component_nr, gameobject *object, void *param) {
 void component_death_tick(int component_nr, gameobject *object, void *param) {
     //printf("hp is %d\n", object->hp);
     if(object->hp <= 0){
-        death_function func = (death_function) object->components_data[component_nr];
+        gameobject_function func = (gameobject_function) object->components_data[component_nr];
         if(func != NULL)
         {
             func(object);
@@ -473,10 +477,10 @@ void components_init() {
         &component_gameobject_remove_tick,
         &component_gameobject_remove_remove
     );
-    component_offscreen_remove = component_create(
-        &component_offscreen_remove_add,
-        &component_offscreen_remove_tick,
-        &component_offscreen_remove_remove
+    component_offscreen = component_create(
+        &component_offscreen_add,
+        &component_offscreen_tick,
+        &component_offscreen_remove
     );
     component_move = component_create(
         &component_move_add,

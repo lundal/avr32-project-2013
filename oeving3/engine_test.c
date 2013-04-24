@@ -8,11 +8,16 @@
 
 //defines
 void death_print(gameobject *object);
+void ufo_offscreen(gameobject *object);
+void player_death(gameobject *object);
 void enemy_spawner();
 void powerup_spawner();
 
 drawable *rabby_red, *power_sprite;
 drawable *ufo1, *ufo2, *ufo3, *ufo4, *ufo5;
+gameobject *player1, *player2;
+
+font *f_small, *f_large;
 
 int main() {
     engine_init();
@@ -33,8 +38,8 @@ int main() {
     bmp_tint(img_powerup, 0, 214, 29);
     
     // Load fonts
-    font *f_small = font_load("font_small");
-    font *f_large = font_load("font_large");
+    f_small = font_load("font_small");
+    f_large = font_load("font_large");
     
     // Create drawables
     ufo1 = drawable_create_bmp(img_ufo1);
@@ -48,7 +53,7 @@ int main() {
     power_sprite = drawable_create_bmp(img_powerup);
     
     // Add object
-    gameobject *player1 = gameobject_create();
+    player1 = gameobject_create();
     player1->pos_y = 200;
     player1->size_x = 32;
     player1->size_y = 32;
@@ -57,12 +62,12 @@ int main() {
     component_add(player1, component_sprite, rabby);
     component_add(player1, component_shoot, bullet);
     component_add(player1, component_hpbar,(int[]) {30,5}) ;
+    component_add(player1, component_death, &player_death);
     player1->hp = 20;
     engine_gameobject_add(player1);
     
     // Add object
-
-    gameobject *player2 = gameobject_create();
+    player2 = gameobject_create();
     player2->pos_y = 200;
     player2->type = TYPE_PLAYER;
     player2->size_x = 32;
@@ -71,6 +76,7 @@ int main() {
     component_add(player2, component_sprite, rabby);
     component_add(player2, component_shoot, bullet);
     component_add(player2, component_hpbar, (int[]) {30,5}) ;
+    component_add(player2, component_death, &player_death);
     player2->hp = 20;
     engine_gameobject_add(player2);
     
@@ -109,7 +115,7 @@ void enemy_spawner(){
         component_add(enemy, component_hpbar, (int[]) {enemy->hp,5}) ;
         component_add(enemy, component_zigzag, &(component_zigzag_data){2, 50});
         component_add(enemy, component_move, &(component_move_data){0, 1});
-        component_add(enemy, component_offscreen_remove, NULL);
+        component_add(enemy, component_offscreen, &ufo_offscreen);
         component_add(enemy, component_death, &death_print);
         engine_gameobject_add(enemy);
     }
@@ -147,4 +153,22 @@ void powerup_spawner(){
 
 void death_print(gameobject *object){
     printf("YO I'M a DEATH FUNCTION\n");
+}
+
+void ufo_offscreen(gameobject *object) {
+    component_add(player1, component_damage, (void*)5);
+    component_add(player2, component_damage, (void*)5);
+    engine_gameobject_remove(object);
+}
+
+void player_death(gameobject *object) {
+    screen_fill(255,0,0);
+    if (object == player1) {
+        screen_draw_text(20, 20, f_large, "RABBIT 1 LOSES");
+    } else {
+        screen_draw_text(20, 20, f_large, "RABBIT 2 LOSES");
+    }
+    screen_update_all();
+    //ENGINE_RUNNING = 0;
+    sleep(3);
 }
