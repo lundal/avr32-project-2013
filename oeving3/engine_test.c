@@ -9,7 +9,7 @@
 //defines
 void death_print(gameobject *object);
 void enemy_spawner();
-drawable *rabby_red;
+drawable *rabby_red, *power_sprite;
 drawable *ufo1, *ufo2, *ufo3, *ufo4, *ufo5;
 
 int main() {
@@ -38,14 +38,15 @@ int main() {
     ufo3 = drawable_create_bmp(img_ufo3);
     ufo4 = drawable_create_bmp(img_ufo4);
     ufo5 = drawable_create_bmp(img_ufo5);
-    drawable *lol = drawable_create_text(f_small, "LOL");
     drawable *rabby = drawable_create_bmp(img_rabby);
     drawable *bullet = drawable_create_rect(5, 5, 255,255,255);
     rabby_red = drawable_create_bmp(img_rabby_red);
+    power_sprite = rabby_red;
     
     // Add object
     gameobject *player1 = gameobject_create();
     player1->pos_y = 200;
+    player1->type = TYPE_PLAYER;
     component_add(player1, component_player_control, (void*)0);
     component_add(player1, component_sprite, rabby);
     component_add(player1, component_shoot, bullet);
@@ -57,6 +58,7 @@ int main() {
 
     gameobject *player2 = gameobject_create();
     player2->pos_y = 200;
+    player2->type = TYPE_PLAYER;
     component_add(player2, component_player_control, (void*)1);
     component_add(player2, component_sprite, rabby);
     component_add(player2, component_shoot, bullet);
@@ -104,10 +106,37 @@ void enemy_spawner(){
     }
 }
 
+void powerup_spawner(){
+    //Spawn enemy every 100th tick 
+    if(TICK % 500 == 50){
+     // Add object
+        gameobject *powerup = gameobject_create();
+        powerup->type = TYPE_NONE;
+        powerup->size_x = 30;
+        powerup->size_y = 20;
+        powerup->pos_x = rand() % (SCREEN_WIDTH - 60) + 30;
+        powerup->pos_y = -10;
+        
+        // Use random image
+        drawable *sprite;
+        sprite = power_sprite;
+
+        // Add collision effect
+        component_collision_data data2 = {
+            .target_type = TYPE_PLAYER,
+            .self_effect = component_gameobject_remove,
+            .self_param = NULL,
+            .other_effect = component_damage,
+            .other_param = (void*)(-3),
+        };
+        component_add(powerup, component_collision, &data2);
+        component_add(powerup, component_sprite, sprite);
+        component_add(powerup, component_zigzag, &(component_zigzag_data){3, 40});
+        component_add(powerup, component_move, &(component_move_data){0, 1});
+        engine_gameobject_add(powerup);
+    }
+}
 
 void death_print(gameobject *object){
     printf("YO I'M a DEATH FUNCTION\n");
 }
-
-
-
