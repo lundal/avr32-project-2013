@@ -15,9 +15,9 @@ void player_death(gameobject *object);
 void enemy_spawner();
 void powerup_spawner();
 
-drawable *rabby, *rabby_red, *power_sprite;
+drawable *rabby, *rabby_red, *power_sprite, *bullet;
 drawable *ufo1, *ufo2, *ufo3, *ufo4, *ufo5;
-gameobject *player1, *player2, *bullet;
+gameobject *player1, *player2;
 
 font *f_small, *f_large;
 
@@ -46,7 +46,7 @@ int main() {
     ufo4 = drawable_create_bmp(img_ufo4);
     ufo5 = drawable_create_bmp(img_ufo5);
     rabby = drawable_create_bmp(img_rabby);
-    bullet = drawable_create_rect(4, 4, 255,255,255);
+    bullet = drawable_create_rect(4, 4, 255, 255, 255);
     rabby_red = drawable_create_bmp(img_rabby_red);
     power_sprite = rabby_red;
     
@@ -68,12 +68,12 @@ void init() {
     player1->pos_x = SCREEN_WIDTH/2 + 10;
     player1->pos_y = 200;
     player1->type = TYPE_PLAYER;
+    player1->hp = player1->size_x;
     component_add(player1, component_player_control, (void*)0);
     component_add(player1, component_sprite, rabby);
     component_add(player1, component_shoot, bullet);
-    component_add(player1, component_hpbar,(int[]) {player1->size_x,4}) ;
+    component_add(player1, component_hpbar,(int[]) {player1->hp, 4}) ;
     component_add(player1, component_death, &player_death);
-    player1->hp = player1->size_x;
     engine_gameobject_add(player1);
     
     // Add object
@@ -83,12 +83,12 @@ void init() {
     player2->pos_x = SCREEN_WIDTH/2 - player2->size_x - 10;
     player2->pos_y = 200;
     player2->type = TYPE_PLAYER;
+    player2->hp = player2->size_x;
     component_add(player2, component_player_control, (void*)1);
     component_add(player2, component_sprite, rabby);
     component_add(player2, component_shoot, bullet);
-    component_add(player2, component_hpbar, (int[]) {player2->size_x,4}) ;
+    component_add(player2, component_hpbar, (int[]) {player2->hp, 4}) ;
     component_add(player2, component_death, &player_death);
-    player2->hp = player2->size_x;
     engine_gameobject_add(player2);
     
     //Add enemy spawner
@@ -107,28 +107,49 @@ void enemy_spawner(){
     if(TICK % 100 == 0){
      // Add object
         gameobject *enemy = gameobject_create();
-        enemy->type = TYPE_ENEMY;
-        enemy->size_x = 30;
-        enemy->size_y = 20;
-        enemy->pos_x = rand() % (SCREEN_WIDTH - 60) + 30;
-        enemy->pos_y = -10;
+        drawable *sprite = NULL;
         
-        // Use random image
+        // Randomize
         int r = rand() % 5 + 1;
-        drawable *sprite;
-        if (r == 1) sprite = ufo1;
-        if (r == 2) sprite = ufo2;
-        if (r == 3) sprite = ufo3;
-        if (r == 4) sprite = ufo4;
-        if (r == 5) sprite = ufo5;
-        component_add(enemy, component_sprite, sprite);
+        if (r == 1) {
+            sprite = ufo1;
+            enemy->size_x = 60;
+            enemy->size_y = 30;
+        }
+        else if (r == 2) {
+            sprite = ufo2;
+            enemy->size_x = 30;
+            enemy->size_y = 15;
+        }
+        else if (r == 3) {
+            sprite = ufo3;
+            enemy->size_x = 30;
+            enemy->size_y = 15;
+        }
+        else if (r == 4) {
+            sprite = ufo4;
+            enemy->size_x = 30;
+            enemy->size_y = 15;
+        }
+        else if (r == 5) {
+            sprite = ufo5;
+            enemy->size_x = 30;
+            enemy->size_y = 15;
+        }
         
-        enemy->hp = 30;
-        component_add(enemy, component_hpbar, (int[]) {enemy->hp,5}) ;
+        
+        enemy->type = TYPE_ENEMY;
+        enemy->pos_x = rand() % (SCREEN_WIDTH - enemy->size_x - 40) + 20;
+        enemy->pos_y = - (enemy->size_y - 1);
+        enemy->hp = enemy->size_x;
+        
+        component_add(enemy, component_sprite, sprite);
+        component_add(enemy, component_hpbar, (int[]) {enemy->hp, 4}) ;
         component_add(enemy, component_zigzag, &(component_zigzag_data){2, 50});
         component_add(enemy, component_move, &(component_move_data){0, 1});
         component_add(enemy, component_offscreen, &ufo_offscreen);
         component_add(enemy, component_death, &death_print);
+        
         engine_gameobject_add(enemy);
     }
 }
