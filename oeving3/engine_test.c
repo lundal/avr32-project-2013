@@ -84,18 +84,6 @@ void enemy_spawner(){
 
 void death_print(gameobject *object){
     printf("YO I'M a DEATH FUNCTION\n");
-    gameobject *enemy = gameobject_create();
-    enemy->type = TYPE_ENEMY;
-    enemy->pos_x = rand() % SCREEN_WIDTH;
-    enemy->pos_y = rand() % SCREEN_HEIGHT;
-    enemy->size_x = 32;
-    enemy->size_y = 32;
-    component_add(enemy, component_sprite, rabby_red);
-    component_add(enemy, component_hpbar, (int[]) {30,5}) ;
-    component_add(enemy, component_zigzag, &(component_zigzag_data){2, 50});
-    component_add(enemy, component_death, &death_print);
-    enemy->hp = 20;
-    engine_gameobject_add(enemy);
 }
 
 
