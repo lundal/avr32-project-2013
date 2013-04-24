@@ -75,27 +75,30 @@ int main() {
 
 void enemy_spawner(){
     //Spawn enemy every 100th tick 
-    if(TICK % 200 == 0){
+    if(TICK % 100 == 0){
      // Add object
         gameobject *enemy = gameobject_create();
         enemy->type = TYPE_ENEMY;
-        enemy->pos_x = rand() % SCREEN_WIDTH;
-        enemy->pos_y = rand() % SCREEN_HEIGHT;
         enemy->size_x = 30;
         enemy->size_y = 20;
+        enemy->pos_x = rand() % (SCREEN_WIDTH - 60) + 30;
+        enemy->pos_y = -10;
         
         // Use random image
-        int r = rand() % 4 + 2;
+        int r = rand() % 5 + 1;
         drawable *sprite;
+        if (r == 1) sprite = ufo1;
         if (r == 2) sprite = ufo2;
         if (r == 3) sprite = ufo3;
         if (r == 4) sprite = ufo4;
         if (r == 5) sprite = ufo5;
-        component_add(enemy, component_sprite, rabby_red);
+        component_add(enemy, component_sprite, sprite);
         
         enemy->hp = 30;
         component_add(enemy, component_hpbar, (int[]) {enemy->hp,5}) ;
         component_add(enemy, component_zigzag, &(component_zigzag_data){2, 50});
+        component_add(enemy, component_move, &(component_move_data){0, 1});
+        component_add(enemy, component_offscreen_remove, NULL);
         component_add(enemy, component_death, &death_print);
         engine_gameobject_add(enemy);
     }
