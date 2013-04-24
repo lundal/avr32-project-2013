@@ -62,3 +62,7 @@ int main() {
     
     return 0;
 }
+
+void death_print(gameobject *object){
+    printf("YO I'M a DEATH FUNCTION");
+}

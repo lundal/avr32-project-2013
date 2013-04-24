@@ -277,12 +277,15 @@ void component_death_add(int component_nr, gameobject *object, void *param) {
 
 // Function that is called each tick
 void component_death_tick(int component_nr, gameobject *object, void *param) {
+    //printf("hp is %d\n", object->hp);
     if(object->hp <= 0){
         death_function func = (death_function) object->components_data[component_nr];
         if(func != NULL)
         {
             func(object);
         }
+
+        //printf("object dead!");
         engine_gameobject_remove(object);
     }
 }
@@ -384,6 +387,11 @@ void components_init() {
         &component_damage_add,
         &component_damage_tick,
         &component_damage_remove
+        );  
+    component_death = component_create(
+        &component_death_add,
+        &component_death_tick,
+        &component_death_remove
         );  
 }
 
