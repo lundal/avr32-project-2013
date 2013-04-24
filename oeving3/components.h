@@ -5,7 +5,8 @@
 
 // Components
 extern component *component_gameobject_remove;
-extern component *component_move_disappear;
+extern component *component_offscreen_remove;
+extern component *component_move;
 extern component *component_sprite;
 extern component *component_player_control;
 extern component *component_shoot;

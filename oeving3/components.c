@@ -35,31 +35,19 @@ void component_gameobject_remove_remove(int component_nr, gameobject *object, vo
 }
 
 
+
 // *****************************************************************************
-// *** Move in a direction and remove when offscreen
+// *** Remove object when offscreen
 // *****************************************************************************
-component *component_move_disappear;
+component *component_offscreen_remove;
 
 // Function that is called when the component is added
-// param: component_move_data *speed
-void component_move_disappear_add(int component_nr, gameobject *object, void *param) {
-    // Get data
-    component_move_data data = *(component_move_data*)param;
-    
-    // Store data
-    object->components_data[component_nr] = (void*)malloc(sizeof(component_move_data));
-    *((component_move_data*)object->components_data[component_nr]) = data;
+void component_offscreen_remove_add(int component_nr, gameobject *object, void *param) {
+    return;
 }
 
 // Function that is called each tick
-void component_move_disappear_tick(int component_nr, gameobject *object, void *param) {
-    // Get data
-    component_move_data *data = (component_move_data*)object->components_data[component_nr];
-    
-    // Move
-    object->pos_y += data->speed_x;
-    object->pos_y += data->speed_y;
-    
+void component_offscreen_remove_tick(int component_nr, gameobject *object, void *param) {
     // Edge check
     if ( (object->pos_x + object->size_x < 0) || (object->pos_x >= SCREEN_WIDTH) ||
          (object->pos_y + object->size_y < 0) || (object->pos_y >= SCREEN_HEIGHT) ) {
@@ -69,7 +57,40 @@ void component_move_disappear_tick(int component_nr, gameobject *object, void *p
 }
 
 // Function that is called when the component is removed
-void component_move_disappear_remove(int component_nr, gameobject *object, void *param) {
+void component_offscreen_remove_remove(int component_nr, gameobject *object, void *param) {
+    return;
+}
+
+
+
+// *****************************************************************************
+// *** Move in a direction
+// *****************************************************************************
+component *component_move;
+
+// Function that is called when the component is added
+// param: component_move_data *speed
+void component_move_add(int component_nr, gameobject *object, void *param) {
+    // Get data
+    component_move_data data = *(component_move_data*)param;
+    
+    // Store data
+    object->components_data[component_nr] = (void*)malloc(sizeof(component_move_data));
+    *((component_move_data*)object->components_data[component_nr]) = data;
+}
+
+// Function that is called each tick
+void component_move_tick(int component_nr, gameobject *object, void *param) {
+    // Get data
+    component_move_data *data = (component_move_data*)object->components_data[component_nr];
+    
+    // Move
+    object->pos_y += data->speed_x;
+    object->pos_y += data->speed_y;
+}
+
+// Function that is called when the component is removed
+void component_move_remove(int component_nr, gameobject *object, void *param) {
     free(object->components_data[component_nr]);
 }
 
@@ -155,7 +176,10 @@ void component_shoot_tick(int component_nr, gameobject *object, void *param) {
             .speed_x = 0,
             .speed_y = -5
         };
-        component_add(bullet, component_move_disappear, &data1);
+        component_add(bullet, component_move, &data1);
+        
+        // Remove when offscreen
+        component_add(bullet, component_offscreen_remove, NULL);
         
         // Add collision effect
         component_collision_data data2 = {
@@ -320,10 +344,15 @@ void components_init() {
         &component_gameobject_remove_tick,
         &component_gameobject_remove_remove
     );
-    component_move_disappear = component_create(
-        &component_move_disappear_add,
-        &component_move_disappear_tick,
-        &component_move_disappear_remove
+    component_offscreen_remove = component_create(
+        &component_offscreen_remove_add,
+        &component_offscreen_remove_tick,
+        &component_offscreen_remove_remove
+    );
+    component_move = component_create(
+        &component_move_add,
+        &component_move_tick,
+        &component_move_remove
     );
     component_sprite = component_create(
         &component_sprite_add,
