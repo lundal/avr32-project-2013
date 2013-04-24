@@ -46,7 +46,7 @@ int main() {
     ufo4 = drawable_create_bmp(img_ufo4);
     ufo5 = drawable_create_bmp(img_ufo5);
     rabby = drawable_create_bmp(img_rabby);
-    bullet = drawable_create_rect(5, 5, 255,255,255);
+    bullet = drawable_create_rect(4, 4, 255,255,255);
     rabby_red = drawable_create_bmp(img_rabby_red);
     power_sprite = rabby_red;
     
