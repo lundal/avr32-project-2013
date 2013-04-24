@@ -49,6 +49,7 @@ int main() {
     enemy->size_y = 32;
     component_add(enemy, component_sprite, rabby_red);
     component_add(enemy, component_hpbar, (int[]) {30,5}) ;
+    component_add(enemy, component_zigzag, &(component_zigzag_data){2, 50});
     component_add(enemy, component_death, &death_print);
     enemy->hp = 20;
     engine_gameobject_add(enemy);
@@ -77,6 +78,7 @@ void death_print(gameobject *object){
     enemy->size_y = 32;
     component_add(enemy, component_sprite, rabby_red);
     component_add(enemy, component_hpbar, (int[]) {30,5}) ;
+    component_add(enemy, component_zigzag, &(component_zigzag_data){2, 50});
     component_add(enemy, component_death, &death_print);
     enemy->hp = 20;
     engine_gameobject_add(enemy);
