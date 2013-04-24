@@ -13,17 +13,19 @@ void player_death(gameobject *object);
 void enemy_spawner();
 void powerup_spawner();
 
-drawable *rabby_red, *power_sprite;
+drawable *rabby, *rabby_red, *power_sprite;
 drawable *ufo1, *ufo2, *ufo3, *ufo4, *ufo5;
 gameobject *player1, *player2;
 
 font *f_small, *f_large;
 
 int main() {
-    engine_init();
-    
     // Init components
     components_init();
+    
+    // Load fonts
+    f_small = font_load("font_small");
+    f_large = font_load("font_large");
     
     // Load images
     bmp_image *img_ufo1 = bmp_load("images/ufo1.bmp");
@@ -35,21 +37,27 @@ int main() {
     bmp_image *img_rabby_red = bmp_copy(img_rabby);
     bmp_tint(img_rabby_red, 255, 128, 128);
     
-    // Load fonts
-    f_small = font_load("font_small");
-    f_large = font_load("font_large");
-    
     // Create drawables
     ufo1 = drawable_create_bmp(img_ufo1);
     ufo2 = drawable_create_bmp(img_ufo2);
     ufo3 = drawable_create_bmp(img_ufo3);
     ufo4 = drawable_create_bmp(img_ufo4);
     ufo5 = drawable_create_bmp(img_ufo5);
-    drawable *rabby = drawable_create_bmp(img_rabby);
-    drawable *bullet = drawable_create_rect(5, 5, 255,255,255);
+    rabby = drawable_create_bmp(img_rabby);
+    bullet = drawable_create_rect(5, 5, 255,255,255);
     rabby_red = drawable_create_bmp(img_rabby_red);
     power_sprite = rabby_red;
     
+    // Loop game
+    while (1) {
+        engine_init();
+        init();
+        engine_run();
+        engine_dispose();
+    }
+}
+
+void init() {
     // Add object
     player1 = gameobject_create();
     player1->pos_y = 200;
@@ -77,10 +85,6 @@ int main() {
     //Add enemy spawner
     engine_ticker_add(&enemy_spawner);
     engine_ticker_add(&powerup_spawner);
-
-    engine_run();
-    
-    return 0;
 }
 
 
