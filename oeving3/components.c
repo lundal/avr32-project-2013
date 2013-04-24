@@ -211,8 +211,6 @@ void component_collision_add(int component_nr, gameobject *object, void *param) 
     // Store data
     object->components_data[component_nr] = (void*)malloc(sizeof(component_collision_data));
     *((component_collision_data*)object->components_data[component_nr]) = data;
-    //object->components_data[component_nr] = param;
-    return;
 }
 
 // Function that is called each tick
@@ -252,7 +250,6 @@ void component_collision_tick(int component_nr, gameobject *object, void *param)
 void component_collision_remove(int component_nr, gameobject *object, void *param) {
     // Clear param
     free(object->components_data[component_nr]);
-    return;
 }
 
 
