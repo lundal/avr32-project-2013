@@ -143,6 +143,15 @@ void enemy_spawner(){
         enemy->pos_y = - (enemy->size_y - 1);
         enemy->hp = enemy->size_x;
         
+        // Add collision effect
+        component_collision_data data = {
+            .target_type = TYPE_PLAYER,
+            .self_effect = component_gameobject_remove,
+            .self_param = NULL,
+            .other_effect = component_damage,
+            .other_param = (void*)10,
+        };
+        component_add(enemy, component_collision, &data);
         component_add(enemy, component_sprite, sprite);
         component_add(enemy, component_hpbar, (int[]) {enemy->hp, 4}) ;
         component_add(enemy, component_zigzag, &(component_zigzag_data){2, 50});
