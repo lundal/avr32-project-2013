@@ -7,6 +7,8 @@
 #include <stdlib.h>
 
 //defines
+void init();
+void dispose();
 void death_print(gameobject *object);
 void ufo_offscreen(gameobject *object);
 void player_death(gameobject *object);
@@ -15,7 +17,7 @@ void powerup_spawner();
 
 drawable *rabby, *rabby_red, *power_sprite;
 drawable *ufo1, *ufo2, *ufo3, *ufo4, *ufo5;
-gameobject *player1, *player2;
+gameobject *player1, *player2, *bullet;
 
 font *f_small, *f_large;
 
@@ -53,6 +55,7 @@ int main() {
         engine_init();
         init();
         engine_run();
+        dispose();
         engine_dispose();
     }
 }
@@ -85,6 +88,11 @@ void init() {
     //Add enemy spawner
     engine_ticker_add(&enemy_spawner);
     engine_ticker_add(&powerup_spawner);
+}
+
+
+void dispose() {
+    return;
 }
 
 
@@ -160,13 +168,28 @@ void ufo_offscreen(gameobject *object) {
 }
 
 void player_death(gameobject *object) {
+    // Check for repeat
+    if (player1->hp == player2->hp && object == player2) {
+        return;
+    }
+    
     screen_fill(255,0,0);
-    if (object == player1) {
-        screen_draw_text(20, 20, f_large, "RABBIT 1 LOSES");
+    if (player1->hp == player2->hp) {
+        screen_draw_text(40, 100, f_large, "ALL RABBITS DIE!");
+        screen_draw_text(40, 130, f_small, "Aliens have scorched the land...");
+        screen_draw_text(40, 150, f_small, "Pixie-land is no more...");
+    }
+    else if (object == player1) {
+        screen_draw_text(40, 100, f_large, "RABBIT 1 DIES!");
+        screen_draw_text(40, 130, f_small, "While rabbit 2 lives on...");
+        screen_draw_text(40, 150, f_small, "For now...");
     } else {
-        screen_draw_text(20, 20, f_large, "RABBIT 2 LOSES");
+        screen_draw_text(40, 100, f_large, "RABBIT 2 DIES!");
+        screen_draw_text(40, 130, f_small, "While rabbit 1 lives on...");
+        screen_draw_text(40, 150, f_small, "For now...");
     }
     screen_update_all();
-    //ENGINE_RUNNING = 0;
+    
+    ENGINE_RUNNING = 0;
     sleep(3);
 }
