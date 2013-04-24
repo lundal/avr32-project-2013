@@ -60,6 +60,7 @@ drawable* drawable_create_rect(int width, int height, int r, int g, int b);
 int button_down(int button_nr);
 void led_on(unsigned char led_nr);
 void led_off(unsigned char led_nr);
+void led_off_all();
 
 int main();
 

@@ -55,6 +55,7 @@ void engine_init() {
     
     // Open leds
     leds_file = fopen("/dev/leds","wb");
+    led_off_all();
 
     // Init tickers
     tickers_size = 0;
@@ -331,5 +332,11 @@ void led_off(unsigned char led_nr){
         return;
     }
     fprintf(leds_file,"%c",'a'+led_nr);
+    fflush(leds_file);
+}
+
+void led_off_all(){
+    //Driver ignores extra characters :D
+    fprintf(leds_file,"Please turn off the all the god damn leds, you clever bastard!");
     fflush(leds_file);
 }
