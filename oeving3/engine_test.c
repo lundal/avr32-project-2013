@@ -9,6 +9,8 @@
 //defines
 void death_print(gameobject *object);
 void enemy_spawner();
+void powerup_spawner();
+
 drawable *rabby_red, *power_sprite;
 drawable *ufo1, *ufo2, *ufo3, *ufo4, *ufo5;
 
@@ -68,6 +70,7 @@ int main() {
     
     //Add enemy spawner
     engine_ticker_add(&enemy_spawner);
+    engine_ticker_add(&powerup_spawner);
 
     engine_run();
     
@@ -131,8 +134,7 @@ void powerup_spawner(){
         };
         component_add(powerup, component_collision, &data2);
         component_add(powerup, component_sprite, sprite);
-        component_add(powerup, component_zigzag, &(component_zigzag_data){3, 40});
-        component_add(powerup, component_move, &(component_move_data){0, 1});
+        component_add(powerup, component_move, &(component_move_data){0, 2});
         engine_gameobject_add(powerup);
     }
 }
