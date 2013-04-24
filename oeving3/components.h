@@ -3,6 +3,10 @@
 
 #include "component.h"
 
+// General function pointer
+
+typedef void (*death_function)(gameobject *object);
+
 // Components
 extern component *component_gameobject_remove;
 extern component *component_move_disappear;
