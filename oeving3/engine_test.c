@@ -63,26 +63,32 @@ int main() {
 void init() {
     // Add object
     player1 = gameobject_create();
+    player1->size_x = 32;
+    player1->size_y = 32;
+    player1->pos_x = SCREEN_WIDTH/2 + 10;
     player1->pos_y = 200;
     player1->type = TYPE_PLAYER;
     component_add(player1, component_player_control, (void*)0);
     component_add(player1, component_sprite, rabby);
     component_add(player1, component_shoot, bullet);
-    component_add(player1, component_hpbar,(int[]) {30,5}) ;
+    component_add(player1, component_hpbar,(int[]) {player1->size_x,4}) ;
     component_add(player1, component_death, &player_death);
-    player1->hp = 20;
+    player1->hp = player1->size_x;
     engine_gameobject_add(player1);
     
     // Add object
     player2 = gameobject_create();
+    player2->size_x = 32;
+    player2->size_y = 32;
+    player2->pos_x = SCREEN_WIDTH/2 - player2->size_x - 10;
     player2->pos_y = 200;
     player2->type = TYPE_PLAYER;
     component_add(player2, component_player_control, (void*)1);
     component_add(player2, component_sprite, rabby);
     component_add(player2, component_shoot, bullet);
-    component_add(player2, component_hpbar, (int[]) {30,5}) ;
+    component_add(player2, component_hpbar, (int[]) {player2->size_x,4}) ;
     component_add(player2, component_death, &player_death);
-    player2->hp = 20;
+    player2->hp = player2->size_x;
     engine_gameobject_add(player2);
     
     //Add enemy spawner
