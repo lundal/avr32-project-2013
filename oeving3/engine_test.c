@@ -16,9 +16,11 @@ void player_death(gameobject *object);
 void enemy_spawner();
 void powerup_spawner();
 
-drawable *rabby, *rabby_red, *power_sprite, *bullet;
+drawable *rabby, *rabby_red, *bullet;
 drawable *ufo1, *ufo2, *ufo3, *ufo4, *ufo5;
+drawable *power_sprite[4];
 gameobject *player1, *player2;
+
 
 font *f_small, *f_large;
 
@@ -37,10 +39,16 @@ int main() {
     bmp_image *img_ufo4 = bmp_load("images/ufo4.bmp");
     bmp_image *img_ufo5 = bmp_load("images/ufo5.bmp");
     bmp_image *img_rabby = bmp_load("rabbit.bmp");
-    bmp_image *img_powerup = bmp_load("images/pow1.bmp");
+    bmp_image *img_powerup1 = bmp_load("images/pow1.bmp");
+    bmp_image *img_powerup2 = bmp_load("images/pow1.bmp");
+    bmp_image *img_powerup3 = bmp_load("images/pow1.bmp");
+    bmp_image *img_powerup4 = bmp_load("images/pow1.bmp");
     bmp_image *img_rabby_red = bmp_copy(img_rabby);
     bmp_tint(img_rabby_red, 255, 128, 128);
-    bmp_tint(img_powerup, 0, 214, 29);
+    bmp_tint(img_powerup1, 0, 214, 29);
+    bmp_tint(img_powerup2, 0, 214, 150);
+    bmp_tint(img_powerup3, 150, 214, 29);
+    bmp_tint(img_powerup4, 255, 0, 29);
     
     // Create drawables
     ufo1 = drawable_create_bmp(img_ufo1);
@@ -51,7 +59,10 @@ int main() {
     rabby = drawable_create_bmp(img_rabby);
     bullet = drawable_create_rect(4, 4, 255, 255, 255);
     rabby_red = drawable_create_bmp(img_rabby_red);
-    power_sprite = drawable_create_bmp(img_powerup);
+    power_sprite[0] = drawable_create_bmp(img_powerup1);
+    power_sprite[1] = drawable_create_bmp(img_powerup2);
+    power_sprite[2] = drawable_create_bmp(img_powerup3);
+    power_sprite[3] = drawable_create_bmp(img_powerup4);
     
     // Loop game
     while (1) {
@@ -152,7 +163,7 @@ void enemy_spawner(){
         
         // Add collision effect
         component_collision_data data = {
-            .target_type = TYPE_PLAYER,
+            .target_type = TYPE_PLAYER1 | TYPE_PLAYER2,
             .self_effect = component_gameobject_remove,
             .self_param = NULL,
             .other_effect = component_damage,
@@ -171,8 +182,7 @@ void enemy_spawner(){
 }
 
 void powerup_spawner(){
-    //Spawn enemy every 100th tick 
-    if(TICK % 500 == 50){
+    if(TICK % 400 == 50){
      // Add object
         gameobject *powerup = gameobject_create();
         powerup->type = TYPE_NONE;
@@ -183,55 +193,40 @@ void powerup_spawner(){
         
         // Use random image
         drawable *sprite;
-        sprite = power_sprite;
 
         int r = rand() % 4;
+        sprite = power_sprite[r];
         int led_nr = r;
         component *self_effect = component_damage;
         void* self_param = 0;
         component *enemy_effect = component_damage;
         void* enemy_param = 0;
-        int cr;
-        int cg;
-        int cb;
         switch(r){
             case 0:
                 self_param = (void*) 10;
                 enemy_param = (void*) 0;
-                cr = 0;
-                cg = 255;
-                cb = 0;
                 break;
             case 1:
                 self_param = (void*) 7;
                 enemy_param = (void*) 3;
-                cr = 0;
-                cg = 180;
-                cb = 255;
                 break;
             case 2:
                 self_param = (void*) 5;
                 enemy_param = (void*) 5;
-                cr = 255;
-                cg = 255;
-                cb = 0;
                 break;
             case 3:
                 self_param = (void*) 0;
                 enemy_param = (void*) 10;
-                cr = 100;
-                cg = 0;
-                cb = 0;
                 break;
         };
         component_powerup_data *data1 = malloc(sizeof(component_powerup_data));
 
         *data1 = (component_powerup_data){
             .led_nr = 2,
-                .self_effect = component_damage,
-                .self_param = (void*)(-10),
-                .enemy_effect = component_damage,
-                .enemy_param = (void*)(10),
+                .self_effect = self_effect,
+                .self_param = self_param,
+                .enemy_effect = enemy_effect,
+                .enemy_param = enemy_param,
         };
         //TODO: Free where?
 
