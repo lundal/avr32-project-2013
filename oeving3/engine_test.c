@@ -23,6 +23,7 @@ int main() {
     // Create drawables
     drawable *lol = drawable_create_text(f_small, "LOL");
     drawable *rabby = drawable_create_bmp(img_rabby);
+    drawable *bullet = drawable_create_rect(5, 5, 255,255,255);
     drawable *rabby_red = drawable_create_bmp(img_rabby_red);
     
     // Add object
@@ -30,7 +31,7 @@ int main() {
     player1->pos_y = 200;
     component_add(player1, component_player_control, (void*)0);
     component_add(player1, component_sprite, rabby);
-    component_add(player1, component_shoot, rabby_red);
+    component_add(player1, component_shoot, bullet);
     component_add(player1, component_hpbar,(int[]) {30,5}) ;
     player1->hp = 20;
     engine_gameobject_add(player1);
@@ -42,7 +43,7 @@ int main() {
     enemy->pos_y = 20;
     enemy->size_x = 32;
     enemy->size_y = 32;
-    component_add(enemy, component_sprite, rabby);
+    component_add(enemy, component_sprite, rabby_red);
     component_add(enemy, component_hpbar, (int[]) {30,5}) ;
     enemy->hp = 20;
     engine_gameobject_add(enemy);
@@ -51,7 +52,7 @@ int main() {
     player2->pos_y = 200;
     component_add(player2, component_player_control, (void*)1);
     component_add(player2, component_sprite, rabby);
-    component_add(player2, component_shoot, rabby_red);
+    component_add(player2, component_shoot, bullet);
     component_add(player2, component_hpbar, (int[]) {30,5}) ;
     player2->hp = 20;
     engine_gameobject_add(player2);

@@ -111,7 +111,7 @@ void component_shoot_tick(int component_nr, gameobject *object, void *param) {
         component_add(bullet, component_upup, sprite);
         void** arr = malloc(sizeof(void*)*2);
         arr[0] = component_damage;
-        arr[1] = 3;
+        arr[1] = 1;
         component_add(bullet, component_affect_enemy, arr);
         bullet->type = TYPE_BULLET;
         bullet->pos_x = object->pos_x;
