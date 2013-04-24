@@ -118,7 +118,7 @@ void component_zigzag_tick(int component_nr, gameobject *object, void *param) {
     component_zigzag_data *data = (component_zigzag_data*)object->components_data[component_nr];
     
     // Move
-    if ( (TICK % data->rapidity) > (data->rapidity / 2) ) {
+    if ( (TICK % data->rapidity) < (data->rapidity / 2) ) {
         object->pos_x += data->velocity;   
     }
     else {
