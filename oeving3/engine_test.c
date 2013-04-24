@@ -5,6 +5,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+//defines
+void death_print(gameobject *object);
+
 int main() {
     engine_init();
     
@@ -45,7 +48,7 @@ int main() {
     enemy->size_y = 32;
     component_add(enemy, component_sprite, rabby_red);
     component_add(enemy, component_hpbar, (int[]) {30,5}) ;
-    component_add(enemy, component_death, NULL);
+    component_add(enemy, component_death, &death_print);
     enemy->hp = 20;
     engine_gameobject_add(enemy);
 
@@ -64,5 +67,5 @@ int main() {
 }
 
 void death_print(gameobject *object){
-    printf("YO I'M a DEATH FUNCTION");
+    printf("YO I'M a DEATH FUNCTION\n");
 }
