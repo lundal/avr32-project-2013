@@ -103,7 +103,7 @@ void enemy_spawner(){
         component_add(enemy, component_hpbar, (int[]) {enemy->hp,5}) ;
         component_add(enemy, component_zigzag, &(component_zigzag_data){2, 50});
         component_add(enemy, component_move, &(component_move_data){0, 1});
-        component_add(enemy, component_offscreen_remove, NULL);
+        component_add(enemy, component_offscreen, &engine_gameobject_remove);
         component_add(enemy, component_death, &death_print);
         engine_gameobject_add(enemy);
     }

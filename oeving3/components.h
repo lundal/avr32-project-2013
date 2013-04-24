@@ -9,7 +9,7 @@ typedef void (*gameobject_function)(gameobject *object);
 
 // Components
 extern component *component_gameobject_remove;
-extern component *component_offscreen_remove;
+extern component *component_offscreen;
 extern component *component_move;
 extern component *component_zigzag;
 extern component *component_sprite;
