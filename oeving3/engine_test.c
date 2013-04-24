@@ -10,6 +10,7 @@
 void death_print(gameobject *object);
 void enemy_spawner();
 drawable *rabby_red;
+drawable *ufo1, *ufo2, *ufo3, *ufo4, *ufo5;
 
 int main() {
     engine_init();
@@ -18,6 +19,11 @@ int main() {
     components_init();
     
     // Load images
+    bmp_image *img_ufo1 = bmp_load("images/ufo1.bmp");
+    bmp_image *img_ufo2 = bmp_load("images/ufo2.bmp");
+    bmp_image *img_ufo3 = bmp_load("images/ufo3.bmp");
+    bmp_image *img_ufo4 = bmp_load("images/ufo4.bmp");
+    bmp_image *img_ufo5 = bmp_load("images/ufo5.bmp");
     bmp_image *img_rabby = bmp_load("rabbit.bmp");
     bmp_image *img_rabby_red = bmp_copy(img_rabby);
     bmp_tint(img_rabby_red, 255, 128, 128);
@@ -27,6 +33,11 @@ int main() {
     font *f_large = font_load("font_large");
     
     // Create drawables
+    ufo1 = drawable_create_bmp(img_ufo1);
+    ufo2 = drawable_create_bmp(img_ufo2);
+    ufo3 = drawable_create_bmp(img_ufo3);
+    ufo4 = drawable_create_bmp(img_ufo4);
+    ufo5 = drawable_create_bmp(img_ufo5);
     drawable *lol = drawable_create_text(f_small, "LOL");
     drawable *rabby = drawable_create_bmp(img_rabby);
     drawable *bullet = drawable_create_rect(5, 5, 255,255,255);
@@ -70,9 +81,18 @@ void enemy_spawner(){
         enemy->type = TYPE_ENEMY;
         enemy->pos_x = rand() % SCREEN_WIDTH;
         enemy->pos_y = rand() % SCREEN_HEIGHT;
-        enemy->size_x = 32;
-        enemy->size_y = 32;
+        enemy->size_x = 30;
+        enemy->size_y = 20;
+        
+        // Use random image
+        int r = rand() % 4 + 2;
+        drawable *sprite;
+        if (r == 2) sprite = ufo2;
+        if (r == 3) sprite = ufo3;
+        if (r == 4) sprite = ufo4;
+        if (r == 5) sprite = ufo5;
         component_add(enemy, component_sprite, rabby_red);
+        
         enemy->hp = 30;
         component_add(enemy, component_hpbar, (int[]) {enemy->hp,5}) ;
         component_add(enemy, component_zigzag, &(component_zigzag_data){2, 50});
