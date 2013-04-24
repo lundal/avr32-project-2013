@@ -27,8 +27,10 @@ int main() {
     bmp_image *img_ufo4 = bmp_load("images/ufo4.bmp");
     bmp_image *img_ufo5 = bmp_load("images/ufo5.bmp");
     bmp_image *img_rabby = bmp_load("rabbit.bmp");
+    bmp_image *img_powerup = bmp_load("images/pow1.bmp");
     bmp_image *img_rabby_red = bmp_copy(img_rabby);
     bmp_tint(img_rabby_red, 255, 128, 128);
+    bmp_tint(img_powerup, 0, 214, 29);
     
     // Load fonts
     font *f_small = font_load("font_small");
@@ -43,11 +45,13 @@ int main() {
     drawable *rabby = drawable_create_bmp(img_rabby);
     drawable *bullet = drawable_create_rect(5, 5, 255,255,255);
     rabby_red = drawable_create_bmp(img_rabby_red);
-    power_sprite = rabby_red;
+    power_sprite = drawable_create_bmp(img_powerup);
     
     // Add object
     gameobject *player1 = gameobject_create();
     player1->pos_y = 200;
+    player1->size_x = 32;
+    player1->size_y = 32;
     player1->type = TYPE_PLAYER;
     component_add(player1, component_player_control, (void*)0);
     component_add(player1, component_sprite, rabby);
@@ -61,6 +65,8 @@ int main() {
     gameobject *player2 = gameobject_create();
     player2->pos_y = 200;
     player2->type = TYPE_PLAYER;
+    player2->size_x = 32;
+    player2->size_y = 32;
     component_add(player2, component_player_control, (void*)1);
     component_add(player2, component_sprite, rabby);
     component_add(player2, component_shoot, bullet);
