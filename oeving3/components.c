@@ -122,7 +122,7 @@ void component_zigzag_tick(int component_nr, gameobject *object, void *param) {
         object->pos_x += data->velocity;   
     }
     else {
-        object->pos_x += data->velocity;   
+        object->pos_x -= data->velocity;   
     }
 }
 
