@@ -5,7 +5,7 @@
 
 // General function pointer
 
-typedef void (*death_function)(gameobject *object);
+typedef void (*gameobject_function)(gameobject *object);
 
 // Components
 extern component *component_gameobject_remove;

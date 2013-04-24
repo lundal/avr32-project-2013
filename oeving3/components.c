@@ -331,7 +331,7 @@ void component_collision_remove(int component_nr, gameobject *object, void *para
 component *component_death;
 
 // Function that is called when the component is added
-// param = death_function function pointer or NULL to simply die
+// param = gameobject_function function pointer or NULL to simply die
 void component_death_add(int component_nr, gameobject *object, void *param) {
     object->components_data[component_nr] = param;
 }
@@ -340,7 +340,7 @@ void component_death_add(int component_nr, gameobject *object, void *param) {
 void component_death_tick(int component_nr, gameobject *object, void *param) {
     //printf("hp is %d\n", object->hp);
     if(object->hp <= 0){
-        death_function func = (death_function) object->components_data[component_nr];
+        gameobject_function func = (gameobject_function) object->components_data[component_nr];
         if(func != NULL)
         {
             func(object);
