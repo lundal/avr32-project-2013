@@ -224,7 +224,7 @@ void component_shoot_tick(int component_nr, gameobject *object, void *param) {
             .self_effect = component_gameobject_remove,
             .self_param = NULL,
             .other_effect = component_damage,
-            .other_param = (void*)1,
+            .other_param = (void*)10,
         };
         component_add(bullet, component_collision, &data2);
         
