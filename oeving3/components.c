@@ -127,7 +127,7 @@ void component_zigzag_tick(int component_nr, gameobject *object, void *param) {
 }
 
 // Function that is called when the component is removed
-void component_move_remove(int component_nr, gameobject *object, void *param) {
+void component_zigzag_remove(int component_nr, gameobject *object, void *param) {
     free(object->components_data[component_nr]);
 }
 
