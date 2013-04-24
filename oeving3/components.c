@@ -277,7 +277,7 @@ void component_death_add(int component_nr, gameobject *object, void *param) {
 
 // Function that is called each tick
 void component_death_tick(int component_nr, gameobject *object, void *param) {
-    if(object.hp <= 0){
+    if(object->hp <= 0){
         death_function func = (death_function) object->components_data[component_nr];
         if(func != NULL)
         {

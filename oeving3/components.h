@@ -16,6 +16,7 @@ extern component *component_shoot;
 extern component *component_collision;
 extern component *component_hpbar;
 extern component *component_damage;
+extern component *component_death;
 
 typedef struct {
     int speed_x;
