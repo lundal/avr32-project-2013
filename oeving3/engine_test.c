@@ -203,15 +203,15 @@ void powerup_spawner(){
         void* enemy_param = 0;
         switch(r){
             case 0:
-                self_param = (void*) 10;
+                self_param = (void*) -10;
                 enemy_param = (void*) 0;
                 break;
             case 1:
-                self_param = (void*) 7;
+                self_param = (void*) -7;
                 enemy_param = (void*) 3;
                 break;
             case 2:
-                self_param = (void*) 5;
+                self_param = (void*) -5;
                 enemy_param = (void*) 5;
                 break;
             case 3:

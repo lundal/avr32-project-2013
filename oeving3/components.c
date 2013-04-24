@@ -177,13 +177,13 @@ void component_player_control_add(int component_nr, gameobject *object, void* da
 void component_player_control_tick(int component_nr, gameobject *object, void* data){
     int player_nr;
     player_nr = (int)object->components_data[component_nr];
-
+    //TODO: Parameterize speed.
     if(player_nr > 1 || player_nr < 0) return;
     if(button_down(PLAYER_MOVE_RIGHT+player_nr*PLAYER_MOVE_GAP)) { 
-        object->pos_x = (object->pos_x + 1) % SCREEN_WIDTH;
+        object->pos_x = (object->pos_x + 2) % SCREEN_WIDTH;
     }
     if(button_down(PLAYER_MOVE_LEFT+player_nr*PLAYER_MOVE_GAP)) { 
-        object->pos_x = (object->pos_x - 1) % SCREEN_WIDTH;
+        object->pos_x = (object->pos_x - 2) % SCREEN_WIDTH;
     }
 }
 
@@ -281,14 +281,12 @@ component *component_powerup;
 // Function that is called when the component is added
 // param = component_powerup_data 
 void component_powerup_add(int component_nr, gameobject *object, void *param) {
-    printf("Adding powerup\n");
     object->components_data[component_nr] = param;
     // Get data
     component_powerup_data data = *(component_powerup_data*)param;
 
     //Turn on led
     int led_nr = data.led_nr;
-    printf("self_effect = %d\n", data.self_effect);
     if(object->type == TYPE_PLAYER2){
         led_nr = 7 - led_nr; //Mirror for player 2
     }   
