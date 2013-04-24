@@ -11,6 +11,7 @@ typedef void (*death_function)(gameobject *object);
 extern component *component_gameobject_remove;
 extern component *component_offscreen_remove;
 extern component *component_move;
+extern component *component_zigzag;
 extern component *component_sprite;
 extern component *component_player_control;
 extern component *component_shoot;
@@ -18,6 +19,11 @@ extern component *component_collision;
 extern component *component_hpbar;
 extern component *component_damage;
 extern component *component_death;
+
+typedef struct {
+    int velocity;
+    int rapidity;
+} component_zigzag_data;
 
 typedef struct {
     int speed_x;

@@ -85,12 +85,49 @@ void component_move_tick(int component_nr, gameobject *object, void *param) {
     component_move_data *data = (component_move_data*)object->components_data[component_nr];
     
     // Move
-    object->pos_y += data->speed_x;
+    object->pos_x += data->speed_x;
     object->pos_y += data->speed_y;
 }
 
 // Function that is called when the component is removed
 void component_move_remove(int component_nr, gameobject *object, void *param) {
+    free(object->components_data[component_nr]);
+}
+
+
+
+// *****************************************************************************
+// *** Move in a direction
+// *****************************************************************************
+component *component_zigzag;
+
+// Function that is called when the component is added
+// param: component_zigzag_data *speed
+void component_zigzag_add(int component_nr, gameobject *object, void *param) {
+    // Get data
+    component_zigzag_data data = *(component_zigzag_data*)param;
+    
+    // Store data
+    object->components_data[component_nr] = (void*)malloc(sizeof(component_zigzag_data));
+    *((component_zigzag_data*)object->components_data[component_nr]) = data;
+}
+
+// Function that is called each tick
+void component_zigzag_tick(int component_nr, gameobject *object, void *param) {
+    // Get data
+    component_zigzag_data *data = (component_zigzag_data*)object->components_data[component_nr];
+    
+    // Move
+    if ( (TICK % data->rapidity) < (data->rapidity / 2) ) {
+        object->pos_x += data->velocity;   
+    }
+    else {
+        object->pos_x -= data->velocity;   
+    }
+}
+
+// Function that is called when the component is removed
+void component_zigzag_remove(int component_nr, gameobject *object, void *param) {
     free(object->components_data[component_nr]);
 }
 
@@ -367,7 +404,6 @@ void component_hpbar_remove(int component_nr, gameobject *object, void *param) {
 
 
 
-
 // *****************************************************************************
 // *** Init function
 // *****************************************************************************
@@ -386,6 +422,11 @@ void components_init() {
         &component_move_add,
         &component_move_tick,
         &component_move_remove
+    );
+    component_zigzag = component_create(
+        &component_zigzag_add,
+        &component_zigzag_tick,
+        &component_zigzag_remove
     );
     component_sprite = component_create(
         &component_sprite_add,
