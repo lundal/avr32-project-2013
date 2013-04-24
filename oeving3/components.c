@@ -61,8 +61,8 @@ void component_move_disappear_tick(int component_nr, gameobject *object, void *p
     object->pos_y += data->speed_y;
     
     // Edge check
-    if ( (object->pos_x + object->size_x < 0) || (object->pos_x >= SCREEN_HEIGHT) ||
-         (object->pos_y + object->size_y < 0) || (object->pos_y >= SCREEN_WIDTH) ) {
+    if ( (object->pos_x + object->size_x < 0) || (object->pos_x >= SCREEN_WIDTH) ||
+         (object->pos_y + object->size_y < 0) || (object->pos_y >= SCREEN_HEIGHT) ) {
         // Remove gameobject
         engine_gameobject_remove(object);
     }
