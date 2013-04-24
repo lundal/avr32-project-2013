@@ -45,6 +45,7 @@ int main() {
     enemy->size_y = 32;
     component_add(enemy, component_sprite, rabby_red);
     component_add(enemy, component_hpbar, (int[]) {30,5}) ;
+    component_add(enemy, component_death, NULL);
     enemy->hp = 20;
     engine_gameobject_add(enemy);
 
