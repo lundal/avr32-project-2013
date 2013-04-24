@@ -73,6 +73,7 @@ int component_find(gameobject *object, component *c) {
     return -1;
 }
 
+
 // Removes a component from a gameobject
 // Return number of removed component
 // Return -1 if the component was not found

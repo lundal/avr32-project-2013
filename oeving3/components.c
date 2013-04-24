@@ -3,6 +3,7 @@
 #include "engine.h"
 #include "graphics.h"
 #include "component.h"
+#include "engine_test.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -281,23 +282,16 @@ component *component_powerup;
 // param = component_powerup_data 
 void component_powerup_add(int component_nr, gameobject *object, void *param) {
     printf("Adding powerup\n");
-
+    object->components_data[component_nr] = param;
     // Get data
     component_powerup_data data = *(component_powerup_data*)param;
-    
-    // Store data
-    object->components_data[component_nr] = (void*)malloc(sizeof(component_powerup_data));
-    *((component_powerup_data*)object->components_data[component_nr]) = data;
-    
 
     //Turn on led
     int led_nr = data.led_nr;
-    printf("led_nr = %d\n",led_nr);
     printf("self_effect = %d\n", data.self_effect);
     if(object->type == TYPE_PLAYER2){
         led_nr = 7 - led_nr; //Mirror for player 2
     }   
-    printf("led_nr = %d\n",led_nr);
     led_on(led_nr);
 }
 
@@ -312,10 +306,21 @@ void component_powerup_tick(int component_nr, gameobject *object, void *param) {
         button_nr = POWERUP_BUTTON_2;
         break;
     }
+
     if(button_down(button_nr)){
         component_powerup_data *data = (component_move_data*) object->components_data[component_nr];
         component_add(object, data->self_effect, data->self_param);
         //TODO: add enemy component
+        gameobject *enemy;
+        if(object->type == TYPE_PLAYER1){
+            enemy = player2;
+        }else{
+            enemy = player1;
+        }
+        if(enemy){
+            component_add(enemy, data->enemy_effect, data->enemy_param);
+        }
+
         component_remove_by_nr(object, component_nr, NULL);
     }
 }

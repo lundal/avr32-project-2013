@@ -2,6 +2,7 @@
 #include "components.h"
 #include "font.h"
 #include "graphics.h"
+#include "engine_test.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -136,20 +137,24 @@ void powerup_spawner(){
         drawable *sprite;
         sprite = power_sprite;
 
-        component_powerup_data data1 = {
+        component_powerup_data *data1 = malloc(sizeof(component_powerup_data));
+
+        *data1 = (component_powerup_data){
             .led_nr = 2,
             .self_effect = component_damage,
             .self_param = (void*)(-10),
             .enemy_effect = component_damage,
             .enemy_param = (void*)(10),
         };
+        //TODO: Free where?
+
         // Add collision effect
         component_collision_data data2 = {
             .target_type = TYPE_PLAYER1 | TYPE_PLAYER2,
             .self_effect = component_gameobject_remove,
             .self_param = NULL,
             .other_effect = component_powerup,
-            .other_param = &data1,
+            .other_param = data1,
         };
 
         component_add(powerup, component_collision, &data2);
@@ -160,7 +165,6 @@ void powerup_spawner(){
 }
 
 void death_print(gameobject *object){
-    printf("YO I'M a DEATH FUNCTION\n");
 }
 
 void ufo_offscreen(gameobject *object) {
