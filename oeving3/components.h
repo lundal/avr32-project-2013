@@ -3,6 +3,10 @@
 
 #include "component.h"
 
+// General function pointer
+
+typedef void (*death_function)(gameobject *object);
+
 // Components
 extern component *component_gameobject_remove;
 extern component *component_offscreen_remove;
@@ -13,6 +17,7 @@ extern component *component_shoot;
 extern component *component_collision;
 extern component *component_hpbar;
 extern component *component_damage;
+extern component *component_death;
 
 typedef struct {
     int speed_x;

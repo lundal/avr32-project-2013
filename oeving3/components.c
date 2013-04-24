@@ -287,6 +287,39 @@ void component_collision_remove(int component_nr, gameobject *object, void *para
     free(object->components_data[component_nr]);
 }
 
+// *****************************************************************************
+// *** Death component
+// *** Dies at 0 hp, calls a specified function and removes game object
+// *****************************************************************************
+component *component_death;
+
+// Function that is called when the component is added
+// param = death_function function pointer or NULL to simply die
+void component_death_add(int component_nr, gameobject *object, void *param) {
+    object->components_data[component_nr] = param;
+}
+
+// Function that is called each tick
+void component_death_tick(int component_nr, gameobject *object, void *param) {
+    //printf("hp is %d\n", object->hp);
+    if(object->hp <= 0){
+        death_function func = (death_function) object->components_data[component_nr];
+        if(func != NULL)
+        {
+            func(object);
+        }
+
+        //printf("object dead!");
+        engine_gameobject_remove(object);
+    }
+}
+
+// Function that is called when the component is removed
+void component_death_remove(int component_nr, gameobject *object, void *param) {
+    return;
+}
+
+
 
 // *****************************************************************************
 // *** HP bar component 
@@ -383,6 +416,11 @@ void components_init() {
         &component_damage_add,
         &component_damage_tick,
         &component_damage_remove
+        );  
+    component_death = component_create(
+        &component_death_add,
+        &component_death_tick,
+        &component_death_remove
         );  
 }
 
