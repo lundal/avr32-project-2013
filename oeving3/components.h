@@ -4,13 +4,22 @@
 #include "component.h"
 
 // Components
+extern component *component_gameobject_remove;
 extern component *component_upup;
 extern component *component_sprite;
 extern component *component_player_control;
 extern component *component_shoot;
-extern component *component_affect_enemy;
+extern component *component_collision;
 extern component *component_hpbar;
 extern component *component_damage;
+
+typedef struct {
+    int target_type;
+    component *self_effect;
+    void *self_param;
+    component *other_effect;
+    void *other_param;
+} component_collision_data;
 
 #define TYPE_NONE 0
 #define TYPE_PLAYER 1
