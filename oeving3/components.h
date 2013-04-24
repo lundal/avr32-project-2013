@@ -47,14 +47,18 @@ typedef struct {
 
 typedef struct {
     component* enemy_effect;
+    void *self_param;
     component* self_effect;
+    void *enemy_param;
     int led_nr;
 } component_powerup_data;
 
 #define TYPE_NONE 0
-#define TYPE_PLAYER 1
-#define TYPE_ENEMY 2
-#define TYPE_BULLET 3
+#define TYPE_PLAYER1 1
+#define TYPE_PLAYER2 2
+#define TYPE_ENEMY 3
+#define TYPE_BULLET 4
+#define TYPE_POWERUP 4
 
 // Init function
 void components_init();

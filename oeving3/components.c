@@ -291,7 +291,7 @@ void component_powerup_add(int component_nr, gameobject *object, void *param) {
 
     //Turn on led
     int led_nr = data.led_nr;
-    if(object->type = TYPE_PLAYER2){
+    if(object->type == TYPE_PLAYER2){
         led_nr = 7 - led_nr; //Mirror for player 2
     }   
     led_on(led_nr);
@@ -310,8 +310,8 @@ void component_powerup_tick(int component_nr, gameobject *object, void *param) {
     }
     if(button_down(button_nr)){
         component_powerup_data *data = (component_move_data*) object->components_data[component_nr];
-        component_add(object, data->self_effect);
-        //add enemy component
+        component_add(object, data->self_effect, data->self_param);
+        //TODO: add enemy component
         component_remove_by_nr(object, component_nr, NULL);
     }
 }
@@ -322,7 +322,7 @@ void component_powerup_remove(int component_nr, gameobject *object, void *param)
 
     //Turn on led
     int led_nr = data->led_nr;
-    if(object->type = TYPE_PLAYER2){
+    if(object->type == TYPE_PLAYER2){
         led_nr = 7 - led_nr; //Mirror for player 2
     }   
     led_off(led_nr);

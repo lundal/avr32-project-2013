@@ -57,7 +57,7 @@ int main() {
     player1->pos_y = 200;
     player1->size_x = 32;
     player1->size_y = 32;
-    player1->type = TYPE_PLAYER;
+    player1->type = TYPE_PLAYER1;
     component_add(player1, component_player_control, (void*)0);
     component_add(player1, component_sprite, rabby);
     component_add(player1, component_shoot, bullet);
@@ -69,7 +69,7 @@ int main() {
     // Add object
     player2 = gameobject_create();
     player2->pos_y = 200;
-    player2->type = TYPE_PLAYER;
+    player2->type = TYPE_PLAYER1;
     player2->size_x = 32;
     player2->size_y = 32;
     component_add(player2, component_player_control, (void*)1);
@@ -137,13 +137,22 @@ void powerup_spawner(){
         sprite = power_sprite;
 
         // Add collision effect
-        component_collision_data data2 = {
-            .target_type = TYPE_PLAYER,
+        component_collision_data data1 = {
+            .target_type = TYPE_PLAYER1,
             .self_effect = component_gameobject_remove,
             .self_param = NULL,
             .other_effect = component_damage,
             .other_param = (void*)(-3),
         };
+        //Somewhat dirty fix to hit both. Should rework the component instead
+        component_collision_data data2 = {
+            .target_type = TYPE_PLAYER2,
+            .self_effect = component_gameobject_remove,
+            .self_param = NULL,
+            .other_effect = component_damage,
+            .other_param = (void*)(-3),
+        };
+        component_add(powerup, component_collision, &data1);
         component_add(powerup, component_collision, &data2);
         component_add(powerup, component_sprite, sprite);
         component_add(powerup, component_move, &(component_move_data){0, 2});
