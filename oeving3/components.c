@@ -319,6 +319,31 @@ void component_death_remove(int component_nr, gameobject *object, void *param) {
     return;
 }
 
+// *****************************************************************************
+// *** Ticker component
+// *** Spawns enemies at a given rate
+// *****************************************************************************
+component *component_ticker;
+
+// Function that is called when the component is added
+// param = death_function function pointer or NULL to simply die
+
+void component_ticker_add(int component_nr, gameobject *object, void *param) {
+    object->components_data[component_nr] = param;
+}
+
+// Function that is called each tick
+void component_ticker_tick(int component_nr, gameobject *object, void *param) {
+    int rate = (int) object->component_data[component_nr];
+    if(TICK % 
+}
+
+// Function that is called when the component is removed
+void component_ticker_remove(int component_nr, gameobject *object, void *param) {
+    return;
+}
+
+
 
 
 // *****************************************************************************
