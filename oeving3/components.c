@@ -267,6 +267,67 @@ void component_damage_remove(int component_nr, gameobject *object, void *param) 
     return;
 }
 
+// *****************************************************************************
+// *** Powerup component
+// *** Lights a LED, and inserts a component in enemy when button is pushed
+// *****************************************************************************
+component *component_powerup;
+
+// Function that is called when the component is added
+// param = component_powerup_data 
+void component_powerup_add(int component_nr, gameobject *object, void *param) {
+
+    // Get data
+    component_powerup_data data = *(component_powerup_data*)param;
+    
+    // Store data
+    object->components_data[component_nr] = (void*)malloc(sizeof(component_powerup_data));
+    *((component_powerup_data*)object->components_data[component_nr]) = data;
+    
+
+    //Turn on led
+    int led_nr = data.led_nr;
+    if(object->type = TYPE_PLAYER2){
+        led_nr = 7 - led_nr; //Mirror for player 2
+    }   
+    led_on(led_nr);
+}
+
+// Function that is called each tick
+void component_powerup_tick(int component_nr, gameobject *object, void *param) {
+    int button_nr = -1;
+    switch(object->type){
+    case TYPE_PLAYER1:
+        button_nr = POWERUP_BUTTON_1;
+        break;
+    case TYPE_PLAYER2:
+        button_nr = POWERUP_BUTTON_2;
+        break;
+    }
+    if(button_down(button_nr)){
+        component_powerup_data *data = (component_move_data*) object->components_data[component_nr];
+        component_add(object, data->self_effect);
+        //add enemy component
+        component_remove_by_nr(object, component_nr, NULL);
+    }
+}
+
+// Function that is called when the component is removed
+void component_powerup_remove(int component_nr, gameobject *object, void *param) {
+    component_powerup_data *data = (component_move_data*) object->components_data[component_nr];
+
+    //Turn on led
+    int led_nr = data->led_nr;
+    if(object->type = TYPE_PLAYER2){
+        led_nr = 7 - led_nr; //Mirror for player 2
+    }   
+    led_off(led_nr);
+
+    free(object->components_data[component_nr]);
+    return;
+}
+
+
 
 
 // *****************************************************************************
@@ -462,5 +523,10 @@ void components_init() {
         &component_death_tick,
         &component_death_remove
         );  
+    component_powerup = component_create(
+        &component_powerup_add,
+        &component_powerup_tick,
+        &component_powerup_remove
+        ); 
 }
 

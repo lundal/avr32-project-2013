@@ -3,6 +3,12 @@
 
 #include "component.h"
 
+
+//Constants
+
+#define POWERUP_BUTTON_1 0
+#define POWERUP_BUTTON_2 7
+
 // General function pointer
 
 typedef void (*death_function)(gameobject *object);
@@ -19,6 +25,7 @@ extern component *component_collision;
 extern component *component_hpbar;
 extern component *component_damage;
 extern component *component_death;
+extern component *component_powerup;
 
 typedef struct {
     int velocity;
@@ -37,6 +44,12 @@ typedef struct {
     component *other_effect;
     void *other_param;
 } component_collision_data;
+
+typedef struct {
+    component* enemy_effect;
+    component* self_effect;
+    int led_nr;
+} component_powerup_data;
 
 #define TYPE_NONE 0
 #define TYPE_PLAYER 1
