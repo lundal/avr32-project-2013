@@ -1,13 +1,14 @@
 #include "engine.h"
 #include "components.h"
 #include "font.h"
+#include "graphics.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 
 //defines
 void death_print(gameobject *object);
-
+drawable *rabby_red;
 int main() {
     engine_init();
     
@@ -27,7 +28,7 @@ int main() {
     drawable *lol = drawable_create_text(f_small, "LOL");
     drawable *rabby = drawable_create_bmp(img_rabby);
     drawable *bullet = drawable_create_rect(5, 5, 255,255,255);
-    drawable *rabby_red = drawable_create_bmp(img_rabby_red);
+    rabby_red = drawable_create_bmp(img_rabby_red);
     
     // Add object
     gameobject *player1 = gameobject_create();
@@ -68,4 +69,15 @@ int main() {
 
 void death_print(gameobject *object){
     printf("YO I'M a DEATH FUNCTION\n");
+    gameobject *enemy = gameobject_create();
+    enemy->type = TYPE_ENEMY;
+    enemy->pos_x = rand() % SCREEN_WIDTH;
+    enemy->pos_y = rand() % SCREEN_HEIGHT;
+    enemy->size_x = 32;
+    enemy->size_y = 32;
+    component_add(enemy, component_sprite, rabby_red);
+    component_add(enemy, component_hpbar, (int[]) {30,5}) ;
+    component_add(enemy, component_death, &death_print);
+    enemy->hp = 20;
+    engine_gameobject_add(enemy);
 }
