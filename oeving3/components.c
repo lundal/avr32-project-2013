@@ -85,7 +85,7 @@ void component_move_tick(int component_nr, gameobject *object, void *param) {
     component_move_data *data = (component_move_data*)object->components_data[component_nr];
     
     // Move
-    object->pos_y += data->speed_x;
+    object->pos_x += data->speed_x;
     object->pos_y += data->speed_y;
 }
 
@@ -102,7 +102,7 @@ void component_move_remove(int component_nr, gameobject *object, void *param) {
 component *component_zigzag;
 
 // Function that is called when the component is added
-// param: component_move_data *speed
+// param: component_zigzag_data *speed
 void component_zigzag_add(int component_nr, gameobject *object, void *param) {
     // Get data
     component_zigzag_data data = *(component_zigzag_data*)param;
