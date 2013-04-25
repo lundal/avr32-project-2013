@@ -301,6 +301,37 @@ void component_damage_remove(int component_nr, gameobject *object, void *param) 
 }
 
 // *****************************************************************************
+// *** Damage component
+// *** Causes set amount of damage and removes itself
+// *****************************************************************************
+component *component_hpswap;
+
+// Function that is called when the component is added
+// param = (int) damage
+void component_hpswap_add(int component_nr, gameobject *object, void *param) {
+    //Make sure we don't add multiple components of this type
+    //If there is another one, it will have lower component_nr and be 
+    //found first.
+    if(component_find(object, component_hpswap) == component_nr){
+        gameobject *enemy = object->type == TYPE_PLAYER1? player2 : player1;
+        int enemy_hp = enemy->hp;
+        enemy->hp = object->hp;
+        object->hp = enemy_hp;
+    }
+    component_remove_by_nr(object, component_nr, NULL);
+}
+
+// Function that is called each tick
+void component_hpswap_tick(int component_nr, gameobject *object, void *param) {
+}
+
+// Function that is called when the component is removed
+void component_hpswap_remove(int component_nr, gameobject *object, void *param) {
+    return;
+}
+
+
+// *****************************************************************************
 // *** Mind control component
 // *** Gives the other player control.
 // *****************************************************************************
@@ -370,16 +401,20 @@ void component_powerup_tick(int component_nr, gameobject *object, void *param) {
 
     if(button_down(button_nr)){
         component_powerup_data *data = (component_move_data*) object->components_data[component_nr];
-        component_add(object, data->self_effect, data->self_param);
-        //TODO: add enemy component
+        
+
         gameobject *enemy;
         if(object->type == TYPE_PLAYER1){
             enemy = player2;
         }else{
             enemy = player1;
         }
-        if(enemy){
+        if(enemy && (data->enemy_effect != NULL)){
             component_add(enemy, data->enemy_effect, data->enemy_param);
+        }
+
+        if(data->self_effect){
+            component_add(object, data->self_effect, data->self_param);
         }
 
         component_remove_by_nr(object, component_nr, NULL);
@@ -606,6 +641,11 @@ void components_init() {
         &component_mindcontrol_add,
         &component_mindcontrol_tick,
         &component_mindcontrol_remove
+        );
+    component_hpswap = component_create(
+        &component_hpswap_add,
+        &component_hpswap_tick,
+        &component_hpswap_remove
         );
 }
 

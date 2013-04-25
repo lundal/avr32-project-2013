@@ -31,7 +31,7 @@ void powerup_spawner();
 bmp_image *img_blood;
 drawable *space, *rabby, *rabby_red, *bullet;
 drawable *ufo1, *ufo2, *ufo3, *ufo4, *ufo5;
-drawable *power_sprite[4];
+drawable *power_sprite[3];
 gameobject *background, *player1, *player2;
 
 font *f_small, *f_large;
@@ -92,10 +92,9 @@ int main() {
     bmp_image *img_powerup4 = bmp_load("images/pow1.bmp");
     bmp_image *img_rabby_red = bmp_copy(img_rabby);
     bmp_tint(img_rabby_red, 255, 128, 128);
-    bmp_tint(img_powerup1, 0, 214, 29);
-    bmp_tint(img_powerup2, 0, 214, 150);
-    bmp_tint(img_powerup3, 150, 214, 29);
-    bmp_tint(img_powerup4, 255, 0, 29);
+    bmp_tint(img_powerup3, 0, 250, 29);
+    bmp_tint(img_powerup2, 0, 0, 255);
+    bmp_tint(img_powerup1, 255, 255, 29);
     
     // Create drawables
     space = drawable_create_bmp(img_space);
@@ -258,18 +257,22 @@ void powerup_spawner(){
         int r = rand() % 2;
         sprite = power_sprite[r];
         int led_nr = r;
-        component *self_effect = component_damage;
+        component *self_effect;
         void* self_param = 0;
-        component *enemy_effect = component_mindcontrol;
+        component *enemy_effect;
         void* enemy_param = 0;
         switch(r){
             case 0:
-                self_param = (void*) -10;
-                enemy_param = (void*) 100;
+                enemy_effect = component_hpswap;
+                self_param = NULL; 
+                self_effect = NULL;
+                enemy_param = NULL;
                 break;
             case 1:
-                self_param = (void*) -7;
-                enemy_param = (void*) 100;
+                enemy_effect = component_mindcontrol;
+                self_param = MINDCONTROL_DURATION; 
+                self_effect = component_damage;
+                enemy_param = -MINDCONTROL_HEAL;
                 break;
         };
         component_powerup_data *data1 = malloc(sizeof(component_powerup_data));
@@ -316,7 +319,7 @@ void death_powerup(gameobject *object){
         .other_param = -4,
     };
     component_add(powerup, component_collision, &data2);
-    component_add(powerup, component_sprite, power_sprite[0]);
+    component_add(powerup, component_sprite, power_sprite[2]);
     component_add(powerup, component_move, &(component_move_data){0, 2});
     engine_gameobject_add(powerup);
 }
