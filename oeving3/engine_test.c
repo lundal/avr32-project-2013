@@ -4,8 +4,20 @@
 #include "graphics.h"
 #include "engine_test.h"
 
+#include "midi/sample.h"
+#include "midi/tones.h"
+#include "midi/midi.h"
+
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
+
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <sys/mman.h>
+#include <linux/soundcard.h>
+
+#include "midi/hes_a_pirate.c"
 
 //defines
 void init();
@@ -16,15 +28,52 @@ void player_death(gameobject *object);
 void enemy_spawner();
 void powerup_spawner();
 
-drawable *rabby, *rabby_red, *bullet;
+drawable *space, *rabby, *rabby_red, *bullet;
 drawable *ufo1, *ufo2, *ufo3, *ufo4, *ufo5;
 drawable *power_sprite[4];
-gameobject *player1, *player2;
-
+gameobject *background, *player1, *player2;
 
 font *f_small, *f_large;
 
+void midi_run(void *param) {
+    // Sound settings
+    int dsp_bits = 16;
+    int dsp_rate = 22000;
+
+    // Init sound
+    tones_init(WAVE_SQUARE);
+    //tones_init(WAVE_SINE);
+    midi_init();
+    midi_play(&hes_a_pirate);
+    
+    // Open audio device
+    int sound_file = open("/dev/dsp", O_WRONLY);
+    
+    // Set proper playback parameters
+    ioctl(sound_file, SOUND_PCM_WRITE_BITS, &dsp_bits);
+    ioctl(sound_file, SOUND_PCM_WRITE_RATE, &dsp_rate);
+    
+    // Main loop
+    while (1) {
+        // Get data from midi player
+        int16_t data = midi_tick();
+        
+        // Write to audio device
+        write(sound_file, &data, 2);
+    }
+    
+    // Close audio device
+    close(sound_file);
+    
+    return 0;
+}
+
 int main() {
+    // Start midi player in another thread
+    pthread_t thread_midi;
+    int result = pthread_create(&thread_midi, NULL, midi_run, NULL);
+    //system("./midi.out &");
+
     // Init components
     components_init();
     
@@ -33,6 +82,7 @@ int main() {
     f_large = font_load("font_large");
     
     // Load images
+    bmp_image *img_space = bmp_load("images/space.bmp");
     bmp_image *img_ufo1 = bmp_load("images/ufo1.bmp");
     bmp_image *img_ufo2 = bmp_load("images/ufo2.bmp");
     bmp_image *img_ufo3 = bmp_load("images/ufo3.bmp");
@@ -51,6 +101,7 @@ int main() {
     bmp_tint(img_powerup4, 255, 0, 29);
     
     // Create drawables
+    space = drawable_create_bmp(img_space);
     ufo1 = drawable_create_bmp(img_ufo1);
     ufo2 = drawable_create_bmp(img_ufo2);
     ufo3 = drawable_create_bmp(img_ufo3);
@@ -75,6 +126,15 @@ int main() {
 }
 
 void init() {
+    // Add backgound object
+    background = gameobject_create();
+    background->size_x = 320;
+    background->size_y = 240;
+    background->size_x = 0;
+    background->size_y = 0;
+    component_add(background, component_sprite, space);
+    engine_gameobject_add(background);
+    
     // Add object
     player1 = gameobject_create();
     player1->size_x = 32;
