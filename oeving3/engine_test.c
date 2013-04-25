@@ -22,7 +22,7 @@
 //defines
 void init();
 void dispose();
-void death_print(gameobject *object);
+void death_powerup(gameobject *object);
 void ufo_offscreen(gameobject *object);
 void player_death(gameobject *object);
 void enemy_spawner();
@@ -236,7 +236,7 @@ void enemy_spawner(){
         component_add(enemy, component_zigzag, &(component_zigzag_data){2, 50});
         component_add(enemy, component_move, &(component_move_data){0, 1});
         component_add(enemy, component_offscreen, &ufo_offscreen);
-        component_add(enemy, component_death, &death_print);
+        component_add(enemy, component_death, &death_powerup);
         
         engine_gameobject_add(enemy);
     }
@@ -255,7 +255,7 @@ void powerup_spawner(){
         // Use random image
         drawable *sprite;
 
-        int r = rand() % 4;
+        int r = rand() % 2;
         sprite = power_sprite[r];
         int led_nr = r;
         component *self_effect = component_damage;
@@ -269,14 +269,6 @@ void powerup_spawner(){
                 break;
             case 1:
                 self_param = (void*) -7;
-                enemy_param = (void*) 100;
-                break;
-            case 2:
-                self_param = (void*) -5;
-                enemy_param = (void*) 105;
-                break;
-            case 3:
-                self_param = (void*) 0;
                 enemy_param = (void*) 100;
                 break;
         };
@@ -307,7 +299,26 @@ void powerup_spawner(){
     }
 }
 
-void death_print(gameobject *object){
+void death_powerup(gameobject *object){
+    gameobject *powerup = gameobject_create();
+    powerup->type = TYPE_NONE;
+    powerup->size_x = 30;
+    powerup->size_y = 20;
+    powerup->pos_x = object->pos_x;
+    powerup->pos_y = object->pos_y;
+
+    // Add collision effect
+    component_collision_data data2 = {
+        .target_type = TYPE_PLAYER1 | TYPE_PLAYER2,
+        .self_effect = component_gameobject_remove,
+        .self_param = NULL,
+        .other_effect = component_damage,
+        .other_param = -4,
+    };
+    component_add(powerup, component_collision, &data2);
+    component_add(powerup, component_sprite, power_sprite[0]);
+    component_add(powerup, component_move, &(component_move_data){0, 2});
+    engine_gameobject_add(powerup);
 }
 
 void ufo_offscreen(gameobject *object) {
@@ -321,7 +332,7 @@ void player_death(gameobject *object) {
     if (player1->hp == player2->hp && object == player2) {
         return;
     }
-    
+
     //screen_fill(255,0,0);
     screen_draw_bmp(0, 0, img_blood);
     if (player1->hp == player2->hp) {
@@ -339,7 +350,7 @@ void player_death(gameobject *object) {
         screen_draw_text(40, 150, f_small, "For now...");
     }
     screen_update_all();
-    
+
     ENGINE_RUNNING = 0;
     sleep(3);
 }
