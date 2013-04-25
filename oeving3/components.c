@@ -300,29 +300,6 @@ void component_damage_remove(int component_nr, gameobject *object, void *param) 
     return;
 }
 
-// *****************************************************************************
-// *** Freeze component
-// *** Causes player to stop moving for a given amount of time
-// *****************************************************************************
-component *component_damage;
-
-// Function that is called when the component is added
-// param = (int) damage
-void component_damage_add(int component_nr, gameobject *object, void *param) {
-    object->components_data[component_nr] = param;
-}
-
-// Function that is called each tick
-void component_damage_tick(int component_nr, gameobject *object, void *param) {
-    int damage = (int) object->components_data[component_nr];
-    object->hp -= damage;
-    component_remove_by_nr(object, component_nr, NULL);
-}
-
-// Function that is called when the component is removed
-void component_damage_remove(int component_nr, gameobject *object, void *param) {
-    return;
-}
 
 
 // *****************************************************************************

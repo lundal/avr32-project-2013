@@ -28,6 +28,7 @@ void player_death(gameobject *object);
 void enemy_spawner();
 void powerup_spawner();
 
+bmp_image *img_blood;
 drawable *space, *rabby, *rabby_red, *bullet;
 drawable *ufo1, *ufo2, *ufo3, *ufo4, *ufo5;
 drawable *power_sprite[4];
@@ -69,11 +70,6 @@ void midi_run(void *param) {
 }
 
 int main() {
-    // Start midi player in another thread
-    pthread_t thread_midi;
-    int result = pthread_create(&thread_midi, NULL, midi_run, NULL);
-    //system("./midi.out &");
-
     // Init components
     components_init();
     
@@ -82,6 +78,7 @@ int main() {
     f_large = font_load("font_large");
     
     // Load images
+    img_blood = bmp_load("images/blood.bmp");
     bmp_image *img_space = bmp_load("images/space.bmp");
     bmp_image *img_ufo1 = bmp_load("images/ufo1.bmp");
     bmp_image *img_ufo2 = bmp_load("images/ufo2.bmp");
@@ -114,6 +111,10 @@ int main() {
     power_sprite[1] = drawable_create_bmp(img_powerup2);
     power_sprite[2] = drawable_create_bmp(img_powerup3);
     power_sprite[3] = drawable_create_bmp(img_powerup4);
+    
+    // Start midi player in another thread
+    pthread_t thread_midi;
+    int result = pthread_create(&thread_midi, NULL, midi_run, NULL);
     
     // Loop game
     while (1) {
@@ -321,7 +322,8 @@ void player_death(gameobject *object) {
         return;
     }
     
-    screen_fill(255,0,0);
+    //screen_fill(255,0,0);
+    screen_draw_bmp(0, 0, img_blood);
     if (player1->hp == player2->hp) {
         screen_draw_text(40, 100, f_large, "ALL RABBITS DIE!");
         screen_draw_text(40, 130, f_small, "Aliens have scorched the land...");
