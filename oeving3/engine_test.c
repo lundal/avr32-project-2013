@@ -222,7 +222,7 @@ void powerup_spawner(){
         component_powerup_data *data1 = malloc(sizeof(component_powerup_data));
 
         *data1 = (component_powerup_data){
-            .led_nr = 2,
+            .led_nr = led_nr,
                 .self_effect = self_effect,
                 .self_param = self_param,
                 .enemy_effect = enemy_effect,
