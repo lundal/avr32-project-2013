@@ -35,6 +35,7 @@ extern component *component_hpbar;
 extern component *component_damage;
 extern component *component_death;
 extern component *component_powerup;
+extern component *component_mindcontrol;
 
 typedef struct {
     int velocity;

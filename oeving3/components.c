@@ -301,26 +301,36 @@ void component_damage_remove(int component_nr, gameobject *object, void *param) 
 }
 
 // *****************************************************************************
-// *** Freeze component
-// *** Causes player to stop moving for a given amount of time
+// *** Mind control component
+// *** Gives the other player control.
 // *****************************************************************************
-component *component_damage;
+component *component_mindcontrol;
 
 // Function that is called when the component is added
-// param = (int) damage
-void component_damage_add(int component_nr, gameobject *object, void *param) {
+// param = (int) duration
+void component_mindcontrol_add(int component_nr, gameobject *object, void *param) {
     object->components_data[component_nr] = param;
+    //Change control
+    int control_nr = component_find(object, component_player_control);
+    if(control_nr >= 0){
+        object->components_data[control_nr] = (object->type == TYPE_PLAYER1) ? 1 : 0;
+    }
 }
 
 // Function that is called each tick
-void component_damage_tick(int component_nr, gameobject *object, void *param) {
-    int damage = (int) object->components_data[component_nr];
-    object->hp -= damage;
-    component_remove_by_nr(object, component_nr, NULL);
+void component_mindcontrol_tick(int component_nr, gameobject *object, void *param) {
+    int counter = (int) object->components_data[component_nr];
+    counter--;
+    object->components_data[component_nr] = (void*) counter;
+    if(counter < 0) component_remove_by_nr(object, component_nr, NULL);
 }
 
 // Function that is called when the component is removed
-void component_damage_remove(int component_nr, gameobject *object, void *param) {
+void component_mindcontrol_remove(int component_nr, gameobject *object, void *param) {
+    int control_nr = component_find(object, component_player_control);
+    if(control_nr >= 0){
+        object->components_data[control_nr] = (object->type == TYPE_PLAYER1) ? 0 : 1;
+    }
     return;
 }
 
@@ -592,5 +602,10 @@ void components_init() {
         &component_powerup_tick,
         &component_powerup_remove
         ); 
+    component_mindcontrol = component_create(
+        &component_mindcontrol_add,
+        &component_mindcontrol_tick,
+        &component_mindcontrol_remove
+        );
 }
 

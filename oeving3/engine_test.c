@@ -259,24 +259,24 @@ void powerup_spawner(){
         int led_nr = r;
         component *self_effect = component_damage;
         void* self_param = 0;
-        component *enemy_effect = component_damage;
+        component *enemy_effect = component_mindcontrol;
         void* enemy_param = 0;
         switch(r){
             case 0:
                 self_param = (void*) -10;
-                enemy_param = (void*) 0;
+                enemy_param = (void*) 100;
                 break;
             case 1:
                 self_param = (void*) -7;
-                enemy_param = (void*) 3;
+                enemy_param = (void*) 100;
                 break;
             case 2:
                 self_param = (void*) -5;
-                enemy_param = (void*) 5;
+                enemy_param = (void*) 105;
                 break;
             case 3:
                 self_param = (void*) 0;
-                enemy_param = (void*) 10;
+                enemy_param = (void*) 100;
                 break;
         };
         component_powerup_data *data1 = malloc(sizeof(component_powerup_data));
