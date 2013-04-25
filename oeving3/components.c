@@ -395,20 +395,14 @@ void component_powerup_add(int component_nr, gameobject *object, void *param) {
 
 // Function that is called each tick
 void component_powerup_tick(int component_nr, gameobject *object, void *param) {
-    int button_nr = -1;
-    switch(object->type){
-    case TYPE_PLAYER1:
-        button_nr = POWERUP_BUTTON_1;
-        break;
-    case TYPE_PLAYER2:
-        button_nr = POWERUP_BUTTON_2;
-        break;
+    component_powerup_data *data = (component_move_data*) object->components_data[component_nr];
+
+    int button_nr = data->led_nr;
+    if(object->type == TYPE_PLAYER2){
+        button_nr = 7 - button_nr; //Mirror for player 2
     }
 
     if(button_down(button_nr)){
-        component_powerup_data *data = (component_move_data*) object->components_data[component_nr];
-        
-
         gameobject *enemy;
         if(object->type == TYPE_PLAYER1){
             enemy = player2;
