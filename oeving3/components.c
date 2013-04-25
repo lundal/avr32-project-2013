@@ -317,7 +317,8 @@ void component_hpswap_add(int component_nr, gameobject *object, void *param) {
     //Make sure we don't add multiple components of this type
     //If there is another one, it will have lower component_nr and be 
     //found first.
-    if(component_find(object, component_hpswap) == component_nr){
+    int i = component_find(object, component_hpswap);
+    if(i == component_nr || i < 0){
         gameobject *enemy = object->type == TYPE_PLAYER1? player2 : player1;
         int enemy_hp = enemy->hp;
         enemy->hp = object->hp;
