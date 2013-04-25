@@ -179,11 +179,39 @@ void component_player_control_tick(int component_nr, gameobject *object, void* d
     player_nr = (int)object->components_data[component_nr];
     //TODO: Parameterize speed.
     if(player_nr > 1 || player_nr < 0) return;
+    
+    gameobject *enemy = (object->type == TYPE_PLAYER1) ? player2 : player1;
+
     if(button_down(PLAYER_MOVE_RIGHT+player_nr*PLAYER_MOVE_GAP)) { 
-        object->pos_x = (object->pos_x + 2) % SCREEN_WIDTH;
+        object->pos_x = object->pos_x + 2;
+        
+        
+        //Player collision
+        if(object->pos_x + object->size_x >= enemy->pos_x &&
+            object->pos_x < enemy->pos_x + enemy->size_x){
+            object->pos_x = enemy->pos_x - object->size_x;
+        }
+
+        //Wall collision
+        if(object->pos_x + object->size_x > SCREEN_WIDTH){
+            object->pos_x = SCREEN_WIDTH - object->size_x;
+        }
+
     }
     if(button_down(PLAYER_MOVE_LEFT+player_nr*PLAYER_MOVE_GAP)) { 
-        object->pos_x = (object->pos_x - 2) % SCREEN_WIDTH;
+        object->pos_x = (object->pos_x - 2);
+       
+        //Player collision
+        if(object->pos_x <= enemy->pos_x + enemy->size_x
+          && object->pos_x + object->size_x >= enemy->pos_x ){
+            object->pos_x = enemy->pos_x + enemy->size_x; 
+        }
+        
+
+        //Wall collision
+        if(object->pos_x < 0){
+            object->pos_x = 0;
+        }
     }
 }
 
