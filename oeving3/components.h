@@ -2,6 +2,7 @@
 #define COMPONENTS_HEADER
 
 #include "component.h"
+#include "engine.h"
 
 
 //Constants
@@ -63,6 +64,15 @@ typedef struct {
     void *enemy_param;
     int led_nr;
 } component_powerup_data;
+
+typedef struct {
+    int rate;
+    int speed_x;
+    int speed_y;
+    int damage;
+    int target_type;
+    drawable *sprite;
+} component_shoot_data;
 
 // Init function
 void components_init();

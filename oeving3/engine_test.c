@@ -145,9 +145,17 @@ void init() {
     player1->size_y = 32;
     player1->type = TYPE_PLAYER1;
     player1->hp = player1->size_x;
+    component_shoot_data shoot_data = {
+        .rate = PLAYER_BULLET_RATE,
+        .speed_x = 0,
+        .speed_y = -PLAYER_BULLET_SPEED,
+        .damage = PLAYER_BULLET_DAMAGE,
+        .target_type = TYPE_ENEMY,
+        .sprite = bullet,
+    };
     component_add(player1, component_player_control, (void*)0);
     component_add(player1, component_sprite, rabby);
-    component_add(player1, component_shoot, bullet);
+    component_add(player1, component_shoot, &shoot_data);
     component_add(player1, component_hpbar,(int[]) {player1->hp, 4}) ;
     component_add(player1, component_death, &player_death);
     engine_gameobject_add(player1);
@@ -164,7 +172,7 @@ void init() {
     player2->hp = player2->size_x;
     component_add(player2, component_player_control, (void*)1);
     component_add(player2, component_sprite, rabby);
-    component_add(player2, component_shoot, bullet);
+    component_add(player2, component_shoot, &shoot_data);
     component_add(player2, component_hpbar, (int[]) {player2->hp, 4}) ;
     component_add(player2, component_death, &player_death);
     engine_gameobject_add(player2);

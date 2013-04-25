@@ -227,24 +227,28 @@ component *component_shoot;
 
 // Function that is called when the component is added
 void component_shoot_add(int component_nr, gameobject *object, void *param) {
-    // Store bullet drawable
-    object->components_data[component_nr] = (void*)param;
+     // Get data
+    component_shoot_data data = *(component_shoot_data*)param;
+    
+    // Store data
+    object->components_data[component_nr] = (void*)malloc(sizeof(component_shoot_data));
+    *((component_shoot_data*)object->components_data[component_nr]) = data;
 }
 
 // Function that is called each tick
 void component_shoot_tick(int component_nr, gameobject *object, void *param) {
-    if (TICK % 20 == 0) {
+    component_shoot_data *data = (component_shoot_data*)object->components_data[component_nr];
+    if (TICK % data->rate == 0) {
         // Create object
         gameobject *bullet = gameobject_create();
         
         // Add sprite
-        drawable *sprite = (drawable*)object->components_data[component_nr];
-        component_add(bullet, component_sprite, sprite);
+        component_add(bullet, component_sprite, data->sprite);
         
         // Make it go up
         component_move_data data1 = {
-            .speed_x = 0,
-            .speed_y = -5
+            .speed_x = data->speed_x,
+            .speed_y = data->speed_y,
         };
         component_add(bullet, component_move, &data1);
         
@@ -253,11 +257,11 @@ void component_shoot_tick(int component_nr, gameobject *object, void *param) {
         
         // Add collision effect
         component_collision_data data2 = {
-            .target_type = TYPE_ENEMY,
+            .target_type = data->target_type,
             .self_effect = component_gameobject_remove,
             .self_param = NULL,
             .other_effect = component_damage,
-            .other_param = (void*)10,
+            .other_param = (void*)data->damage,
         };
         component_add(bullet, component_collision, &data2);
         
@@ -273,6 +277,7 @@ void component_shoot_tick(int component_nr, gameobject *object, void *param) {
 
 // Function that is called when the component is removed
 void component_shoot_remove(int component_nr, gameobject *object, void *param) {
+    free(object->components_data[component_nr]);
     return;
 }
 
