@@ -184,7 +184,7 @@ void engine_process_queues() {
 // 
 void engine_draw() {
     // Fill screen with black
-    screen_fill(0,0,0);
+    //screen_fill(0,0,0);
     
     // Loop through the draw queue
 	int i;
