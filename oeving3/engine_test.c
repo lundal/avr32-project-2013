@@ -237,28 +237,37 @@ void enemy_spawner(){
             .other_effect = component_damage,
             .other_param = (void*)10,
         };
+        component_shoot_data shoot_data = {
+            .rate = ENEMY_BULLET_RATE,
+            .speed_x = 0,
+            .speed_y = ENEMY_BULLET_SPEED,
+            .damage = ENEMY_BULLET_DAMAGE,
+            .target_type = TYPE_PLAYER1 | TYPE_PLAYER2,
+            .sprite = bullet,
+        };
         component_add(enemy, component_collision, &data);
+        component_add(enemy, component_shoot, &shoot_data);
         component_add(enemy, component_sprite, sprite);
         component_add(enemy, component_hpbar, (int[]) {enemy->hp, 4}) ;
         component_add(enemy, component_zigzag, &(component_zigzag_data){2, 50});
         component_add(enemy, component_move, &(component_move_data){0, 1});
         component_add(enemy, component_offscreen, &ufo_offscreen);
         component_add(enemy, component_death, &death_powerup);
-        
+
         engine_gameobject_add(enemy);
     }
 }
 
 void powerup_spawner(){
     if(TICK % 400 == 50){
-     // Add object
+        // Add object
         gameobject *powerup = gameobject_create();
         powerup->type = TYPE_NONE;
         powerup->size_x = 30;
         powerup->size_y = 20;
         powerup->pos_x = rand() % (SCREEN_WIDTH - 60) + 30;
         powerup->pos_y = -10;
-        
+
         // Use random image
         drawable *sprite;
 
@@ -271,16 +280,16 @@ void powerup_spawner(){
         void* enemy_param = 0;
         switch(r){
             case 0:
-                enemy_effect = component_hpswap;
+                enemy_effect = NULL;
                 self_param = NULL; 
-                self_effect = NULL;
+                self_effect = component_hpswap;
                 enemy_param = NULL;
                 break;
             case 1:
                 enemy_effect = component_mindcontrol;
-                self_param = MINDCONTROL_DURATION; 
+                enemy_param = MINDCONTROL_DURATION;
                 self_effect = component_damage;
-                enemy_param = -MINDCONTROL_HEAL;
+                self_param = -MINDCONTROL_HEAL; 
                 break;
         };
         component_powerup_data *data1 = malloc(sizeof(component_powerup_data));
