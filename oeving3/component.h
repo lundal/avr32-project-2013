@@ -1,6 +1,8 @@
 #ifndef COMPONENT_HEADER
 #define COMPONENT_HEADER
 
+#define COMPONENT_INITIAL_SIZE 4
+
 // Hack to circumvent circular dependancy
 typedef struct gameobjectstruct gameobject;
 
@@ -22,7 +24,10 @@ struct gameobjectstruct {
     int components_capacity;
     int pos_x;
     int pos_y;
+    int size_x;
+    int size_y;
     int hp;
+    int type;
 };
 
 // Component prototypes
@@ -31,6 +36,7 @@ void component_dispose(component *c);
 int component_add(gameobject *object, component *c, void *param);
 int component_find(gameobject *object, component *c);
 int component_remove(gameobject *object, component *c, void *param);
+void component_remove_by_nr(gameobject *object, int component_nr, void *param);
 
 // Gameobject prototypes
 gameobject* gameobject_create();

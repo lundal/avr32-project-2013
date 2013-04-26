@@ -21,7 +21,12 @@ void component_dispose(component *c) {
 }
 
 // Adds a component to a gameobject
+// Return number of added component
+// Return -1 if the component was not found
 int component_add(gameobject *object, component *c, void *param) {
+    // Check for null
+    if (object == NULL || c == NULL) return -1;
+    
     // Expand arrays if needed
     if (object->components_size == object->components_capacity) {
         object->components_capacity *= 2;
@@ -40,17 +45,66 @@ int component_add(gameobject *object, component *c, void *param) {
     
     // Return nr
     return nr;
+    
+    // TODO: How to prevent tick-glitching?
 }
 
 // Finds the component number of component in gameobject
+// Return number of found component
 // Return -1 if the component was not found
 int component_find(gameobject *object, component *c) {
-    return 0; //TODO: Implement
+    // Check for null
+    if (object == NULL || c == NULL) return -1;
+    
+    // For each component in object
+    int i;
+    for (i = 0; i < object->components_size; i++) {
+        // Get component
+        component *c2 = object->components[i];
+        
+        // If match
+        if (c == c2) {
+            // Return index
+            return i;
+        }
+    }
+    
+    // None was found
+    return -1;
 }
 
+
 // Removes a component from a gameobject
+// Return number of removed component
+// Return -1 if the component was not found
 int component_remove(gameobject *object, component *c, void *param) {
-    return 0; //TODO: Implement
+    // Check for null
+    if (object == NULL || c == NULL) return -1;
+    
+    // Find number
+    int num = component_find(object, c);
+    
+    // Check for error
+    if (num < 0) {
+        return num;
+    }
+    component_remove_by_nr(object, num, param);
+
+    return num;
+    
+    // TODO: How to prevent tick-glitching?
+}
+
+void component_remove_by_nr(gameobject *object, int num, void *param){
+    // Call the component's remove function
+    object->components[num]->remove_function(num, object, param);
+    
+    // Remove component by swapping with last and reduce size
+    object->components[num] = object->components[object->components_size - 1];
+    object->components_data[num] = object->components_data[object->components_size - 1];
+    object->components_size--;
+    
+    return;
 }
 
 // Creates a new gameobject
@@ -60,7 +114,7 @@ gameobject* gameobject_create() {
     
     // Set initial capacity
     object->components_size = 0;
-    object->components_capacity = 4; // TODO: Remove magic number?
+    object->components_capacity = COMPONENT_INITIAL_SIZE;
     
     // Allocate arrays
     object->components = malloc(sizeof(component_function) * object->components_capacity);
