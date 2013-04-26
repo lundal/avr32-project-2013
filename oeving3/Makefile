@@ -10,8 +10,7 @@ CCFLAGS = -Wall -g -O3 -c
 LDFLAGS = -Wall -g -pedantic -lm -lpthread
 
 # File names 
-SRC = bmp.c graphics.c font.c engine.c component.c components.c 
-SRC = bmp.c graphics.c font.c engine.c component.c rabbit_components.c midi/sample.c midi/tones.c midi/midi.c engine_benchmark.c
+SRC = bmp.c graphics.c font.c engine.c component.c rabbit_components.c midi/sample.c midi/tones.c midi/midi.c engine_benchmark.c 
 
 OBJ = $(SRC:.c=.o)
 EXE = bench.out
